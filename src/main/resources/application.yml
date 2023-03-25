@@ -7,3 +7,10 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: update
+
+api:
+  prefix:
+    v1: /api/v1
+
+app:
+  frontUrl: http://localhost:8081

@@ -10,6 +10,7 @@ import ru.kpfu.machinemetrics.repository.EquipmentRepository;
 
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -22,7 +23,7 @@ public class EquipmentServiceTest {
     private EquipmentService equipmentService;
 
     @Test
-    public void testGetAllNotDeleted_expectedList() {
+    public void testGetAllNotDeleted() {
         // given
         Equipment equipment1 = Equipment.builder()
                 .name("Equipment 1")
@@ -42,6 +43,28 @@ public class EquipmentServiceTest {
         softly.assertThat(result.size()).isEqualTo(2);
         softly.assertThat(result.get(0).getName()).isEqualTo(equipment1.getName());
         softly.assertThat(result.get(1).getName()).isEqualTo(equipment2.getName());
+        softly.assertAll();
+    }
+
+    @Test
+    void testSave() {
+        Equipment equipment = Equipment.builder()
+                .name("Test Equipment")
+                .build();
+
+        Equipment savedEquipment = Equipment.builder()
+                .id(1L)
+                .name(equipment.getName())
+                .build();
+
+        when(equipmentRepository.save(any(Equipment.class))).thenReturn(savedEquipment);
+
+        Equipment actualEquipment = equipmentService.save(equipment);
+
+        SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(actualEquipment.getId()).isEqualTo(savedEquipment.getId());
+        softly.assertThat(actualEquipment.getName()).isEqualTo(savedEquipment.getName());
+        softly.assertThat(actualEquipment.isDeleted()).isFalse();
         softly.assertAll();
     }
 }

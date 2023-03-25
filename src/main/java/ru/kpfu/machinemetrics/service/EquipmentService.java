@@ -16,4 +16,9 @@ public class EquipmentService {
     public List<Equipment> getAllNotDeleted() {
         return equipmentRepository.findByDeletedFalse();
     }
+
+    public Equipment save(Equipment equipment) {
+        equipment.setDeleted(false);
+        return equipmentRepository.save(equipment);
+    }
 }
