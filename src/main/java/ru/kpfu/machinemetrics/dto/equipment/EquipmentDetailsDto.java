@@ -1,6 +1,5 @@
-package ru.kpfu.machinemetrics.dto;
+package ru.kpfu.machinemetrics.dto.equipment;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,7 +14,7 @@ import java.time.Instant;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class EquipmentDto {
+public class EquipmentDetailsDto {
 
     private Long id;
 
@@ -23,7 +22,6 @@ public class EquipmentDto {
 
     private String inventoryNumber;
 
-    @NotBlank(message = "{validation.equipment.name.empty}")
     private String name;
 
     private BigDecimal cost;

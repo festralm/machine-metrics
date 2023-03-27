@@ -2,7 +2,9 @@ package ru.kpfu.machinemetrics.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
-import ru.kpfu.machinemetrics.dto.EquipmentDto;
+import ru.kpfu.machinemetrics.dto.equipment.EquipmentCreateDto;
+import ru.kpfu.machinemetrics.dto.equipment.EquipmentDetailsDto;
+import ru.kpfu.machinemetrics.dto.equipment.EquipmentItemDto;
 import ru.kpfu.machinemetrics.model.Equipment;
 
 import java.util.List;
@@ -10,11 +12,13 @@ import java.util.List;
 @Mapper
 public interface EquipmentMapper {
 
-    EquipmentMapper INSTANCE = Mappers.getMapper(EquipmentMapper.class);
+    Equipment toEquipment(EquipmentCreateDto dto);
 
-    Equipment toEquipment(EquipmentDto dto);
+    EquipmentCreateDto toEquipmentCreateDto(Equipment equipment);
 
-    EquipmentDto toEquipmentDto(Equipment equipment);
+    EquipmentDetailsDto toEquipmentDetailsDto(Equipment equipment);
 
-    List<EquipmentDto> toEquipmentDtos(List<Equipment> equipments);
+    List<EquipmentCreateDto> toEquipmentCreateDtos(List<Equipment> equipments);
+
+    List<EquipmentItemDto> toEquipmentItemDtos(List<Equipment> equipments);
 }

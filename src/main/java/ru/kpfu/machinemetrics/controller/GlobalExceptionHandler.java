@@ -1,6 +1,6 @@
 package ru.kpfu.machinemetrics.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
@@ -9,15 +9,16 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import ru.kpfu.machinemetrics.dto.ErrorResponse;
+import ru.kpfu.machinemetrics.exception.ResourceNotFoundException;
 
 import java.util.Locale;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
 
-    @Autowired
-    private MessageSource messageSource;
+    private final MessageSource messageSource;
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleInvalidRequestException(MethodArgumentNotValidException e) {
@@ -34,6 +35,13 @@ public class GlobalExceptionHandler {
         String message = messageSource.getMessage("exception.general", null, locale);
         ErrorResponse error = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), message);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException e) {
+        String message = e.getMessage();
+        ErrorResponse error = new ErrorResponse(HttpStatus.NOT_FOUND.value(), message);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 }
 

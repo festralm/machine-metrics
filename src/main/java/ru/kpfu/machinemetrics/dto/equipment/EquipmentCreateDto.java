@@ -1,9 +1,6 @@
-package ru.kpfu.machinemetrics.model;
+package ru.kpfu.machinemetrics.dto.equipment;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,42 +10,31 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.Instant;
 
-@Entity
-@Getter
 @Setter
+@Getter
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class Equipment {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@AllArgsConstructor
+public class EquipmentCreateDto {
 
     private String photoPath;
 
     private String inventoryNumber;
 
+    @NotBlank(message = "{validation.equipment.name.empty}")
     private String name;
 
     private BigDecimal cost;
 
     private String source;
 
-    // todo many to one ?
     private String department;
 
-    // todo many to one ?
     private String responsiblePerson;
 
-    // todo many to one ?
     private String status;
 
     private Instant receiptDate;
 
     private Instant lastOperationDate;
-
-    // todo ... another params
-
-    private boolean deleted;
 }

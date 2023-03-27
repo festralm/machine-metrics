@@ -5,8 +5,11 @@ import org.springframework.stereotype.Repository;
 import ru.kpfu.machinemetrics.model.Equipment;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface EquipmentRepository extends JpaRepository<Equipment, Long> {
-    List<Equipment> findByDeletedFalse();
+    List<Equipment> findAllByDeletedFalse();
+
+    Optional<Equipment> findByIdAndDeletedFalse(Long id);
 }
