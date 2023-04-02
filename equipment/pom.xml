@@ -26,6 +26,11 @@
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>ru.kpfu</groupId>
+            <artifactId>common-config</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
 
 </project>

@@ -73,11 +73,6 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
         </dependency>
-        <dependency>
-            <groupId>ru.kpfu.</groupId>
-            <artifactId>common-config</artifactId>
-            <version>1.0.0</version>
-        </dependency>
     </dependencies>
     <build>
         <plugins>
