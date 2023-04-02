@@ -37,7 +37,7 @@ public class EquipmentService {
                             new Object[]{id},
                             locale
                     );
-                    throw new ResourceNotFoundException(message);
+                    return new ResourceNotFoundException(message);
                 });
     }
 

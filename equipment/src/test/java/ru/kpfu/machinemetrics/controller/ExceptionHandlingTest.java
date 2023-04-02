@@ -20,7 +20,9 @@ import java.util.Locale;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(EquipmentController.class)
 @ImportAutoConfiguration(MessageSourceConfig.class)
@@ -34,6 +36,9 @@ public class ExceptionHandlingTest {
 
     @MockBean
     private EquipmentService equipmentService;
+
+    @MockBean
+    private EquipmentMapper equipmentMapper;
 
     @Test
     public void testInternalServerError() throws Exception {

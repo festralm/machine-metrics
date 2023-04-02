@@ -30,7 +30,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleNullPointerException(Exception e) {
+    public ResponseEntity<ErrorResponse> handleNullPointerException() {
         Locale locale = LocaleContextHolder.getLocale();
         String message = messageSource.getMessage("exception.general", null, locale);
         ErrorResponse error = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), message);

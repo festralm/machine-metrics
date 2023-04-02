@@ -11,10 +11,10 @@ import org.springframework.context.MessageSource;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.kpfu.machinemetrics.configuration.MessageSourceConfig;
-import ru.kpfu.machinemetrics.dto.ErrorResponse;
 import ru.kpfu.machinemetrics.dto.EquipmentCreateDto;
 import ru.kpfu.machinemetrics.dto.EquipmentDetailsDto;
 import ru.kpfu.machinemetrics.dto.EquipmentItemDto;
+import ru.kpfu.machinemetrics.dto.ErrorResponse;
 import ru.kpfu.machinemetrics.exception.ResourceNotFoundException;
 import ru.kpfu.machinemetrics.mapper.EquipmentMapper;
 import ru.kpfu.machinemetrics.model.Equipment;
@@ -98,7 +98,8 @@ public class EquipmentControllerTest {
                 .andExpect(jsonPath("$[1].name").value(equipment2.getName()))
                 .andDo(result -> {
                     String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
-                    List<EquipmentItemDto> actualList = Arrays.asList(objectMapper.readValue(response, EquipmentItemDto[].class));
+                    List<EquipmentItemDto> actualList = Arrays.asList(objectMapper.readValue(response,
+                            EquipmentItemDto[].class));
 
                     SoftAssertions softly = new SoftAssertions();
                     softly.assertThat(actualList).isNotNull();
@@ -185,10 +186,14 @@ public class EquipmentControllerTest {
                 .andExpect(jsonPath("$.department").value(savedEquipmentDetailsDto.getDepartment()))
                 .andExpect(jsonPath("$.responsiblePerson").value(savedEquipmentDetailsDto.getResponsiblePerson()))
                 .andExpect(jsonPath("$.status").value(savedEquipmentDetailsDto.getStatus()))
+                // todo maybe later
+//                .andExpect(jsonPath("$.receiptDate").value(savedEquipmentDetailsDto.getReceiptDate()))
+//                .andExpect(jsonPath("$.lastOperationDate").value(savedEquipmentDetailsDto.getLastOperationDate()))
                 .andExpect(header().string("Location", "/equipment/" + savedEquipmentDetailsDto.getId()))
                 .andDo(result -> {
                     String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
-                    EquipmentDetailsDto actualEquipmentCreateDto = objectMapper.readValue(response, EquipmentDetailsDto.class);
+                    EquipmentDetailsDto actualEquipmentCreateDto = objectMapper.readValue(response,
+                            EquipmentDetailsDto.class);
 
                     SoftAssertions softly = new SoftAssertions();
                     softly.assertThat(actualEquipmentCreateDto).isNotNull();
@@ -287,7 +292,8 @@ public class EquipmentControllerTest {
                 .andExpect(jsonPath("$.status").value(equipment.getStatus()))
                 .andDo(result -> {
                     String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
-                    EquipmentDetailsDto actualEquipmentDetailsDto = objectMapper.readValue(response, EquipmentDetailsDto.class);
+                    EquipmentDetailsDto actualEquipmentDetailsDto = objectMapper.readValue(response,
+                            EquipmentDetailsDto.class);
 
                     SoftAssertions softly = new SoftAssertions();
                     softly.assertThat(actualEquipmentDetailsDto).isNotNull();
@@ -465,7 +471,8 @@ public class EquipmentControllerTest {
                 .andExpect(jsonPath("$.status").value(editedEquipmentDetailsDto.getStatus()))
                 .andDo(result -> {
                     String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
-                    EquipmentDetailsDto actualEquipmentDetailsDto = objectMapper.readValue(response, EquipmentDetailsDto.class);
+                    EquipmentDetailsDto actualEquipmentDetailsDto = objectMapper.readValue(response,
+                            EquipmentDetailsDto.class);
 
                     SoftAssertions softly = new SoftAssertions();
                     softly.assertThat(actualEquipmentDetailsDto).isNotNull();
@@ -524,7 +531,8 @@ public class EquipmentControllerTest {
         );
 
         when(equipmentMapper.toEquipment(any(EquipmentCreateDto.class))).thenReturn(updatedEquipment);
-        doThrow(new ResourceNotFoundException(message)).when(equipmentService).edit(eq(equipmentId), eq(updatedEquipment));
+        doThrow(new ResourceNotFoundException(message)).when(equipmentService).edit(eq(equipmentId),
+                eq(updatedEquipment));
 
         ErrorResponse expectedResponseBody = new ErrorResponse(404, message);
 

@@ -1,3 +1,6 @@
+server:
+  port: 8082
+
 influxdb:
   url: http://localhost:8086
   bucket: machinemetrics

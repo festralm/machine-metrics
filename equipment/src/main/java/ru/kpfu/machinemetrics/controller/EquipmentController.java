@@ -57,7 +57,8 @@ public class EquipmentController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EquipmentDetailsDto> edit(@PathVariable Long id, @Valid @RequestBody EquipmentCreateDto equipmentCreateDto) {
+    public ResponseEntity<EquipmentDetailsDto> edit(@PathVariable Long id,
+                                                    @Valid @RequestBody EquipmentCreateDto equipmentCreateDto) {
         Equipment updatedEquipment = equipmentMapper.toEquipment(equipmentCreateDto);
         Equipment editedEquipment = equipmentService.edit(id, updatedEquipment);
         EquipmentDetailsDto editedEquipmentDetailsDto = equipmentMapper.toEquipmentDetailsDto(editedEquipment);

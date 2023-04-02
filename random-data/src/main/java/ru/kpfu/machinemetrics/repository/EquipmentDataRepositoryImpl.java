@@ -2,36 +2,22 @@ package ru.kpfu.machinemetrics.repository;
 
 import com.influxdb.client.InfluxDBClient;
 import com.influxdb.client.WriteApiBlocking;
-import com.influxdb.client.domain.WritePrecision;
 import com.influxdb.client.write.Point;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
-import ru.kpfu.machinemetrics.model.EquipmentData;
-
-import java.time.Instant;
+import ru.kpfu.machinemetrics.properties.InfluxDbProperties;
 
 @Repository
 @RequiredArgsConstructor
 public class EquipmentDataRepositoryImpl implements EquipmentDataRepository {
 
-    @Value("${influxdb.bucket}")
-    private String bucket;
-
-    @Value("${influxdb.org}")
-    private String org;
-
     private final InfluxDBClient influxDBClient;
+    private final InfluxDbProperties influxDbProperties;
 
     @Override
-    public void save(EquipmentData equipmentData) {
-        Point point = Point.measurement("equipment_data")
-                .addTag("equipment_id", equipmentData.getEquipmentId().toString())
-                .addField("u", equipmentData.getU())
-                .addField("enabled", equipmentData.getEnabled())
-                .time(Instant.now(), WritePrecision.NS);
+    public void save(Point point) {
 
         WriteApiBlocking writeApi = influxDBClient.getWriteApiBlocking();
-        writeApi.writePoint(bucket, org, point);
+        writeApi.writePoint(influxDbProperties.getBucket(), influxDbProperties.getOrg(), point);
     }
 }
