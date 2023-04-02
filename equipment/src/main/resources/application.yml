@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/equipment
+    username: equipment
+    password: ${POSTGRES_PASSWORD}
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
+api:
+  prefix:
+    v1: /api/v1
+
+app:
+  frontUrl: http://localhost:8081
