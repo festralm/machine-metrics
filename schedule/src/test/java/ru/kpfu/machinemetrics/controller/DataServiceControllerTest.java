@@ -58,12 +58,10 @@ public class DataServiceControllerTest {
         DataService dataService1 = DataService.builder()
                 .id(0L)
                 .name("DataService 1")
-                .url("url 1")
                 .build();
         DataService dataService2 = DataService.builder()
                 .id(1L)
                 .name("DataService 2")
-                .url("url 2")
                 .build();
         List<DataService> dataServiceList = List.of(dataService1, dataService2);
 
@@ -76,10 +74,8 @@ public class DataServiceControllerTest {
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].id").value(dataService1.getId()))
                 .andExpect(jsonPath("$[0].name").value(dataService1.getName()))
-                .andExpect(jsonPath("$[0].url").value(dataService1.getUrl()))
                 .andExpect(jsonPath("$[1].id").value(dataService2.getId()))
                 .andExpect(jsonPath("$[1].name").value(dataService2.getName()))
-                .andExpect(jsonPath("$[1].url").value(dataService2.getUrl()))
                 .andDo(result -> {
                     String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
                     List<DataService> actualList = Arrays.asList(objectMapper.readValue(response,
@@ -89,9 +85,7 @@ public class DataServiceControllerTest {
                     softly.assertThat(actualList).isNotNull();
                     softly.assertThat(actualList).hasSize(2);
                     softly.assertThat(actualList.get(0).getName()).isEqualTo(dataService1.getName());
-                    softly.assertThat(actualList.get(0).getUrl()).isEqualTo(dataService1.getUrl());
                     softly.assertThat(actualList.get(1).getName()).isEqualTo(dataService2.getName());
-                    softly.assertThat(actualList.get(1).getUrl()).isEqualTo(dataService2.getUrl());
                     softly.assertAll();
                 });
     }
@@ -101,13 +95,11 @@ public class DataServiceControllerTest {
         // given
         DataService dataServiceCreate = DataService.builder()
                 .name("name")
-                .url("url")
                 .build();
 
         DataService savedDataService = DataService.builder()
                 .id(1L)
                 .name(dataServiceCreate.getName())
-                .url(dataServiceCreate.getUrl())
                 .build();
 
         when(dataServiceService.save(any())).thenReturn(savedDataService);
@@ -120,7 +112,6 @@ public class DataServiceControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").value(savedDataService.getId()))
                 .andExpect(jsonPath("$.name").value(savedDataService.getName()))
-                .andExpect(jsonPath("$.url").value(savedDataService.getUrl()))
                 .andExpect(header().string("Location", "/data-service/" + savedDataService.getId()))
                 .andDo(result -> {
                     String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
@@ -130,7 +121,6 @@ public class DataServiceControllerTest {
                     softly.assertThat(actualDataServiceCreate).isNotNull();
                     softly.assertThat(actualDataServiceCreate.getId()).isEqualTo(savedDataService.getId());
                     softly.assertThat(actualDataServiceCreate.getName()).isEqualTo(savedDataService.getName());
-                    softly.assertThat(actualDataServiceCreate.getUrl()).isEqualTo(savedDataService.getUrl());
                     softly.assertAll();
                 });
     }
@@ -140,41 +130,9 @@ public class DataServiceControllerTest {
         // given
         DataService dataServiceCreate = DataService.builder()
                 .name("")
-                .url("Url")
                 .build();
 
         String message = messageSource.getMessage("validation.data-service.name.empty", null, new Locale("ru"));
-        ErrorResponse expectedResponseBody = new ErrorResponse(400, "\"" + message + "\"");
-
-        // expect
-        mockMvc.perform(post("/api/v1/data-service")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dataServiceCreate)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.status").value(expectedResponseBody.getStatus()))
-                .andExpect(jsonPath("$.message").value(expectedResponseBody.getMessage()))
-                .andDo(result -> {
-
-                    String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
-                    ErrorResponse actualResponseBody = objectMapper.readValue(response, ErrorResponse.class);
-
-                    SoftAssertions softly = new SoftAssertions();
-                    softly.assertThat(actualResponseBody).isNotNull();
-                    softly.assertThat(actualResponseBody.getStatus()).isEqualTo(expectedResponseBody.getStatus());
-                    softly.assertThat(actualResponseBody.getMessage()).isEqualTo(expectedResponseBody.getMessage());
-                    softly.assertAll();
-                });
-    }
-
-    @Test
-    public void testCreateWithEmptyUrl() throws Exception {
-        // given
-        DataService dataServiceCreate = DataService.builder()
-                .name("Name")
-                .build();
-
-        String message = messageSource.getMessage("validation.data-service.url.empty", null, new Locale("ru"));
         ErrorResponse expectedResponseBody = new ErrorResponse(400, "\"" + message + "\"");
 
         // expect
@@ -204,7 +162,6 @@ public class DataServiceControllerTest {
         DataService dataService = DataService.builder()
                 .id(1L)
                 .name("DataService 1")
-                .url("URL 1")
                 .build();
 
         when(dataServiceService.getById(dataService.getId())).thenReturn(dataService);
@@ -215,7 +172,6 @@ public class DataServiceControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").value(dataService.getId()))
                 .andExpect(jsonPath("$.name").value(dataService.getName()))
-                .andExpect(jsonPath("$.url").value(dataService.getUrl()))
                 .andDo(result -> {
                     String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
                     DataService actualDataService = objectMapper.readValue(response, DataService.class);
@@ -224,7 +180,6 @@ public class DataServiceControllerTest {
                     softly.assertThat(actualDataService).isNotNull();
                     softly.assertThat(actualDataService.getId()).isEqualTo(dataService.getId());
                     softly.assertThat(actualDataService.getName()).isEqualTo(dataService.getName());
-                    softly.assertThat(actualDataService.getUrl()).isEqualTo(dataService.getUrl());
                     softly.assertAll();
                 });
     }
@@ -316,13 +271,11 @@ public class DataServiceControllerTest {
         DataService updatedDataService = DataService.builder()
                 .id(dataServiceId)
                 .name("DataService 1")
-                .url("Url 1")
                 .build();
 
         DataService savedDataService = DataService.builder()
                 .id(dataServiceId)
                 .name(updatedDataService.getName())
-                .url(updatedDataService.getUrl())
                 .build();
 
         when(dataServiceService.edit(any())).thenReturn(savedDataService);
@@ -335,7 +288,6 @@ public class DataServiceControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").value(dataServiceId))
                 .andExpect(jsonPath("$.name").value(savedDataService.getName()))
-                .andExpect(jsonPath("$.url").value(savedDataService.getUrl()))
                 .andDo(result -> {
                     String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
                     DataService actualDataService = objectMapper.readValue(response, DataService.class);
@@ -344,7 +296,6 @@ public class DataServiceControllerTest {
                     softly.assertThat(actualDataService).isNotNull();
                     softly.assertThat(actualDataService.getId()).isEqualTo(savedDataService.getId());
                     softly.assertThat(actualDataService.getName()).isEqualTo(savedDataService.getName());
-                    softly.assertThat(actualDataService.getUrl()).isEqualTo(savedDataService.getUrl());
                     softly.assertAll();
                 });
     }
@@ -357,7 +308,6 @@ public class DataServiceControllerTest {
         DataService updatedDataService = DataService.builder()
                 .id(dataServiceId)
                 .name("Name")
-                .url("Url")
                 .build();
 
         Locale locale = new Locale("ru");

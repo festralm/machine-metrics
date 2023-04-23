@@ -42,11 +42,9 @@ public class DataServiceServiceTest {
         // given
         DataService dataService1 = DataService.builder()
                 .name("DataService 1")
-                .url("url 1")
                 .build();
         DataService dataService2 = DataService.builder()
                 .name("DataService 2")
-                .url("url 2")
                 .build();
         List<DataService> dataServiceList = List.of(dataService1, dataService2);
 
@@ -59,9 +57,7 @@ public class DataServiceServiceTest {
         SoftAssertions softly = new SoftAssertions();
         softly.assertThat(result.size()).isEqualTo(2);
         softly.assertThat(result.get(0).getName()).isEqualTo(dataService1.getName());
-        softly.assertThat(result.get(0).getUrl()).isEqualTo(dataService1.getUrl());
         softly.assertThat(result.get(1).getName()).isEqualTo(dataService2.getName());
-        softly.assertThat(result.get(1).getUrl()).isEqualTo(dataService2.getUrl());
         softly.assertAll();
     }
 
@@ -70,13 +66,11 @@ public class DataServiceServiceTest {
         // given
         DataService dataService = DataService.builder()
                 .name("Test DataService")
-                .url("Test url")
                 .build();
 
         DataService savedDataService = DataService.builder()
                 .id(1L)
                 .name(dataService.getName())
-                .url(dataService.getUrl())
                 .build();
 
         when(dataServiceRepository.save(any(DataService.class))).thenReturn(savedDataService);
@@ -88,7 +82,6 @@ public class DataServiceServiceTest {
         SoftAssertions softly = new SoftAssertions();
         softly.assertThat(actualDataService.getId()).isEqualTo(savedDataService.getId());
         softly.assertThat(actualDataService.getName()).isEqualTo(savedDataService.getName());
-        softly.assertThat(actualDataService.getUrl()).isEqualTo(savedDataService.getUrl());
         softly.assertAll();
     }
 
@@ -98,7 +91,6 @@ public class DataServiceServiceTest {
         DataService dataService = new DataService();
         dataService.setId(1L);
         dataService.setName("DataService 1");
-        dataService.setUrl("Url 1");
 
         when(dataServiceRepository.findById(dataService.getId())).thenReturn(Optional.of(dataService));
 
@@ -109,7 +101,6 @@ public class DataServiceServiceTest {
         SoftAssertions softly = new SoftAssertions();
         softly.assertThat(actualDataService.getId()).isEqualTo(dataService.getId());
         softly.assertThat(actualDataService.getName()).isEqualTo(dataService.getName());
-        softly.assertThat(actualDataService.getUrl()).isEqualTo(dataService.getUrl());
         softly.assertAll();
     }
 
@@ -141,7 +132,6 @@ public class DataServiceServiceTest {
         DataService dataService = new DataService();
         dataService.setId(dataServiceId);
         dataService.setName("Test DataService");
-        dataService.setUrl("Test Url");
 
         when(dataServiceRepository.findById(dataServiceId)).thenReturn(Optional.of(dataService));
 
@@ -182,7 +172,6 @@ public class DataServiceServiceTest {
         DataService updatedDataService = DataService.builder()
                 .id(dataServiceId)
                 .name("Updated DataService")
-                .url("Updated URL")
                 .build();
 
         when(dataServiceRepository.findById(dataServiceId)).thenReturn(Optional.of(updatedDataService));
@@ -198,7 +187,6 @@ public class DataServiceServiceTest {
         SoftAssertions softly = new SoftAssertions();
         softly.assertThat(actualDataService.getId()).isEqualTo(updatedDataService.getId());
         softly.assertThat(actualDataService.getName()).isEqualTo(updatedDataService.getName());
-        softly.assertThat(actualDataService.getUrl()).isEqualTo(updatedDataService.getUrl());
         softly.assertAll();
     }
 

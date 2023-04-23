@@ -1,5 +1,5 @@
 server:
-  port: 8082
+  port: 8085
 
 influxdb:
   url: http://localhost:8086
@@ -15,4 +15,4 @@ spring:
     password: guest
 
 app:
-  name: random-1
+  name: random-2

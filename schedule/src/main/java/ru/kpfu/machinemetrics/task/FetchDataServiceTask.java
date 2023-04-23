@@ -1,17 +1,17 @@
 package ru.kpfu.machinemetrics.task;
 
 import lombok.AllArgsConstructor;
-import ru.kpfu.machinemetrics.client.DataServiceClient;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 @AllArgsConstructor
 public class FetchDataServiceTask implements Runnable {
 
-    private String url;
+    private String serviceName;
     private Long equipmentId;
-    private DataServiceClient dataServiceClient;
+    private RabbitTemplate rabbitTemplate;
 
     @Override
     public void run() {
-        dataServiceClient.triggerService(url, equipmentId);
+        rabbitTemplate.convertAndSend(String.format("rk-%s", serviceName), equipmentId);
     }
 }

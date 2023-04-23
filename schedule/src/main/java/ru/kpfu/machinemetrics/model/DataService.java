@@ -26,8 +26,4 @@ public class DataService {
 
     @NotBlank(message = "{validation.data-service.name.empty}")
     private String name;
-
-
-    @NotBlank(message = "{validation.data-service.url.empty}")
-    private String url;
 }

@@ -47,6 +47,7 @@ public class EquipmentService {
         equipmentRepository.save(equipment);
 
         // todo delete from schedule
+        // todo delete from influx db
     }
 
     public Equipment edit(Long id, Equipment updatedEquipment) {

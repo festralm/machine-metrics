@@ -3,13 +3,13 @@ package ru.kpfu.machinemetrics.service;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.kpfu.machinemetrics.client.DataServiceClient;
 import ru.kpfu.machinemetrics.exception.ResourceNotFoundException;
 import ru.kpfu.machinemetrics.model.EquipmentInfo;
 import ru.kpfu.machinemetrics.repository.EquipmentInfoRepository;
@@ -31,7 +31,7 @@ public class EquipmentInfoService {
     private final EquipmentInfoRepository equipmentInfoRepository;
     private final MessageSource messageSource;
     private final TaskScheduler taskScheduler;
-    private final DataServiceClient dataServiceClient;
+    private final RabbitTemplate rabbitTemplate;
 
     private ConcurrentMap<Long, ScheduledFuture<?>> equipmentIdToTask = new ConcurrentHashMap<>();
 
@@ -43,7 +43,6 @@ public class EquipmentInfoService {
 
     public EquipmentInfo save(@NotNull EquipmentInfo equipmentInfo) {
         final EquipmentInfo savedEquipmentInfo = equipmentInfoRepository.save(equipmentInfo);
-        // start  job
         if (savedEquipmentInfo.getEnabled()) {
             startTask(savedEquipmentInfo);
         }
@@ -83,9 +82,9 @@ public class EquipmentInfoService {
 
     private void startTask(EquipmentInfo equipmentInfo) {
         stopTask(equipmentInfo.getId());
-            CronTrigger cronTrigger = new CronTrigger(equipmentInfo.getCron().getId());
-        Runnable fetchDataServiceTask = new FetchDataServiceTask(equipmentInfo.getDataService().getUrl(),
-                equipmentInfo.getId(), dataServiceClient);
+        CronTrigger cronTrigger = new CronTrigger(equipmentInfo.getCron().getId());
+        Runnable fetchDataServiceTask = new FetchDataServiceTask(equipmentInfo.getDataService().getName(),
+                equipmentInfo.getId(), rabbitTemplate);
         ScheduledFuture<?> taskFuture = taskScheduler.schedule(fetchDataServiceTask, cronTrigger);
         equipmentIdToTask.put(equipmentInfo.getId(), taskFuture);
     }
