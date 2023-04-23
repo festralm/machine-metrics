@@ -1,4 +1,4 @@
-package ru.kpfu.machinemetrics.controller;
+package ru.kpfu.machinemetrics;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import ru.kpfu.machinemetrics.dto.ErrorResponse;
 import ru.kpfu.machinemetrics.exception.ResourceNotFoundException;
+import ru.kpfu.machinemetrics.exception.ValidationException;
 
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -29,19 +30,26 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(error);
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleNullPointerException() {
-        Locale locale = LocaleContextHolder.getLocale();
-        String message = messageSource.getMessage("exception.general", null, locale);
-        ErrorResponse error = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), message);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
-    }
-
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException e) {
         String message = e.getMessage();
         ErrorResponse error = new ErrorResponse(HttpStatus.NOT_FOUND.value(), message);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<ErrorResponse> handleValidationException(ValidationException e) {
+        String message = e.getMessage();
+        ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), message);
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleOtherExceptions(Exception e) {
+        Locale locale = LocaleContextHolder.getLocale();
+        String message = messageSource.getMessage("exception.general", null, locale);
+        ErrorResponse error = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), message);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 }
 

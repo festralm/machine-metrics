@@ -18,7 +18,6 @@ public class EquipmentDataService {
 
     private static final Random r = new Random();
 
-    @Scheduled(cron = "0 * * * * *")
     public void generateData() {
         final double u = r.nextDouble() * 100;
         EquipmentData equipmentData = EquipmentData.builder().equipmentId(1L).u(u).enabled(u > 20).build();

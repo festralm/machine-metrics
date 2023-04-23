@@ -17,8 +17,10 @@
 
     <modules>
         <module>common-config</module>
+        <module>common-web</module>
         <module>equipment</module>
         <module>random-data</module>
+        <module>schedule</module>
     </modules>
 
     <properties>

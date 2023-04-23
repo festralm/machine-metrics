@@ -7,10 +7,9 @@
         <artifactId>machinemetrics</artifactId>
         <version>1.0.0</version>
     </parent>
-    <artifactId>equipment</artifactId>
+    <artifactId>schedule</artifactId>
     <version>1.0.0</version>
-    <name>equipment</name>
-    <description>equipment</description>
+    <name>schedule</name>
 
     <dependencies>
         <dependency>

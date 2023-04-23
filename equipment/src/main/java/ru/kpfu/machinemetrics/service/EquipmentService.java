@@ -45,6 +45,8 @@ public class EquipmentService {
         Equipment equipment = getById(id);
         equipment.setDeleted(true);
         equipmentRepository.save(equipment);
+
+        // todo delete from schedule
     }
 
     public Equipment edit(Long id, Equipment updatedEquipment) {

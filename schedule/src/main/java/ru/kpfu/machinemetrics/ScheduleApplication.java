@@ -5,10 +5,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
-public class RandomDataApplication {
+@EnableScheduling
+public class ScheduleApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(RandomDataApplication.class, args);
+        SpringApplication.run(ScheduleApplication.class, args);
     }
 
 }

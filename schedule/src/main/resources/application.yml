@@ -1,0 +1,24 @@
+server:
+  port: 8083
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/schedule
+    username: schedule
+    password: ${POSTGRES_PASSWORD}
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  quartz:
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: always
+
+api:
+  prefix:
+    v1: /api/v1
+
+app:
+  front:
+    url: http://localhost:8081

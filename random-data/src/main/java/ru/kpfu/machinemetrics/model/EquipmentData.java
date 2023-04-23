@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 @Builder
 public class EquipmentData {
-    Long equipmentId;
-    Double u;
-    Boolean enabled;
+    private Long equipmentId;
+    private Double u;
+    private Boolean enabled;
 }
