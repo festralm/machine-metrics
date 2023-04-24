@@ -35,14 +35,14 @@ public class ExceptionHandlingTest {
     private MessageSource messageSource;
 
     @MockBean
-    private EquipmentService equipmentService;
+    private EquipmentService equipmentServiceMock;
 
     @MockBean
-    private EquipmentMapper equipmentMapper;
+    private EquipmentMapper equipmentMapperMock;
 
     @Test
     public void testInternalServerError() throws Exception {
-        when(equipmentService.getAllNotDeleted()).thenThrow(new RuntimeException());
+        when(equipmentServiceMock.getAllNotDeleted()).thenThrow(new RuntimeException());
 
         String message = messageSource.getMessage("exception.general", null, new Locale("ru"));
         ErrorResponse expectedResponseBody = new ErrorResponse(500, message);

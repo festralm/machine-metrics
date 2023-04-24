@@ -56,10 +56,10 @@ public class EquipmentControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private EquipmentService equipmentService;
+    private EquipmentService equipmentServiceMock;
 
     @MockBean
-    private EquipmentMapper equipmentMapper;
+    private EquipmentMapper equipmentMapperMock;
 
     @Test
     public void testListAll() throws Exception {
@@ -84,8 +84,8 @@ public class EquipmentControllerTest {
                 .build();
         List<EquipmentItemDto> expectedEquipmentItemDtoList = List.of(equipmentItemDto1, equipmentCreateDto2);
 
-        when(equipmentService.getAllNotDeleted()).thenReturn(equipmentList);
-        when(equipmentMapper.toEquipmentItemDtos(eq(equipmentList))).thenReturn(expectedEquipmentItemDtoList);
+        when(equipmentServiceMock.getAllNotDeleted()).thenReturn(equipmentList);
+        when(equipmentMapperMock.toEquipmentItemDtos(eq(equipmentList))).thenReturn(expectedEquipmentItemDtoList);
 
         // expect
         mockMvc.perform(get("/api/v1/equipment"))
@@ -167,9 +167,9 @@ public class EquipmentControllerTest {
                 .lastOperationDate(savedEquipment.getLastOperationDate())
                 .build();
 
-        when(equipmentMapper.toEquipment(any(EquipmentCreateDto.class))).thenReturn(equipment);
-        when(equipmentService.save(eq(equipment))).thenReturn(savedEquipment);
-        when(equipmentMapper.toEquipmentDetailsDto(eq(savedEquipment))).thenReturn(savedEquipmentDetailsDto);
+        when(equipmentMapperMock.toEquipment(any(EquipmentCreateDto.class))).thenReturn(equipment);
+        when(equipmentServiceMock.save(eq(equipment))).thenReturn(savedEquipment);
+        when(equipmentMapperMock.toEquipmentDetailsDto(eq(savedEquipment))).thenReturn(savedEquipmentDetailsDto);
 
         // expect
         mockMvc.perform(post("/api/v1/equipment")
@@ -271,8 +271,8 @@ public class EquipmentControllerTest {
                 .lastOperationDate(equipment.getLastOperationDate())
                 .build();
 
-        when(equipmentService.getById(equipment.getId())).thenReturn(equipment);
-        when(equipmentMapper.toEquipmentDetailsDto(equipment)).thenReturn(equipmentDetailsDto);
+        when(equipmentServiceMock.getById(equipment.getId())).thenReturn(equipment);
+        when(equipmentMapperMock.toEquipmentDetailsDto(equipment)).thenReturn(equipmentDetailsDto);
 
         // expect
         mockMvc.perform(get("/api/v1/equipment/{id}", equipment.getId()))
@@ -321,7 +321,7 @@ public class EquipmentControllerTest {
                 locale
         );
 
-        when(equipmentService.getById(equipmentId)).thenThrow(new ResourceNotFoundException(message));
+        when(equipmentServiceMock.getById(equipmentId)).thenThrow(new ResourceNotFoundException(message));
 
         ErrorResponse expectedResponseBody = new ErrorResponse(404, message);
 
@@ -347,7 +347,7 @@ public class EquipmentControllerTest {
     public void testDeleteExistingEquipment() throws Exception {
         // given
         Long equipmentId = 1L;
-        doNothing().when(equipmentService).delete(equipmentId);
+        doNothing().when(equipmentServiceMock).delete(equipmentId);
 
         // expect
         mockMvc.perform(delete("/api/v1/equipment/{id}", equipmentId))
@@ -366,7 +366,7 @@ public class EquipmentControllerTest {
                 locale
         );
 
-        doThrow(new ResourceNotFoundException(message)).when(equipmentService).delete(equipmentId);
+        doThrow(new ResourceNotFoundException(message)).when(equipmentServiceMock).delete(equipmentId);
 
         ErrorResponse expectedResponseBody = new ErrorResponse(404, message);
 
@@ -447,9 +447,9 @@ public class EquipmentControllerTest {
                 .lastOperationDate(editedEquipment.getLastOperationDate())
                 .build();
 
-        when(equipmentMapper.toEquipment(any(EquipmentCreateDto.class))).thenReturn(updatedEquipment);
-        when(equipmentService.edit(eq(equipmentId), eq(updatedEquipment))).thenReturn(editedEquipment);
-        when(equipmentMapper.toEquipmentDetailsDto(eq(editedEquipment))).thenReturn(editedEquipmentDetailsDto);
+        when(equipmentMapperMock.toEquipment(any(EquipmentCreateDto.class))).thenReturn(updatedEquipment);
+        when(equipmentServiceMock.edit(eq(equipmentId), eq(updatedEquipment))).thenReturn(editedEquipment);
+        when(equipmentMapperMock.toEquipmentDetailsDto(eq(editedEquipment))).thenReturn(editedEquipmentDetailsDto);
 
         // when
         mockMvc.perform(put("/api/v1/equipment/{id}", equipmentId)
@@ -527,8 +527,8 @@ public class EquipmentControllerTest {
                 locale
         );
 
-        when(equipmentMapper.toEquipment(any(EquipmentCreateDto.class))).thenReturn(updatedEquipment);
-        doThrow(new ResourceNotFoundException(message)).when(equipmentService).edit(eq(equipmentId),
+        when(equipmentMapperMock.toEquipment(any(EquipmentCreateDto.class))).thenReturn(updatedEquipment);
+        doThrow(new ResourceNotFoundException(message)).when(equipmentServiceMock).edit(eq(equipmentId),
                 eq(updatedEquipment));
 
         ErrorResponse expectedResponseBody = new ErrorResponse(404, message);

@@ -16,7 +16,6 @@ public class EquipmentDataRepositoryImpl implements EquipmentDataRepository {
 
     @Override
     public void save(Point point) {
-
         WriteApiBlocking writeApi = influxDBClient.getWriteApiBlocking();
         writeApi.writePoint(influxDbProperties.getBucket(), influxDbProperties.getOrg(), point);
     }
