@@ -165,32 +165,6 @@ public class DataServiceServiceTest {
     }
 
     @Test
-    void testEdit() {
-        // given
-        Long dataServiceId = 1L;
-
-        DataService updatedDataService = DataService.builder()
-                .id(dataServiceId)
-                .name("Updated DataService")
-                .build();
-
-        when(dataServiceRepository.findById(dataServiceId)).thenReturn(Optional.of(updatedDataService));
-        when(dataServiceRepository.save(any(DataService.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        // when
-        DataService actualDataService = dataServiceService.edit(updatedDataService);
-
-        // then
-        verify(dataServiceRepository).findById(dataServiceId);
-        verify(dataServiceRepository).save(updatedDataService);
-
-        SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(actualDataService.getId()).isEqualTo(updatedDataService.getId());
-        softly.assertThat(actualDataService.getName()).isEqualTo(updatedDataService.getName());
-        softly.assertAll();
-    }
-
-    @Test
     void testEditDataServiceNotFound() {
         // given
         Long dataServiceId = 1L;

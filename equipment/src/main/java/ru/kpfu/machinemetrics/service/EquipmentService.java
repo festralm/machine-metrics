@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import ru.kpfu.machinemetrics.exception.ResourceNotFoundException;
 import ru.kpfu.machinemetrics.model.Equipment;
 import ru.kpfu.machinemetrics.repository.EquipmentRepository;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 import java.util.List;
 import java.util.Locale;
@@ -19,6 +20,7 @@ public class EquipmentService {
 
     private final EquipmentRepository equipmentRepository;
     private final MessageSource messageSource;
+    private final RabbitTemplate rabbitTemplate;
 
     public List<Equipment> getAllNotDeleted() {
         return equipmentRepository.findAllByDeletedFalse();
@@ -46,6 +48,7 @@ public class EquipmentService {
         equipment.setDeleted(true);
         equipmentRepository.save(equipment);
 
+        rabbitTemplate.convertAndSend("rk-equipment", id);
         // todo delete from schedule
         // todo delete from influx db
     }

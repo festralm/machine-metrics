@@ -7,6 +7,13 @@ influxdb:
   token: ${INFLUXDB_TOKEN}
   org: Alia
 
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
 api:
   prefix:
     v1: /api/v1

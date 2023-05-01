@@ -8,4 +8,6 @@ import java.util.List;
 public interface EquipmentDataRepository {
 
     List<EquipmentData> getData(@NotNull String start, @NotNull String stop, Long equipmentId);
+
+    void delete(@NotNull Long equipmentId);
 }

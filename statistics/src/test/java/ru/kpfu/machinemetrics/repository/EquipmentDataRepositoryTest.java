@@ -1,9 +1,9 @@
 package ru.kpfu.machinemetrics.repository;
 
+import com.influxdb.client.DeleteApi;
 import com.influxdb.client.InfluxDBClient;
 import com.influxdb.client.QueryApi;
-import com.influxdb.query.FluxRecord;
-import com.influxdb.query.FluxTable;
+import com.influxdb.client.domain.DeletePredicateRequest;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,11 +12,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import ru.kpfu.machinemetrics.model.EquipmentData;
 import ru.kpfu.machinemetrics.properties.InfluxDbProperties;
 
-import java.time.Instant;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -45,7 +46,7 @@ public class EquipmentDataRepositoryTest {
         String expectedQuery = "from(bucket: \"bucket\") " +
                 "|> range(start: time(v: 2023-03-24T01:00:00Z), stop: time(v: 2023-04-24T01:00:00Z)) " +
                 "|> filter(fn: (r) => r[\"_measurement\"] == \"equipment_data\")" +
-                "|> filter(fn: (r) => r[\"equipment_id\"] == 1)" +
+                "|> filter(fn: (r) => r[\"equipment_id\"] == \"1\")" +
                 "|> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")";
 
         QueryApi queryApiMock = mock(QueryApi.class);
@@ -66,6 +67,7 @@ public class EquipmentDataRepositoryTest {
         verify(influxDBClientMock, times(1)).getQueryApi();
         verify(queryApiMock, times(1)).query(eq(expectedQuery), eq("org"));
     }
+
     @Test
     void testGetDataWithEmptyId() {
         // given
@@ -94,5 +96,32 @@ public class EquipmentDataRepositoryTest {
         softly.assertAll();
         verify(influxDBClientMock, times(1)).getQueryApi();
         verify(queryApiMock, times(1)).query(eq(expectedQuery), eq("org"));
+    }
+
+    @Test
+    void testDeleteByEquipmentId() {
+        // given
+        Long givenId = 1L;
+        final String expectedPredicate = "equipment_id=\"1\"";
+
+        DeleteApi deleteApiMock = mock(DeleteApi.class);
+        when(influxDBClientMock.getDeleteApi()).thenReturn(deleteApiMock);
+
+        doNothing().when(deleteApiMock).delete(
+                any(DeletePredicateRequest.class),
+                any(String.class),
+                any(String.class)
+        );
+
+        // when
+        equipmentDataRepository.delete(givenId);
+
+        // then
+        verify(influxDBClientMock, times(1)).getDeleteApi();
+        verify(deleteApiMock, times(1)).delete(
+                argThat(arg -> arg != null && arg.getPredicate().equals(expectedPredicate)),
+                eq("bucket"),
+                eq("org")
+        );
     }
 }

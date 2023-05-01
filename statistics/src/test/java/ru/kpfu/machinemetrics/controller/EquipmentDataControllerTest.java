@@ -9,13 +9,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.kpfu.machinemetrics.StatisticsDto;
 import ru.kpfu.machinemetrics.configuration.MessageSourceConfig;
 import ru.kpfu.machinemetrics.model.EquipmentData;
 import ru.kpfu.machinemetrics.service.EquipmentDataService;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.eq;
@@ -50,7 +50,13 @@ public class EquipmentDataControllerTest {
                 EquipmentData.builder().equipmentId(givenId).enabled(false).build()
         );
 
-        when(equipmentDataService.getData(eq(givenId), eq(givenStart), eq(givenStop))).thenReturn(givenList);
+        StatisticsDto givenDto = StatisticsDto.builder()
+                .equipmentData(givenList)
+                .start(givenStart)
+                .end(givenStop)
+                .build();
+
+        when(equipmentDataService.getData(eq(givenId), eq(givenStart), eq(givenStop))).thenReturn(givenDto);
 
         // expect
         mockMvc.perform(get("/api/v1/equipment-data")
@@ -60,23 +66,24 @@ public class EquipmentDataControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].equipmentId").value(givenId))
-                .andExpect(jsonPath("$[0].enabled").value(true))
-                .andExpect(jsonPath("$[1].equipmentId").value(givenId))
-                .andExpect(jsonPath("$[1].enabled").value(false))
+                .andExpect(jsonPath("$.equipmentData.length()").value(2))
+                .andExpect(jsonPath("$.equipmentData[0].equipmentId").value(givenId))
+                .andExpect(jsonPath("$.equipmentData[0].enabled").value(true))
+                .andExpect(jsonPath("$.equipmentData[1].equipmentId").value(givenId))
+                .andExpect(jsonPath("$.equipmentData[1].enabled").value(false))
                 .andDo(result -> {
                     String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
-                    List<EquipmentData> actualList = Arrays.asList(objectMapper.readValue(response,
-                            EquipmentData[].class));
+                    StatisticsDto actualDto = objectMapper.readValue(response, StatisticsDto.class);
 
                     SoftAssertions softly = new SoftAssertions();
-                    softly.assertThat(actualList).isNotNull();
-                    softly.assertThat(actualList).hasSize(2);
-                    softly.assertThat(actualList.get(0).getEquipmentId()).isEqualTo(givenId);
-                    softly.assertThat(actualList.get(0).getEnabled()).isEqualTo(true);
-                    softly.assertThat(actualList.get(1).getEquipmentId()).isEqualTo(givenId);
-                    softly.assertThat(actualList.get(1).getEnabled()).isEqualTo(false);
+                    softly.assertThat(actualDto).isNotNull();
+                    softly.assertThat(actualDto.getStart()).isEqualTo(givenStart);
+                    softly.assertThat(actualDto.getEnd()).isEqualTo(givenStop);
+                    softly.assertThat(actualDto.getEquipmentData()).hasSize(2);
+                    softly.assertThat(actualDto.getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
+                    softly.assertThat(actualDto.getEquipmentData().get(0).getEnabled()).isEqualTo(true);
+                    softly.assertThat(actualDto.getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
+                    softly.assertThat(actualDto.getEquipmentData().get(1).getEnabled()).isEqualTo(false);
                     softly.assertAll();
                 });
     }
