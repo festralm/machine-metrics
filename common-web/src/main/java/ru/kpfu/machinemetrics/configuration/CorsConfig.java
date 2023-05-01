@@ -1,4 +1,4 @@
-package ru.kpfu.machinemetrics;
+package ru.kpfu.machinemetrics.configuration;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
+import ru.kpfu.machinemetrics.properties.FrontProperties;
 
 @Configuration
 @RequiredArgsConstructor

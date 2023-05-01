@@ -35,7 +35,7 @@ public class EquipmentDataRepositoryImpl implements EquipmentDataRepository {
                         (
                                 equipmentId == null ?
                                         "" :
-                                        "|> filter(fn: (r) => r[\"equipment_id\"] == %s)"
+                                        "|> filter(fn: (r) => r[\"equipment_id\"] == \"%s\")"
                         ) +
                         "|> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")",
                 influxDbProperties.getBucket(),

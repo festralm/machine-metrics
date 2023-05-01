@@ -16,12 +16,12 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>common-config</module>
         <module>common-web</module>
         <module>equipment</module>
         <module>random-data</module>
         <module>random-data-2</module>
         <module>schedule</module>
+        <module>statistics</module>
     </modules>
 
     <properties>
