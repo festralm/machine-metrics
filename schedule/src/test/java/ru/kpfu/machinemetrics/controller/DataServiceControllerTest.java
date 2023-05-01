@@ -111,7 +111,7 @@ public class DataServiceControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").value(savedDataService.getId()))
                 .andExpect(jsonPath("$.name").value(savedDataService.getName()))
-                .andExpect(header().string("Location", "/data-service/" + savedDataService.getId()))
+                .andExpect(header().string("Location", "/data-service"))
                 .andDo(result -> {
                     String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
                     DataService actualDataServiceCreate = objectMapper.readValue(response, DataService.class);
@@ -246,84 +246,6 @@ public class DataServiceControllerTest {
 
         // expect
         mockMvc.perform(delete("/api/v1/data-service/{id}", dataServiceId))
-                .andExpect(status().isNotFound())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.status").value(expectedResponseBody.getStatus()))
-                .andExpect(jsonPath("$.message").value(expectedResponseBody.getMessage()))
-                .andDo(result -> {
-                    String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
-                    ErrorResponse errorResponse = objectMapper.readValue(response, ErrorResponse.class);
-
-                    SoftAssertions softly = new SoftAssertions();
-                    softly.assertThat(errorResponse).isNotNull();
-                    softly.assertThat(errorResponse.getStatus()).isEqualTo(expectedResponseBody.getStatus());
-                    softly.assertThat(errorResponse.getMessage()).isEqualTo(expectedResponseBody.getMessage());
-                    softly.assertAll();
-                });
-    }
-
-    @Test
-    public void testEditExistingDataService() throws Exception {
-        // given
-        Long dataServiceId = 1L;
-
-        DataService updatedDataService = DataService.builder()
-                .id(dataServiceId)
-                .name("DataService 1")
-                .build();
-
-        DataService savedDataService = DataService.builder()
-                .id(dataServiceId)
-                .name(updatedDataService.getName())
-                .build();
-
-        when(dataServiceService.edit(any())).thenReturn(savedDataService);
-
-        // when
-        mockMvc.perform(put("/api/v1/data-service")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updatedDataService)))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").value(dataServiceId))
-                .andExpect(jsonPath("$.name").value(savedDataService.getName()))
-                .andDo(result -> {
-                    String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
-                    DataService actualDataService = objectMapper.readValue(response, DataService.class);
-
-                    SoftAssertions softly = new SoftAssertions();
-                    softly.assertThat(actualDataService).isNotNull();
-                    softly.assertThat(actualDataService.getId()).isEqualTo(savedDataService.getId());
-                    softly.assertThat(actualDataService.getName()).isEqualTo(savedDataService.getName());
-                    softly.assertAll();
-                });
-    }
-
-    @Test
-    public void testEditNonExistingDataService() throws Exception {
-        // given
-        Long dataServiceId = 1L;
-
-        DataService updatedDataService = DataService.builder()
-                .id(dataServiceId)
-                .name("Name")
-                .build();
-
-        Locale locale = new Locale("ru");
-        String message = messageSource.getMessage(
-                DATA_SERVICE_NOT_FOUND_EXCEPTION_MESSAGE,
-                new Object[]{dataServiceId},
-                locale
-        );
-
-        doThrow(new ResourceNotFoundException(message)).when(dataServiceService).edit(any());
-
-        ErrorResponse expectedResponseBody = new ErrorResponse(404, message);
-
-        // expect
-        mockMvc.perform(put("/api/v1/data-service")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updatedDataService)))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(expectedResponseBody.getStatus()))

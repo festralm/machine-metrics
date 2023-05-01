@@ -3,6 +3,7 @@ package ru.kpfu.machinemetrics.service;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,7 +21,11 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static ru.kpfu.machinemetrics.constants.EquipmentConstants.EQUIPMENT_NOT_FOUND_EXCEPTION_MESSAGE;
 
@@ -33,6 +38,9 @@ public class EquipmentServiceTest {
 
     @MockBean
     private EquipmentRepository equipmentRepositoryMock;
+
+    @MockBean
+    private RabbitTemplate rabbitTemplate;
 
     @Autowired
     private EquipmentService equipmentService;
@@ -144,6 +152,7 @@ public class EquipmentServiceTest {
         // then
         verify(equipmentRepositoryMock, Mockito.times(1)).findByIdAndDeletedFalse(equipmentId);
         verify(equipmentRepositoryMock, Mockito.times(1)).save(equipment);
+        verify(rabbitTemplate, times(1)).convertAndSend(eq("rk-equipment"), eq(equipmentId));
         assertThat(equipment.isDeleted()).isTrue();
     }
 
@@ -159,6 +168,7 @@ public class EquipmentServiceTest {
         // then
         verify(equipmentRepositoryMock, Mockito.times(1)).findByIdAndDeletedFalse(equipmentId);
         verify(equipmentRepositoryMock, Mockito.never()).save(Mockito.any(Equipment.class));
+        verifyNoInteractions(rabbitTemplate);
         String expectedMessage = messageSource.getMessage(
                 EQUIPMENT_NOT_FOUND_EXCEPTION_MESSAGE,
                 new Object[]{equipmentId},

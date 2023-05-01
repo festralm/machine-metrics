@@ -48,9 +48,4 @@ public class DataServiceService {
         // todo what if there are equipments
         dataServiceRepository.delete(dataService);
     }
-
-    public DataService edit(@NotNull DataService updatedDataService) {
-        getById(updatedDataService.getId());
-        return dataServiceRepository.save(updatedDataService);
-    }
 }

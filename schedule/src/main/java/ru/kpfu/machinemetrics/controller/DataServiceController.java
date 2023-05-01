@@ -32,7 +32,7 @@ public class DataServiceController {
     @PostMapping
     public ResponseEntity<DataService> create(@Valid @RequestBody DataService dataService) {
         DataService savedDataService = dataServiceService.save(dataService);
-        return ResponseEntity.created(URI.create("/data-service/" + savedDataService.getId())).body(savedDataService);
+        return ResponseEntity.created(URI.create("/data-service")).body(savedDataService);
     }
 
     @GetMapping("/{id}")
@@ -44,10 +44,5 @@ public class DataServiceController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         dataServiceService.delete(id);
         return ResponseEntity.noContent().build();
-    }
-
-    @PutMapping
-    public DataService edit(@Valid @RequestBody DataService dataService) {
-        return dataServiceService.edit(dataService);
     }
 }
