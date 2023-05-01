@@ -186,9 +186,6 @@ public class EquipmentControllerTest {
                 .andExpect(jsonPath("$.department").value(savedEquipmentDetailsDto.getDepartment()))
                 .andExpect(jsonPath("$.responsiblePerson").value(savedEquipmentDetailsDto.getResponsiblePerson()))
                 .andExpect(jsonPath("$.status").value(savedEquipmentDetailsDto.getStatus()))
-                // todo maybe later
-//                .andExpect(jsonPath("$.receiptDate").value(savedEquipmentDetailsDto.getReceiptDate()))
-//                .andExpect(jsonPath("$.lastOperationDate").value(savedEquipmentDetailsDto.getLastOperationDate()))
                 .andExpect(header().string("Location", "/equipment/" + savedEquipmentDetailsDto.getId()))
                 .andDo(result -> {
                     String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);

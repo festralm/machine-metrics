@@ -6,3 +6,13 @@ influxdb:
   bucket: machinemetrics
   token: ${INFLUXDB_TOKEN}
   org: Alia
+
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+app:
+  name: random-1

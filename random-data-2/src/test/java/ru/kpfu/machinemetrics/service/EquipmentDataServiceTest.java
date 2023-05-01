@@ -1,11 +1,10 @@
-package ru.kpfu.machinemetrics;
+package ru.kpfu.machinemetrics.service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import ru.kpfu.machinemetrics.repository.EquipmentDataRepository;
-import ru.kpfu.machinemetrics.service.EquipmentDataService;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
@@ -28,7 +27,7 @@ public class EquipmentDataServiceTest {
         doNothing().when(equipmentDataRepository).save(any());
 
         // expect
-        assertThatCode(() -> equipmentDataService.generateData()).doesNotThrowAnyException();
+        assertThatCode(() -> equipmentDataService.generateData(1L)).doesNotThrowAnyException();
         verify(equipmentDataRepository).save(any());
     }
 

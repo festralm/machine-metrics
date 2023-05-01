@@ -44,10 +44,10 @@ public class EquipmentController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EquipmentDetailsDto> get(@PathVariable Long id) {
+    public EquipmentDetailsDto get(@PathVariable Long id) {
         Equipment equipment = equipmentService.getById(id);
         EquipmentDetailsDto equipmentDetailsDto = equipmentMapper.toEquipmentDetailsDto(equipment);
-        return ResponseEntity.ok(equipmentDetailsDto);
+        return equipmentDetailsDto;
     }
 
     @DeleteMapping("/{id}")
@@ -57,11 +57,11 @@ public class EquipmentController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EquipmentDetailsDto> edit(@PathVariable Long id,
-                                                    @Valid @RequestBody EquipmentCreateDto equipmentCreateDto) {
+    public EquipmentDetailsDto edit(@PathVariable Long id,
+                                    @Valid @RequestBody EquipmentCreateDto equipmentCreateDto) {
         Equipment updatedEquipment = equipmentMapper.toEquipment(equipmentCreateDto);
         Equipment editedEquipment = equipmentService.edit(id, updatedEquipment);
         EquipmentDetailsDto editedEquipmentDetailsDto = equipmentMapper.toEquipmentDetailsDto(editedEquipment);
-        return ResponseEntity.ok(editedEquipmentDetailsDto);
+        return editedEquipmentDetailsDto;
     }
 }
