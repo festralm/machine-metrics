@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import ru.kpfu.machinemetrics.repository.EquipmentDataRepository;
-import ru.kpfu.machinemetrics.service.EquipmentDataService;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
@@ -20,16 +19,16 @@ public class EquipmentDataServiceTest {
 
 
     @MockBean
-    private EquipmentDataRepository equipmentDataRepository;
+    private EquipmentDataRepository equipmentDataRepositoryMock;
 
     @Test
     public void testGenerateData() {
         // given
-        doNothing().when(equipmentDataRepository).save(any());
+        doNothing().when(equipmentDataRepositoryMock).save(any());
 
         // expect
         assertThatCode(() -> equipmentDataService.generateData(1L)).doesNotThrowAnyException();
-        verify(equipmentDataRepository).save(any());
+        verify(equipmentDataRepositoryMock).save(any());
     }
 
 }

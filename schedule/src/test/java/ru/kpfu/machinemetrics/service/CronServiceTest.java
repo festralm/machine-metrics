@@ -34,7 +34,7 @@ public class CronServiceTest {
     private MessageSource messageSource;
 
     @MockBean
-    private CronRepository cronRepository;
+    private CronRepository cronRepositoryMock;
 
     @Autowired
     private CronService cronService;
@@ -54,7 +54,7 @@ public class CronServiceTest {
                 .build();
         List<Cron> cronList = List.of(cron1, cron2);
 
-        when(cronRepository.findAll()).thenReturn(cronList);
+        when(cronRepositoryMock.findAll()).thenReturn(cronList);
 
         // when
         List<Cron> result = cronService.getAll();
@@ -86,7 +86,7 @@ public class CronServiceTest {
                 .name(cron.getName())
                 .build();
 
-        when(cronRepository.save(any(Cron.class))).thenReturn(savedCron);
+        when(cronRepositoryMock.save(any(Cron.class))).thenReturn(savedCron);
 
         // when
         Cron actualCron = cronService.save(cron);
@@ -112,7 +112,7 @@ public class CronServiceTest {
         Throwable thrown = catchThrowable(() -> cronService.save(cron));
 
         // then
-        verify(cronRepository, Mockito.never()).save(Mockito.any(Cron.class));
+        verify(cronRepositoryMock, Mockito.never()).save(Mockito.any(Cron.class));
         String expectedMessage = messageSource.getMessage(
                 CRON_VALIDATION_EXCEPTION_MESSAGE,
                 new Object[]{cron.getId()},
@@ -132,28 +132,28 @@ public class CronServiceTest {
                 .name("Cron 1")
                 .build();
 
-        when(cronRepository.findById(cronId)).thenReturn(Optional.of(cron));
+        when(cronRepositoryMock.findById(cronId)).thenReturn(Optional.of(cron));
 
         // when
         cronService.delete(cronId);
 
         // then
-        verify(cronRepository, Mockito.times(1)).findById(cronId);
-        verify(cronRepository, Mockito.times(1)).delete(cron);
+        verify(cronRepositoryMock, Mockito.times(1)).findById(cronId);
+        verify(cronRepositoryMock, Mockito.times(1)).delete(cron);
     }
 
     @Test
     void testDeleteWithNonExistingCron() {
         // given
         String cronId = "1 * * * * ?";
-        when(cronRepository.findById(cronId)).thenReturn(Optional.empty());
+        when(cronRepositoryMock.findById(cronId)).thenReturn(Optional.empty());
 
         // when
         Throwable thrown = catchThrowable(() -> cronService.delete(cronId));
 
         // then
-        verify(cronRepository, Mockito.times(1)).findById(cronId);
-        verify(cronRepository, Mockito.never()).save(Mockito.any(Cron.class));
+        verify(cronRepositoryMock, Mockito.times(1)).findById(cronId);
+        verify(cronRepositoryMock, Mockito.never()).save(Mockito.any(Cron.class));
         String expectedMessage = messageSource.getMessage(
                 CRON_NOT_FOUND_EXCEPTION_MESSAGE,
                 new Object[]{cronId},

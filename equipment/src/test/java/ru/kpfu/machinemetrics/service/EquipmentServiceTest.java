@@ -32,7 +32,7 @@ public class EquipmentServiceTest {
     private MessageSource messageSource;
 
     @MockBean
-    private EquipmentRepository equipmentRepository;
+    private EquipmentRepository equipmentRepositoryMock;
 
     @Autowired
     private EquipmentService equipmentService;
@@ -48,7 +48,7 @@ public class EquipmentServiceTest {
                 .build();
         List<Equipment> equipmentList = List.of(equipment1, equipment2);
 
-        when(equipmentRepository.findAllByDeletedFalse()).thenReturn(equipmentList);
+        when(equipmentRepositoryMock.findAllByDeletedFalse()).thenReturn(equipmentList);
 
         // when
         List<Equipment> result = equipmentService.getAllNotDeleted();
@@ -73,7 +73,7 @@ public class EquipmentServiceTest {
                 .name(equipment.getName())
                 .build();
 
-        when(equipmentRepository.save(any(Equipment.class))).thenReturn(savedEquipment);
+        when(equipmentRepositoryMock.save(any(Equipment.class))).thenReturn(savedEquipment);
 
         // when
         Equipment actualEquipment = equipmentService.save(equipment);
@@ -93,7 +93,7 @@ public class EquipmentServiceTest {
         equipment.setId(1L);
         equipment.setName("Equipment 1");
 
-        when(equipmentRepository.findByIdAndDeletedFalse(equipment.getId())).thenReturn(Optional.of(equipment));
+        when(equipmentRepositoryMock.findByIdAndDeletedFalse(equipment.getId())).thenReturn(Optional.of(equipment));
 
         // when
         Equipment actualEquipment = equipmentService.getById(equipment.getId());
@@ -111,7 +111,7 @@ public class EquipmentServiceTest {
         // given
         Long givenId = 1L;
 
-        when(equipmentRepository.findByIdAndDeletedFalse(givenId)).thenReturn(Optional.empty());
+        when(equipmentRepositoryMock.findByIdAndDeletedFalse(givenId)).thenReturn(Optional.empty());
 
         // when
         Throwable thrown = catchThrowable(() -> equipmentService.getById(givenId));
@@ -136,14 +136,14 @@ public class EquipmentServiceTest {
         equipment.setName("Test Equipment");
         equipment.setDeleted(false);
 
-        when(equipmentRepository.findByIdAndDeletedFalse(equipmentId)).thenReturn(Optional.of(equipment));
+        when(equipmentRepositoryMock.findByIdAndDeletedFalse(equipmentId)).thenReturn(Optional.of(equipment));
 
         // when
         equipmentService.delete(equipmentId);
 
         // then
-        verify(equipmentRepository, Mockito.times(1)).findByIdAndDeletedFalse(equipmentId);
-        verify(equipmentRepository, Mockito.times(1)).save(equipment);
+        verify(equipmentRepositoryMock, Mockito.times(1)).findByIdAndDeletedFalse(equipmentId);
+        verify(equipmentRepositoryMock, Mockito.times(1)).save(equipment);
         assertThat(equipment.isDeleted()).isTrue();
     }
 
@@ -151,14 +151,14 @@ public class EquipmentServiceTest {
     void testDeleteWithNonExistingEquipment() {
         // given
         Long equipmentId = 1L;
-        when(equipmentRepository.findByIdAndDeletedFalse(equipmentId)).thenReturn(Optional.empty());
+        when(equipmentRepositoryMock.findByIdAndDeletedFalse(equipmentId)).thenReturn(Optional.empty());
 
         // when
         Throwable thrown = catchThrowable(() -> equipmentService.delete(equipmentId));
 
         // then
-        verify(equipmentRepository, Mockito.times(1)).findByIdAndDeletedFalse(equipmentId);
-        verify(equipmentRepository, Mockito.never()).save(Mockito.any(Equipment.class));
+        verify(equipmentRepositoryMock, Mockito.times(1)).findByIdAndDeletedFalse(equipmentId);
+        verify(equipmentRepositoryMock, Mockito.never()).save(Mockito.any(Equipment.class));
         String expectedMessage = messageSource.getMessage(
                 EQUIPMENT_NOT_FOUND_EXCEPTION_MESSAGE,
                 new Object[]{equipmentId},
@@ -182,15 +182,15 @@ public class EquipmentServiceTest {
                 .name("Updated Equipment")
                 .build();
 
-        when(equipmentRepository.findByIdAndDeletedFalse(equipmentId)).thenReturn(Optional.of(existingEquipment));
-        when(equipmentRepository.save(any(Equipment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(equipmentRepositoryMock.findByIdAndDeletedFalse(equipmentId)).thenReturn(Optional.of(existingEquipment));
+        when(equipmentRepositoryMock.save(any(Equipment.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // when
         Equipment actualEquipment = equipmentService.edit(equipmentId, updatedEquipment);
 
         // then
-        verify(equipmentRepository).findByIdAndDeletedFalse(equipmentId);
-        verify(equipmentRepository).save(existingEquipment);
+        verify(equipmentRepositoryMock).findByIdAndDeletedFalse(equipmentId);
+        verify(equipmentRepositoryMock).save(existingEquipment);
 
         SoftAssertions softly = new SoftAssertions();
         softly.assertThat(actualEquipment.getId()).isEqualTo(existingEquipment.getId());
@@ -203,7 +203,7 @@ public class EquipmentServiceTest {
         // given
         Long equipmentId = 1L;
 
-        when(equipmentRepository.findByIdAndDeletedFalse(equipmentId)).thenReturn(Optional.empty());
+        when(equipmentRepositoryMock.findByIdAndDeletedFalse(equipmentId)).thenReturn(Optional.empty());
 
         // when
         Throwable thrown = catchThrowable(() -> equipmentService.delete(equipmentId));

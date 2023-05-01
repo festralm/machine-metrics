@@ -31,11 +31,6 @@
         </dependency>
         <dependency>
             <groupId>ru.kpfu</groupId>
-            <artifactId>common-config</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>ru.kpfu</groupId>
             <artifactId>common-web</artifactId>
             <version>1.0.0</version>
         </dependency>

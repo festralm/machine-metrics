@@ -1,4 +1,4 @@
-package ru.kpfu.machinemetrics;
+package ru.kpfu.machinemetrics.configuration;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
