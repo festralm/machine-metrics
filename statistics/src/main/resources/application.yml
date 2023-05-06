@@ -1,5 +1,5 @@
 server:
-  port: 8087
+  port: 9030
 
 influxdb:
   url: http://localhost:8086
@@ -17,7 +17,3 @@ spring:
 api:
   prefix:
     v1: /api/v1
-
-app:
-  front:
-    url: http://localhost:8081

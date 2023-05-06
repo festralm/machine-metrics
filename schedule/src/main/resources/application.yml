@@ -1,5 +1,5 @@
 server:
-  port: 8083
+  port: 9020
 
 spring:
   datasource:
@@ -23,7 +23,3 @@ spring:
 api:
   prefix:
     v1: /api/v1
-
-app:
-  front:
-    url: http://localhost:8081
