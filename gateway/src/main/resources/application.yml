@@ -1,0 +1,29 @@
+server:
+  port: 8000
+
+config:
+  service:
+    port:
+      equipment: 8080
+      schedule: 9020
+      statistics: 9030
+  api:
+    prefix:
+      v1: /api/v1
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: equipment
+          uri: http://127.0.0.1:${config.service.port.equipment}
+          predicates:
+            - Path=${config.api.prefix.v1}/equipment
+        - id: schedule
+          uri: http://127.0.0.1:${config.service.port.schedule}
+          predicates:
+            - Path=${config.api.prefix.v1}/cron,${config.api.prefix.v1}/data-service/**,${config.api.prefix.v1}/equipment-info/**
+        - id: statistics
+          uri: http://127.0.0.1:${config.service.port.statistics}
+          predicates:
+            - Path=${config.api.prefix.v1}/equipment-data

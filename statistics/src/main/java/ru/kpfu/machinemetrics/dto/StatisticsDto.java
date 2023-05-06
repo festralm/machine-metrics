@@ -1,4 +1,4 @@
-package ru.kpfu.machinemetrics;
+package ru.kpfu.machinemetrics.dto;
 
 import lombok.Builder;
 import lombok.Getter;

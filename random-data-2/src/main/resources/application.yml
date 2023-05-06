@@ -1,5 +1,5 @@
 server:
-  port: 8085
+  port: 9010
 
 influxdb:
   url: http://localhost:8086

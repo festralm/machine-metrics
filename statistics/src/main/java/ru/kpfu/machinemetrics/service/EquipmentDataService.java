@@ -3,7 +3,7 @@ package ru.kpfu.machinemetrics.service;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.kpfu.machinemetrics.StatisticsDto;
+import ru.kpfu.machinemetrics.dto.StatisticsDto;
 import ru.kpfu.machinemetrics.model.EquipmentData;
 import ru.kpfu.machinemetrics.repository.EquipmentDataRepository;
 
@@ -34,7 +34,7 @@ public class EquipmentDataService {
                 equipmentId
         );
 
-        // todo query the last previos and retrieve if it was turned on
+        // todo query the last previous and retrieve if it was turned on
         return calculateDuration(equipmentData, start, end);
     }
 

@@ -49,8 +49,6 @@ public class EquipmentService {
         equipmentRepository.save(equipment);
 
         rabbitTemplate.convertAndSend("rk-equipment", id);
-        // todo delete from schedule
-        // todo delete from influx db
     }
 
     public Equipment edit(Long id, Equipment updatedEquipment) {
