@@ -23,7 +23,3 @@ spring:
 api:
   prefix:
     v1: /api/v1
-
-app:
-  front:
-    url: http://localhost:8081
