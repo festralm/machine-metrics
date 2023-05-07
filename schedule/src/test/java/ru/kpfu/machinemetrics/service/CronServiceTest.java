@@ -54,9 +54,9 @@ public class CronServiceTest {
                 .order(2)
                 .name("Cron 2")
                 .build();
-        List<Cron> cronList = List.of(cron1, cron2);
+        List<Cron> cronList = List.of(cron2, cron1);
 
-        when(cronRepositoryMock.findAll()).thenReturn(cronList);
+        when(cronRepositoryMock.findAllByOrderByOrder()).thenReturn(cronList);
 
         // when
         List<Cron> result = cronService.getAll();
