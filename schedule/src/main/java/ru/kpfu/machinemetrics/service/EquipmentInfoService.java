@@ -41,14 +41,6 @@ public class EquipmentInfoService {
         equipmentInfos.forEach(this::startTask);
     }
 
-    public EquipmentInfo save(@NotNull EquipmentInfo equipmentInfo) {
-        final EquipmentInfo savedEquipmentInfo = equipmentInfoRepository.save(equipmentInfo);
-        if (savedEquipmentInfo.getEnabled()) {
-            startTask(savedEquipmentInfo);
-        }
-        return savedEquipmentInfo;
-    }
-
     public EquipmentInfo getById(@NotNull Long id) {
         return equipmentInfoRepository.findById(id)
                 .orElseThrow(() -> {
@@ -68,9 +60,8 @@ public class EquipmentInfoService {
         stopTask(id);
     }
 
-    public EquipmentInfo edit(@NotNull EquipmentInfo updatedEquipmentInfo) {
+    public EquipmentInfo save(@NotNull EquipmentInfo updatedEquipmentInfo) {
         final Long equipmentInfoId = updatedEquipmentInfo.getId();
-        getById(equipmentInfoId);
         final EquipmentInfo savedEquipmentInfo = equipmentInfoRepository.save(updatedEquipmentInfo);
         if (savedEquipmentInfo.getEnabled()) {
             startTask(savedEquipmentInfo);

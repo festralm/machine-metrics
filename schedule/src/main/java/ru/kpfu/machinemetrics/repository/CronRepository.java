@@ -5,5 +5,5 @@ import org.springframework.stereotype.Repository;
 import ru.kpfu.machinemetrics.model.Cron;
 
 @Repository
-public interface CronRepository extends JpaRepository<Cron, String> {
+public interface CronRepository extends JpaRepository<Cron, Long> {
 }

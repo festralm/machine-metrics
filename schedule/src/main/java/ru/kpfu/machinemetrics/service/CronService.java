@@ -29,7 +29,7 @@ public class CronService {
     }
 
     public Cron save(@NotNull Cron cron) {
-        if (!CronExpression.isValidExpression(cron.getId())) {
+        if (!CronExpression.isValidExpression(cron.getCron())) {
             Locale locale = LocaleContextHolder.getLocale();
             String message = messageSource.getMessage(
                     CRON_VALIDATION_EXCEPTION_MESSAGE,
@@ -41,7 +41,8 @@ public class CronService {
         return cronRepository.save(cron);
     }
 
-    public void delete(@NotNull String id) {
+    public void delete(@NotNull Long id) {
+        // todo if equipment exists
         Cron cron = cronRepository.findById(id)
                 .orElseThrow(() -> {
                     Locale locale = LocaleContextHolder.getLocale();

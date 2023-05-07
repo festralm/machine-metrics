@@ -37,7 +37,7 @@ public class CronController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable String id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         cronService.delete(id);
         return ResponseEntity.noContent().build();
     }

@@ -33,7 +33,7 @@ public class EquipmentInfoController {
     }
 
     @PostMapping
-    public ResponseEntity<EquipmentInfo> create(@Valid @RequestBody EquipmentInfoCreateDto equipmentInfoCreateDto) {
+    public ResponseEntity<EquipmentInfo> save(@Valid @RequestBody EquipmentInfoCreateDto equipmentInfoCreateDto) {
         EquipmentInfo equipment = equipmentInfoMapper.toEquipmentInfo(equipmentInfoCreateDto);
         EquipmentInfo savedEquipmentInfo = equipmentInfoService.save(equipment);
         return ResponseEntity.created(URI.create("/equipment/" + savedEquipmentInfo.getId())).body(savedEquipmentInfo);
@@ -43,11 +43,5 @@ public class EquipmentInfoController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         equipmentInfoService.delete(id);
         return ResponseEntity.noContent().build();
-    }
-
-    @PutMapping
-    public EquipmentInfo edit(@Valid @RequestBody EquipmentInfoCreateDto equipmentInfoCreateDto) {
-        EquipmentInfo updatedEquipmentInfo = equipmentInfoMapper.toEquipmentInfo(equipmentInfoCreateDto);
-        return equipmentInfoService.edit(updatedEquipmentInfo);
     }
 }
