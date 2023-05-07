@@ -7,6 +7,7 @@ app:
       equipment: 8080
       schedule: 9020
       statistics: 9030
+      user: 9040
   api:
     prefix:
       v1: /api/v1
@@ -40,3 +41,7 @@ spring:
           uri: http://127.0.0.1:${app.service.port.statistics}
           predicates:
             - Path=${app.api.prefix.v1}/equipment-data
+        - id: user
+          uri: http://127.0.0.1:${app.service.port.user}
+          predicates:
+            - Path=${app.api.prefix.v1}/user/**

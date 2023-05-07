@@ -5,9 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.kpfu.machinemetrics.dto.CronCreateDto;
-import ru.kpfu.machinemetrics.dto.EquipmentInfoCreateDto;
 import ru.kpfu.machinemetrics.model.Cron;
-import ru.kpfu.machinemetrics.model.EquipmentInfo;
 
 @SpringBootTest
 public class CronMapperTest {

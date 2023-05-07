@@ -29,6 +29,23 @@ public class EquipmentDataRepositoryImpl implements EquipmentDataRepository {
     private final InfluxDBClient influxDBClient;
     private final InfluxDbProperties influxDbProperties;
 
+    @org.jetbrains.annotations.NotNull
+    private static List<EquipmentData> mapResult(List<FluxTable> result) {
+        return result.stream()
+                .flatMap(fluxTable -> fluxTable.getRecords().stream()
+                        .map(
+                                fluxRecord -> EquipmentData.builder()
+                                        .equipmentId(Long.parseLong((String) Objects.requireNonNull(fluxRecord.getValueByKey("equipment_id"))))
+                                        .u((Double) fluxRecord.getValueByKey("u"))
+                                        .enabled((Boolean) fluxRecord.getValueByKey("enabled"))
+                                        .time(fluxRecord.getTime())
+                                        .build()
+                        )
+                )
+                .sorted(Comparator.comparing(EquipmentData::getTime))
+                .collect(Collectors.toList());
+    }
+
     @Override
     public List<EquipmentData> getData(@NotNull String start, @NotNull String stop, Long equipmentId) {
 
@@ -76,22 +93,5 @@ public class EquipmentDataRepositoryImpl implements EquipmentDataRepository {
                 influxDbProperties.getBucket(),
                 influxDbProperties.getOrg()
         );
-    }
-
-    @org.jetbrains.annotations.NotNull
-    private static List<EquipmentData> mapResult(List<FluxTable> result) {
-        return result.stream()
-                .flatMap(fluxTable -> fluxTable.getRecords().stream()
-                        .map(
-                                fluxRecord -> EquipmentData.builder()
-                                        .equipmentId(Long.parseLong((String) Objects.requireNonNull(fluxRecord.getValueByKey("equipment_id"))))
-                                        .u((Double) fluxRecord.getValueByKey("u"))
-                                        .enabled((Boolean) fluxRecord.getValueByKey("enabled"))
-                                        .time(fluxRecord.getTime())
-                                        .build()
-                        )
-                )
-                .sorted(Comparator.comparing(EquipmentData::getTime))
-                .collect(Collectors.toList());
     }
 }
