@@ -11,9 +11,10 @@ import org.springframework.context.MessageSource;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.kpfu.machinemetrics.configuration.MessageSourceConfig;
+import ru.kpfu.machinemetrics.dto.CronCreateDto;
 import ru.kpfu.machinemetrics.dto.ErrorResponse;
 import ru.kpfu.machinemetrics.exception.ResourceNotFoundException;
-import ru.kpfu.machinemetrics.exception.ValidationException;
+import ru.kpfu.machinemetrics.mapper.CronMapper;
 import ru.kpfu.machinemetrics.model.Cron;
 import ru.kpfu.machinemetrics.service.CronService;
 
@@ -23,18 +24,19 @@ import java.util.List;
 import java.util.Locale;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ru.kpfu.machinemetrics.constants.CronConstants.CRON_NOT_FOUND_EXCEPTION_MESSAGE;
-import static ru.kpfu.machinemetrics.constants.CronConstants.CRON_VALIDATION_EXCEPTION_MESSAGE;
 
 @WebMvcTest(CronController.class)
 @ImportAutoConfiguration(MessageSourceConfig.class)
@@ -50,24 +52,29 @@ public class CronControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private CronService cronService;
+    private CronMapper cronMapperMock;
+
+    @MockBean
+    private CronService cronServiceMock;
 
     @Test
     public void testListAll() throws Exception {
         // given
         Cron cron1 = Cron.builder()
-                .id("1 * * * * ?")
+                .id(1L)
+                .expression("1 * * * * ?")
                 .order(1)
                 .name("Cron 1")
                 .build();
         Cron cron2 = Cron.builder()
-                .id("2 * * * * ?")
+                .id(2L)
+                .expression("2 * * * * ?")
                 .order(2)
                 .name("Cron 2")
                 .build();
         List<Cron> cronList = List.of(cron1, cron2);
 
-        when(cronService.getAll()).thenReturn(cronList);
+        when(cronServiceMock.getAll()).thenReturn(cronList);
 
         // expect
         mockMvc.perform(get("/api/v1/cron"))
@@ -75,9 +82,11 @@ public class CronControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].id").value(cron1.getId()))
+                .andExpect(jsonPath("$[0].expression").value(cron1.getExpression()))
                 .andExpect(jsonPath("$[0].order").value(cron1.getOrder()))
                 .andExpect(jsonPath("$[0].name").value(cron1.getName()))
                 .andExpect(jsonPath("$[1].id").value(cron2.getId()))
+                .andExpect(jsonPath("$[1].expression").value(cron2.getExpression()))
                 .andExpect(jsonPath("$[1].order").value(cron2.getOrder()))
                 .andExpect(jsonPath("$[1].name").value(cron2.getName()))
                 .andDo(result -> {
@@ -88,9 +97,11 @@ public class CronControllerTest {
                     softly.assertThat(actualList).isNotNull();
                     softly.assertThat(actualList).hasSize(2);
                     softly.assertThat(actualList.get(0).getId()).isEqualTo(cron1.getId());
+                    softly.assertThat(actualList.get(0).getExpression()).isEqualTo(cron1.getExpression());
                     softly.assertThat(actualList.get(0).getOrder()).isEqualTo(cron1.getOrder());
                     softly.assertThat(actualList.get(0).getName()).isEqualTo(cron1.getName());
                     softly.assertThat(actualList.get(1).getId()).isEqualTo(cron2.getId());
+                    softly.assertThat(actualList.get(1).getExpression()).isEqualTo(cron2.getExpression());
                     softly.assertThat(actualList.get(1).getOrder()).isEqualTo(cron2.getOrder());
                     softly.assertThat(actualList.get(1).getName()).isEqualTo(cron2.getName());
                     softly.assertAll();
@@ -100,27 +111,36 @@ public class CronControllerTest {
     @Test
     public void testCreate() throws Exception {
         // given
-        Cron cronCreate = Cron.builder()
-                .id("1 * * * * ?")
+        CronCreateDto cronCreateDto = CronCreateDto.builder()
+                .expression("1 * * * * ?")
                 .order(1)
                 .name("Cron")
                 .build();
 
-        Cron savedCron = Cron.builder()
-                .id(cronCreate.getId())
-                .order(cronCreate.getOrder())
-                .name(cronCreate.getName())
+        Cron cron = Cron.builder()
+                .expression(cronCreateDto.getExpression())
+                .order(cronCreateDto.getOrder())
+                .name(cronCreateDto.getName())
                 .build();
 
-        when(cronService.save(any())).thenReturn(savedCron);
+        Cron savedCron = Cron.builder()
+                .id(1L)
+                .expression(cronCreateDto.getExpression())
+                .order(cronCreateDto.getOrder())
+                .name(cronCreateDto.getName())
+                .build();
+
+        when(cronMapperMock.toCron(any())).thenReturn(cron);
+        when(cronServiceMock.save(any())).thenReturn(savedCron);
 
         // expect
         mockMvc.perform(post("/api/v1/cron")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(cronCreate)))
+                        .content(objectMapper.writeValueAsString(cronCreateDto)))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").value(savedCron.getId()))
+                .andExpect(jsonPath("$.expression").value(savedCron.getExpression()))
                 .andExpect(jsonPath("$.order").value(savedCron.getOrder()))
                 .andExpect(jsonPath("$.name").value(savedCron.getName()))
                 .andExpect(header().string("Location", "/cron"))
@@ -131,6 +151,7 @@ public class CronControllerTest {
                     SoftAssertions softly = new SoftAssertions();
                     softly.assertThat(actualCronCreate).isNotNull();
                     softly.assertThat(actualCronCreate.getId()).isEqualTo(savedCron.getId());
+                    softly.assertThat(actualCronCreate.getExpression()).isEqualTo(savedCron.getExpression());
                     softly.assertThat(actualCronCreate.getOrder()).isEqualTo(savedCron.getOrder());
                     softly.assertThat(actualCronCreate.getName()).isEqualTo(savedCron.getName());
                     softly.assertAll();
@@ -140,8 +161,8 @@ public class CronControllerTest {
     @Test
     public void testCreateWithEmptyName() throws Exception {
         // given
-        Cron cronCreate = Cron.builder()
-                .id("1 * * * * ?")
+        CronCreateDto cronCreateDto = CronCreateDto.builder()
+                .expression("1 * * * * ?")
                 .order(1)
                 .name("")
                 .build();
@@ -152,7 +173,7 @@ public class CronControllerTest {
         // expect
         mockMvc.perform(post("/api/v1/cron")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(cronCreate)))
+                        .content(objectMapper.writeValueAsString(cronCreateDto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(expectedResponseBody.getStatus()))
@@ -173,10 +194,16 @@ public class CronControllerTest {
     @Test
     public void testCreateWithEmptyId() throws Exception {
         // given
-        Cron cronCreate = Cron.builder()
-                .id("")
+        CronCreateDto cronCreateDto = CronCreateDto.builder()
+                .expression("")
                 .order(1)
                 .name("Name 1")
+                .build();
+
+        Cron cron = Cron.builder()
+                .expression(cronCreateDto.getExpression())
+                .order(cronCreateDto.getOrder())
+                .name(cronCreateDto.getName())
                 .build();
 
         String message = messageSource.getMessage("validation.cron.empty", null, new Locale("ru"));
@@ -185,7 +212,7 @@ public class CronControllerTest {
         // expect
         mockMvc.perform(post("/api/v1/cron")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(cronCreate)))
+                        .content(objectMapper.writeValueAsString(cronCreateDto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(expectedResponseBody.getStatus()))
@@ -206,8 +233,8 @@ public class CronControllerTest {
     @Test
     public void testCreateWithEmptyOrder() throws Exception {
         // given
-        Cron cronCreate = Cron.builder()
-                .id("1 * * * * ?")
+        CronCreateDto cronCreateDto = CronCreateDto.builder()
+                .expression("1 * * * * ?")
                 .name("Name 2")
                 .build();
 
@@ -217,7 +244,7 @@ public class CronControllerTest {
         // expect
         mockMvc.perform(post("/api/v1/cron")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(cronCreate)))
+                        .content(objectMapper.writeValueAsString(cronCreateDto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(expectedResponseBody.getStatus()))
@@ -236,30 +263,35 @@ public class CronControllerTest {
     }
 
     @Test
-    public void testCreateWithCronValidationFailed() throws Exception {
+    public void testDeleteExistingCron() throws Exception {
         // given
-        Cron cronCreate = Cron.builder()
-                .id("not valid")
-                .order(1)
-                .name("Cron")
-                .build();
+        Long cronId = 1L;
+        doNothing().when(cronServiceMock).delete(cronId);
+
+        // expect
+        mockMvc.perform(delete("/api/v1/cron/{id}", cronId))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void testDeleteNonExistingCron() throws Exception {
+        // given
+        Long cronId = 1L;
 
         Locale locale = new Locale("ru");
         String message = messageSource.getMessage(
-                CRON_VALIDATION_EXCEPTION_MESSAGE,
-                new Object[]{cronCreate.getId()},
+                CRON_NOT_FOUND_EXCEPTION_MESSAGE,
+                new Object[]{cronId},
                 locale
         );
 
-        doThrow(new ValidationException(message)).when(cronService).save(any(Cron.class));
+        doThrow(new ResourceNotFoundException(message)).when(cronServiceMock).delete(cronId);
 
-        ErrorResponse expectedResponseBody = new ErrorResponse(400, message);
+        ErrorResponse expectedResponseBody = new ErrorResponse(404, message);
 
         // expect
-        mockMvc.perform(post("/api/v1/cron")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(cronCreate)))
-                .andExpect(status().isBadRequest())
+        mockMvc.perform(delete("/api/v1/cron/{id}", cronId))
+                .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(expectedResponseBody.getStatus()))
                 .andExpect(jsonPath("$.message").value(expectedResponseBody.getMessage()))
@@ -276,20 +308,72 @@ public class CronControllerTest {
     }
 
     @Test
-    public void testDeleteExistingCron() throws Exception {
+    public void testEdit() throws Exception {
         // given
-        String cronId = "1 * * * * ?";
-        doNothing().when(cronService).delete(cronId);
+        Long cronId = 1L;
+
+        CronCreateDto cronCreateDto = CronCreateDto.builder()
+                .expression("1 * * * * ?")
+                .order(1)
+                .name("Cron")
+                .build();
+
+        Cron cron = Cron.builder()
+                .expression(cronCreateDto.getExpression())
+                .order(cronCreateDto.getOrder())
+                .name(cronCreateDto.getName())
+                .build();
+
+        Cron savedCron = Cron.builder()
+                .id(cronId)
+                .expression(cronCreateDto.getExpression())
+                .order(cronCreateDto.getOrder())
+                .name(cronCreateDto.getName())
+                .build();
+
+        when(cronMapperMock.toCron(any(CronCreateDto.class))).thenReturn(cron);
+        when(cronServiceMock.edit(eq(cronId), any(Cron.class))).thenReturn(savedCron);
 
         // expect
-        mockMvc.perform(delete("/api/v1/cron/{id}", cronId))
-                .andExpect(status().isNoContent());
+        mockMvc.perform(put("/api/v1/cron/{id}", cronId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(cronCreateDto)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(savedCron.getId()))
+                .andExpect(jsonPath("$.expression").value(savedCron.getExpression()))
+                .andExpect(jsonPath("$.order").value(savedCron.getOrder()))
+                .andExpect(jsonPath("$.name").value(savedCron.getName()))
+                .andDo(result -> {
+                    String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+                    Cron actualCronCreate = objectMapper.readValue(response, Cron.class);
+
+                    SoftAssertions softly = new SoftAssertions();
+                    softly.assertThat(actualCronCreate).isNotNull();
+                    softly.assertThat(actualCronCreate.getId()).isEqualTo(savedCron.getId());
+                    softly.assertThat(actualCronCreate.getExpression()).isEqualTo(savedCron.getExpression());
+                    softly.assertThat(actualCronCreate.getOrder()).isEqualTo(savedCron.getOrder());
+                    softly.assertThat(actualCronCreate.getName()).isEqualTo(savedCron.getName());
+                    softly.assertAll();
+                });
     }
 
     @Test
-    public void testDeleteNonExistingCron() throws Exception {
+    public void testEditNonExistingCron() throws Exception {
         // given
-        String cronId = "1 * * * * ?";
+        Long cronId = 1L;
+
+        CronCreateDto cronCreateDto = CronCreateDto.builder()
+                .expression("1 * * * * ?")
+                .order(1)
+                .name("Cron")
+                .build();
+
+        Cron cron = Cron.builder()
+                .expression(cronCreateDto.getExpression())
+                .order(cronCreateDto.getOrder())
+                .name(cronCreateDto.getName())
+                .build();
 
         Locale locale = new Locale("ru");
         String message = messageSource.getMessage(
@@ -298,12 +382,15 @@ public class CronControllerTest {
                 locale
         );
 
-        doThrow(new ResourceNotFoundException(message)).when(cronService).delete(cronId);
+        when(cronMapperMock.toCron(any(CronCreateDto.class))).thenReturn(cron);
+        doThrow(new ResourceNotFoundException(message)).when(cronServiceMock).edit(eq(cronId), any(Cron.class));
 
         ErrorResponse expectedResponseBody = new ErrorResponse(404, message);
 
         // expect
-        mockMvc.perform(delete("/api/v1/cron/{id}", cronId))
+        mockMvc.perform(put("/api/v1/cron/{id}", cronId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(cronCreateDto)))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(expectedResponseBody.getStatus()))

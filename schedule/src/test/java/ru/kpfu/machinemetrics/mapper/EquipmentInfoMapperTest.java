@@ -20,7 +20,7 @@ public class EquipmentInfoMapperTest {
                 EquipmentInfoCreateDto.builder()
                         .id(1L)
                         .dataServiceId(2L)
-                        .cronId("1 * * * * ?")
+                        .cronId(1L)
                         .build();
 
         // when

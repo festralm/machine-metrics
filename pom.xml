@@ -17,6 +17,7 @@
 
     <modules>
         <module>common-web</module>
+        <module>gateway</module>
         <module>equipment</module>
         <module>random-data</module>
         <module>random-data-2</module>

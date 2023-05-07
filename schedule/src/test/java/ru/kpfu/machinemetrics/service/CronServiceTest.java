@@ -43,12 +43,14 @@ public class CronServiceTest {
     public void testGetAll() {
         // given
         Cron cron1 = Cron.builder()
-                .id("1 * * * * ?")
+                .id(1L)
+                .expression("1 * * * * ?")
                 .order(1)
                 .name("Cron 1")
                 .build();
         Cron cron2 = Cron.builder()
-                .id("2 * * * * ?")
+                .id(2L)
+                .expression("2 * * * * ?")
                 .order(2)
                 .name("Cron 2")
                 .build();
@@ -75,13 +77,13 @@ public class CronServiceTest {
     void testSave() {
         // given
         Cron cron = Cron.builder()
-                .id("1 * * * * ?")
+                .expression("1 * * * * ?")
                 .order(1)
                 .name("Cron 1")
                 .build();
 
         Cron savedCron = Cron.builder()
-                .id(cron.getId())
+                .id(1L)
                 .order(cron.getOrder())
                 .name(cron.getName())
                 .build();
@@ -103,7 +105,7 @@ public class CronServiceTest {
     void testSaveWithWrongCron() {
         // given
         Cron cron = Cron.builder()
-                .id("wrong")
+                .expression("wrong")
                 .order(1)
                 .name("Cron 1")
                 .build();
@@ -124,10 +126,11 @@ public class CronServiceTest {
     @Test
     void testDeleteWithExistingCron() {
         // given
-        String cronId = "1 * * * * ?";
+        Long cronId = 1L;
 
         Cron cron = Cron.builder()
                 .id(cronId)
+                .expression("1 * * * * ?")
                 .order(1)
                 .name("Cron 1")
                 .build();
@@ -145,7 +148,7 @@ public class CronServiceTest {
     @Test
     void testDeleteWithNonExistingCron() {
         // given
-        String cronId = "1 * * * * ?";
+        Long cronId = 1L;
         when(cronRepositoryMock.findById(cronId)).thenReturn(Optional.empty());
 
         // when

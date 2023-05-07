@@ -61,7 +61,6 @@ public class EquipmentController {
                                     @Valid @RequestBody EquipmentCreateDto equipmentCreateDto) {
         Equipment updatedEquipment = equipmentMapper.toEquipment(equipmentCreateDto);
         Equipment editedEquipment = equipmentService.edit(id, updatedEquipment);
-        EquipmentDetailsDto editedEquipmentDetailsDto = equipmentMapper.toEquipmentDetailsDto(editedEquipment);
-        return editedEquipmentDetailsDto;
+        return equipmentMapper.toEquipmentDetailsDto(editedEquipment);
     }
 }

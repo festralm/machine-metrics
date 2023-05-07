@@ -73,7 +73,7 @@ public class EquipmentInfoService {
 
     private void startTask(EquipmentInfo equipmentInfo) {
         stopTask(equipmentInfo.getId());
-        CronTrigger cronTrigger = new CronTrigger(equipmentInfo.getCron().getId());
+        CronTrigger cronTrigger = new CronTrigger(equipmentInfo.getCron().getExpression());
         Runnable fetchDataServiceTask = new FetchDataServiceTask(equipmentInfo.getDataService().getName(),
                 equipmentInfo.getId(), rabbitTemplate);
         ScheduledFuture<?> taskFuture = taskScheduler.schedule(fetchDataServiceTask, cronTrigger);
