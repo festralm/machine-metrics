@@ -25,7 +25,7 @@ public class CronService {
     private final MessageSource messageSource;
 
     public List<Cron> getAll() {
-        return cronRepository.findAll();
+        return cronRepository.findAllByOrderByOrder();
     }
 
     private Cron getById(Long id) {
@@ -42,7 +42,7 @@ public class CronService {
     }
 
     public Cron save(@NotNull Cron cron) {
-        checkExpression(cron);
+        checkExpression(cron.getExpression());
         return cronRepository.save(cron);
     }
 
@@ -55,7 +55,7 @@ public class CronService {
     public Cron edit(Long id, Cron updatedCron) {
         Cron cron = getById(id);
 
-        checkExpression(cron);
+        checkExpression(updatedCron.getExpression());
         cron.setExpression(updatedCron.getExpression());
         cron.setOrder(updatedCron.getOrder());
         cron.setName(updatedCron.getName());
@@ -63,12 +63,12 @@ public class CronService {
         return cronRepository.save(cron);
     }
 
-    private void checkExpression(Cron cron) {
-        if (!CronExpression.isValidExpression(cron.getExpression())) {
+    private void checkExpression(String expression) {
+        if (!CronExpression.isValidExpression(expression)) {
             Locale locale = LocaleContextHolder.getLocale();
             String message = messageSource.getMessage(
                     CRON_VALIDATION_EXCEPTION_MESSAGE,
-                    new Object[]{cron.getId()},
+                    new Object[]{expression},
                     locale
             );
             throw new ValidationException(message);

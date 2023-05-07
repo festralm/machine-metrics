@@ -117,7 +117,7 @@ public class CronServiceTest {
         verify(cronRepositoryMock, Mockito.never()).save(Mockito.any(Cron.class));
         String expectedMessage = messageSource.getMessage(
                 CRON_VALIDATION_EXCEPTION_MESSAGE,
-                new Object[]{cron.getId()},
+                new Object[]{cron.getExpression()},
                 new Locale("ru")
         );
         assertThat(thrown).isInstanceOf(ValidationException.class).hasMessage(expectedMessage);
@@ -164,5 +164,93 @@ public class CronServiceTest {
         );
         assertThat(thrown).isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage(expectedMessage);
+    }
+
+    @Test
+    void testEdit() {
+        // given
+        Long cronId = 1L;
+
+        Cron existingCron = Cron.builder()
+                .id(cronId)
+                .expression("1 * * * * ?")
+                .order(1)
+                .name("Existing Cron")
+                .build();
+
+        Cron updatedCron = Cron.builder()
+                .expression("2 * * * * ?")
+                .order(1)
+                .name("Updated Cron")
+                .build();
+
+        when(cronRepositoryMock.findById(cronId)).thenReturn(Optional.of(existingCron));
+        when(cronRepositoryMock.save(any(Cron.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // when
+        Cron actualCron = cronService.edit(cronId, updatedCron);
+
+        // then
+        verify(cronRepositoryMock).findById(cronId);
+        verify(cronRepositoryMock).save(existingCron);
+
+        SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(actualCron.getId()).isEqualTo(existingCron.getId());
+        softly.assertThat(actualCron.getExpression()).isEqualTo(updatedCron.getExpression());
+        softly.assertThat(actualCron.getOrder()).isEqualTo(updatedCron.getOrder());
+        softly.assertThat(actualCron.getName()).isEqualTo(updatedCron.getName());
+        softly.assertAll();
+    }
+
+    @Test
+    void testEditCronNotFound() {
+        // given
+        Long cronId = 1L;
+
+        when(cronRepositoryMock.findById(cronId)).thenReturn(Optional.empty());
+
+        // when
+        Throwable thrown = catchThrowable(() -> cronService.delete(cronId));
+
+        // then
+        String expectedMessage = messageSource.getMessage(
+                CRON_NOT_FOUND_EXCEPTION_MESSAGE,
+                new Object[]{cronId},
+                new Locale("ru")
+        );
+        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage(expectedMessage);
+    }
+
+    @Test
+    void testEditWithWrongCron() {
+        // given
+        Long cronId = 1L;
+        Cron existingCron = Cron.builder()
+                .id(cronId)
+                .expression("1 * * * * ?")
+                .order(1)
+                .name("Existing Cron")
+                .build();
+
+        Cron updatedCron = Cron.builder()
+                .expression("* * * * * * *")
+                .order(1)
+                .name("Cron 1")
+                .build();
+
+        when(cronRepositoryMock.findById(cronId)).thenReturn(Optional.of(existingCron));
+
+        // when
+        Throwable thrown = catchThrowable(() -> cronService.edit(cronId, updatedCron));
+
+        // then
+        verify(cronRepositoryMock, Mockito.never()).save(Mockito.any(Cron.class));
+        String expectedMessage = messageSource.getMessage(
+                CRON_VALIDATION_EXCEPTION_MESSAGE,
+                new Object[]{updatedCron.getExpression()},
+                new Locale("ru")
+        );
+        assertThat(thrown).isInstanceOf(ValidationException.class).hasMessage(expectedMessage);
     }
 }

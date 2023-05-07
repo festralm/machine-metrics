@@ -152,7 +152,7 @@ public class EquipmentServiceTest {
         // then
         verify(equipmentRepositoryMock, Mockito.times(1)).findByIdAndDeletedFalse(equipmentId);
         verify(equipmentRepositoryMock, Mockito.times(1)).save(equipment);
-        verify(rabbitTemplate, times(1)).convertAndSend(eq("rk-equipment"), eq(equipmentId));
+        verify(rabbitTemplate, times(1)).convertAndSend(eq("rk-equipment"), eq(""), eq(equipmentId));
         assertThat(equipment.isDeleted()).isTrue();
     }
 

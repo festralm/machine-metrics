@@ -48,6 +48,7 @@ public class CronController {
     @PutMapping("/{id}")
     public Cron edit(@PathVariable Long id,
                      @Valid @RequestBody CronCreateDto cronCreateDto) {
+        // todo update tasks if is used
         Cron cron = cronMapper.toCron(cronCreateDto);
         return cronService.edit(id, cron);
     }
