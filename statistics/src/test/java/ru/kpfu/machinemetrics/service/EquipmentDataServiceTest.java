@@ -75,7 +75,8 @@ public class EquipmentDataServiceTest {
     void testGetDataWithNullData() {
         // given
         final Instant now = Instant.now();
-        final Instant expectedStart = ZonedDateTime.now().truncatedTo(ChronoUnit.DAYS).minus(Period.ofMonths(1)).toInstant();
+        final Instant expectedStart =
+                ZonedDateTime.now().truncatedTo(ChronoUnit.DAYS).minus(Period.ofMonths(1)).toInstant();
         final Instant expectedEnd = Instant.now();
         Long hoursBetween = Duration.between(expectedStart, expectedEnd).toHours();
         Instant givenTime1 = now.minusSeconds(60 * 60 * 10);
@@ -104,7 +105,8 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getEquipmentData().get(0).getEquipmentId()).isEqualTo(1L);
         softly.assertThat(actualDto.getEquipmentData().get(0).getEnabled()).isEqualTo(true);
         softly.assertThat(actualDto.getEquipmentData().get(1).getEquipmentId()).isEqualTo(1L);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabled()).isEqualTo(false);;
+        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabled()).isEqualTo(false);
+        ;
         softly.assertThat(actualDto.getEquipmentData().get(2).getEquipmentId()).isEqualTo(1L);
         softly.assertThat(actualDto.getEquipmentData().get(2).getEnabled()).isEqualTo(true);
         softly.assertAll();

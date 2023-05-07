@@ -12,9 +12,8 @@ import java.util.Random;
 @Service
 @RequiredArgsConstructor
 public class EquipmentDataService {
-    private final EquipmentDataRepository equipmentDataRepository;
-
     private static final Random r = new Random();
+    private final EquipmentDataRepository equipmentDataRepository;
 
     public void generateData(Long equipmentId) {
         final double u = r.nextDouble() * 100;

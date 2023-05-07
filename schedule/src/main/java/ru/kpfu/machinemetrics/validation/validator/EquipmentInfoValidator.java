@@ -2,7 +2,6 @@ package ru.kpfu.machinemetrics.validation.validator;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import org.springframework.util.StringUtils;
 import ru.kpfu.machinemetrics.dto.EquipmentInfoCreateDto;
 import ru.kpfu.machinemetrics.validation.annotation.EquipmentInfoConstraint;
 
