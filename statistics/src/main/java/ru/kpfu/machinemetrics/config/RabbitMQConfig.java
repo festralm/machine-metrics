@@ -11,6 +11,6 @@ public class RabbitMQConfig {
 
     @Bean
     public Queue myQueue() {
-        return new Queue("rk-equipment", false);
+        return new Queue("rk-equipment-statistics", true);
     }
 }

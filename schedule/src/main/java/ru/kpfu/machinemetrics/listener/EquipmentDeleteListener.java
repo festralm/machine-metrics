@@ -14,7 +14,7 @@ public class EquipmentDeleteListener {
 
     private final EquipmentInfoService equipmentInfoService;
 
-    @RabbitListener(queues = "rk-equipment")
+    @RabbitListener(queues = "rk-equipment-schedule")
     public void listen(String in) {
         System.out.println("Message read from rk-equipment : " + in);
         try {

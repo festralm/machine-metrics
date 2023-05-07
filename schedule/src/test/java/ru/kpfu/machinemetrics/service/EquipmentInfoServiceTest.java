@@ -28,7 +28,6 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -55,18 +54,22 @@ public class EquipmentInfoServiceTest {
     private RabbitTemplate rabbitTemplate;
 
     @Test
-    void testSave() {
+    void testSaveAndEdit() {
         // given
         EquipmentInfo equipmentInfo =
                 EquipmentInfo.builder()
                         .id(1L)
                         .dataService(DataService.builder().id(1L).name("name").build())
-                        .cron(Cron.builder().id("1 * * * * ?").build())
+                        .cron(Cron.builder().id(1L).expression("* * * * * *").build())
                         .enabled(true)
                         .build();
 
-        EquipmentInfo savedEquipmentInfo =
-                EquipmentInfo.builder().id(equipmentInfo.getId()).dataService(equipmentInfo.getDataService()).cron(equipmentInfo.getCron()).enabled(equipmentInfo.getEnabled()).build();
+        EquipmentInfo savedEquipmentInfo = EquipmentInfo.builder()
+                .id(equipmentInfo.getId())
+                .dataService(equipmentInfo.getDataService())
+                .cron(equipmentInfo.getCron())
+                .enabled(equipmentInfo.getEnabled())
+                .build();
 
         when(equipmentInfoRepository.save(any(EquipmentInfo.class))).thenReturn(savedEquipmentInfo);
         ScheduledFuture<?> taskFuture = mock(ScheduledFuture.class);
@@ -85,9 +88,30 @@ public class EquipmentInfoServiceTest {
         softly.assertThat(actualEquipmentInfo.getDataService().getId()).isEqualTo(savedEquipmentInfo.getDataService().getId());
         softly.assertThat(actualEquipmentInfo.getCron().getId()).isEqualTo(savedEquipmentInfo.getCron().getId());
         softly.assertThat(actualEquipmentInfo.getEnabled()).isEqualTo(savedEquipmentInfo.getEnabled());
-        softly.assertAll();
         verify(taskScheduler, times(1)).schedule(any(FetchDataServiceTask.class), any(CronTrigger.class));
         verify(rabbitTemplate, times(1)).convertAndSend(eq("rk-name"), eq(equipmentInfo.getId()));
+
+        // given
+        equipmentInfo.setDataService(null);
+        equipmentInfo.setCron(null);
+        equipmentInfo.setEnabled(false);
+
+        savedEquipmentInfo.setDataService(equipmentInfo.getDataService());
+        savedEquipmentInfo.setCron(equipmentInfo.getCron());
+        savedEquipmentInfo.setEnabled(equipmentInfo.getEnabled());
+
+        when(equipmentInfoRepository.save(any(EquipmentInfo.class))).thenReturn(savedEquipmentInfo);
+
+        // when
+        actualEquipmentInfo = equipmentInfoService.save(equipmentInfo);
+
+        // then
+        softly.assertThat(actualEquipmentInfo.getId()).isEqualTo(savedEquipmentInfo.getId());
+        softly.assertThat(actualEquipmentInfo.getDataService()).isEqualTo(savedEquipmentInfo.getDataService());
+        softly.assertThat(actualEquipmentInfo.getCron()).isEqualTo(savedEquipmentInfo.getCron());
+        softly.assertThat(actualEquipmentInfo.getEnabled()).isEqualTo(savedEquipmentInfo.getEnabled());
+        softly.assertAll();
+        verify(taskFuture, times(1)).cancel(any(Boolean.class));
     }
 
     @Test
@@ -97,7 +121,7 @@ public class EquipmentInfoServiceTest {
                 EquipmentInfo.builder()
                         .id(1L)
                         .dataService(DataService.builder().id(1L).build())
-                        .cron(Cron.builder().id("1 * * * * ?").build())
+                        .cron(Cron.builder().id(1L).build())
                         .enabled(true)
                         .build();
 
@@ -138,7 +162,7 @@ public class EquipmentInfoServiceTest {
         EquipmentInfo equipmentInfo = EquipmentInfo.builder()
                 .id(equipmentInfoId)
                 .dataService(DataService.builder().id(1L).build())
-                .cron(Cron.builder().id("1 * * * * ?").build())
+                .cron(Cron.builder().id(1L).build())
                 .enabled(true)
                 .build();
 
@@ -170,75 +194,7 @@ public class EquipmentInfoServiceTest {
     }
 
     @Test
-    void testEdit() {
-        // given
-        final Long equipmentInfoId = 1L;
-        EquipmentInfo updatedEquipmentInfo =
-                EquipmentInfo.builder()
-                        .id(equipmentInfoId)
-                        .dataService(DataService.builder().id(1L).build())
-                        .cron(Cron.builder().id("1 * * * * ?").build())
-                        .enabled(false)
-                        .build();
-
-        when(equipmentInfoRepository.findById(equipmentInfoId)).thenReturn(Optional.of(updatedEquipmentInfo));
-        when(equipmentInfoRepository.save(any(EquipmentInfo.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        // when
-        EquipmentInfo actualEquipmentInfo = equipmentInfoService.edit(updatedEquipmentInfo);
-
-        // then
-        verify(equipmentInfoRepository).findById(equipmentInfoId);
-        verify(equipmentInfoRepository).save(updatedEquipmentInfo);
-
-        SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(actualEquipmentInfo.getId()).isEqualTo(updatedEquipmentInfo.getId());
-        softly.assertThat(actualEquipmentInfo.getDataService().getId()).isEqualTo(updatedEquipmentInfo.getDataService().getId());
-        softly.assertThat(actualEquipmentInfo.getCron().getId()).isEqualTo(updatedEquipmentInfo.getCron().getId());
-        softly.assertThat(actualEquipmentInfo.getEnabled()).isEqualTo(updatedEquipmentInfo.getEnabled());
-        softly.assertAll();
-    }
-
-    @Test
-    void testEditEnable() {
-        // given
-        final Long equipmentInfoId = 1L;
-        EquipmentInfo updatedEquipmentInfo =
-                EquipmentInfo.builder()
-                        .id(equipmentInfoId)
-                        .dataService(DataService.builder().id(1L).name("name2").build())
-                        .cron(Cron.builder().id("1 * * * * ?").build())
-                        .enabled(true)
-                        .build();
-
-        when(equipmentInfoRepository.findById(equipmentInfoId)).thenReturn(Optional.of(updatedEquipmentInfo));
-        when(equipmentInfoRepository.save(any(EquipmentInfo.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        ScheduledFuture<?> taskFuture = mock(ScheduledFuture.class);
-        doAnswer(invocation -> {
-            Runnable runnable = invocation.getArgument(0);
-            runnable.run();
-            return taskFuture;
-        }).when(taskScheduler).schedule(any(Runnable.class), any(CronTrigger.class));
-
-        // when
-        EquipmentInfo actualEquipmentInfo = equipmentInfoService.edit(updatedEquipmentInfo);
-
-        // then
-        verify(equipmentInfoRepository).findById(equipmentInfoId);
-        verify(equipmentInfoRepository).save(updatedEquipmentInfo);
-
-        SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(actualEquipmentInfo.getId()).isEqualTo(updatedEquipmentInfo.getId());
-        softly.assertThat(actualEquipmentInfo.getDataService().getId()).isEqualTo(updatedEquipmentInfo.getDataService().getId());
-        softly.assertThat(actualEquipmentInfo.getCron().getId()).isEqualTo(updatedEquipmentInfo.getCron().getId());
-        softly.assertThat(actualEquipmentInfo.getEnabled()).isEqualTo(updatedEquipmentInfo.getEnabled());
-        softly.assertAll();
-        verify(taskScheduler, times(1)).schedule(any(FetchDataServiceTask.class), any(CronTrigger.class));
-        verify(rabbitTemplate, times(1)).convertAndSend(eq("rk-name2"), eq(updatedEquipmentInfo.getId()));
-    }
-
-    @Test
-    void testEditEquipmentNotFound() {
+    void testDeleteEquipmentNotFound() {
         // given
         Long equipmentInfoId = 1L;
 

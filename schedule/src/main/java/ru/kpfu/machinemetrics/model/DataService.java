@@ -1,5 +1,6 @@
 package ru.kpfu.machinemetrics.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -25,5 +26,6 @@ public class DataService {
 
 
     @NotBlank(message = "{validation.data-service.name.empty}")
+    @Column(unique = true)
     private String name;
 }

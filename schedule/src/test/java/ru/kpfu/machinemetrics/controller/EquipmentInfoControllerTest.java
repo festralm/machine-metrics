@@ -64,7 +64,7 @@ public class EquipmentInfoControllerTest {
         EquipmentInfoCreateDto equipmentInfoCreateDto = EquipmentInfoCreateDto.builder()
                 .id(1L)
                 .dataServiceId(2L)
-                .cronId("1 * * * * ?")
+                .cronId(1L)
                 .enabled(true)
                 .build();
 
@@ -108,7 +108,7 @@ public class EquipmentInfoControllerTest {
         // given
         EquipmentInfoCreateDto equipmentInfoCreateDto = EquipmentInfoCreateDto.builder()
                 .dataServiceId(2L)
-                .cronId("1 * * * * ?")
+                .cronId(1L)
                 .enabled(true)
                 .build();
 
@@ -141,7 +141,7 @@ public class EquipmentInfoControllerTest {
         // given
         EquipmentInfoCreateDto equipmentInfoCreateDto = EquipmentInfoCreateDto.builder()
                 .id(1L)
-                .cronId("1 * * * * ?")
+                .cronId(1L)
                 .enabled(true)
                 .build();
 
@@ -176,7 +176,7 @@ public class EquipmentInfoControllerTest {
         EquipmentInfoCreateDto equipmentInfoCreateDto = EquipmentInfoCreateDto.builder()
                 .id(1L)
                 .dataServiceId(1L)
-                .cronId("  ")
+                .cronId(null)
                 .enabled(true)
                 .build();
 
@@ -251,7 +251,7 @@ public class EquipmentInfoControllerTest {
         EquipmentInfo equipmentInfo = EquipmentInfo.builder()
                 .id(1L)
                 .dataService(DataService.builder().id(1L).build())
-                .cron(Cron.builder().id("* * * * * ?").build())
+                .cron(Cron.builder().id(1L).build())
                 .enabled(false)
                 .build();
 
@@ -342,103 +342,6 @@ public class EquipmentInfoControllerTest {
 
         // expect
         mockMvc.perform(delete("/api/v1/equipment-info/{id}", equipmentInfoId))
-                .andExpect(status().isNotFound())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.status").value(expectedResponseBody.getStatus()))
-                .andExpect(jsonPath("$.message").value(expectedResponseBody.getMessage()))
-                .andDo(result -> {
-                    String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
-                    ErrorResponse errorResponse = objectMapper.readValue(response, ErrorResponse.class);
-
-                    SoftAssertions softly = new SoftAssertions();
-                    softly.assertThat(errorResponse).isNotNull();
-                    softly.assertThat(errorResponse.getStatus()).isEqualTo(expectedResponseBody.getStatus());
-                    softly.assertThat(errorResponse.getMessage()).isEqualTo(expectedResponseBody.getMessage());
-                    softly.assertAll();
-                });
-    }
-
-    @Test
-    public void testEditExistingEquipment() throws Exception {
-        // given
-        Long equipmentInfoId = 1L;
-
-        EquipmentInfoCreateDto equipmentInfoCreateDto = EquipmentInfoCreateDto.builder()
-                .id(equipmentInfoId)
-                .dataServiceId(2L)
-                .cronId("1 * * * * ?")
-                .enabled(true)
-                .build();
-
-        EquipmentInfo updatedEquipmentInfo = EquipmentInfo.builder()
-                .id(equipmentInfoCreateDto.getId())
-                .dataService(DataService.builder().id(equipmentInfoCreateDto.getId()).build())
-                .cron(Cron.builder().id(equipmentInfoCreateDto.getCronId()).build())
-                .enabled(equipmentInfoCreateDto.isEnabled())
-                .build();
-
-        when(equipmentInfoMapper.toEquipmentInfo(any(EquipmentInfoCreateDto.class))).thenReturn(updatedEquipmentInfo);
-        when(equipmentInfoService.edit(eq(updatedEquipmentInfo))).thenReturn(updatedEquipmentInfo);
-
-        // when
-        mockMvc.perform(put("/api/v1/equipment-info")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(equipmentInfoCreateDto)))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").value(equipmentInfoId))
-                .andExpect(jsonPath("$.dataService.id").value(updatedEquipmentInfo.getDataService().getId()))
-                .andExpect(jsonPath("$.cron.id").value(updatedEquipmentInfo.getCron().getId()))
-                .andExpect(jsonPath("$.enabled").value(updatedEquipmentInfo.getEnabled()))
-                .andDo(result -> {
-                    String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
-                    EquipmentInfo actualEquipmentInfo = objectMapper.readValue(response, EquipmentInfo.class);
-
-                    SoftAssertions softly = new SoftAssertions();
-                    softly.assertThat(actualEquipmentInfo).isNotNull();
-                    softly.assertThat(actualEquipmentInfo.getId()).isEqualTo(updatedEquipmentInfo.getId());
-                    softly.assertThat(actualEquipmentInfo.getDataService().getId()).isEqualTo(updatedEquipmentInfo.getDataService().getId());
-                    softly.assertThat(actualEquipmentInfo.getCron().getId()).isEqualTo(updatedEquipmentInfo.getCron().getId());
-                    softly.assertThat(actualEquipmentInfo.getEnabled()).isEqualTo(updatedEquipmentInfo.getEnabled());
-                    softly.assertAll();
-                });
-    }
-
-    @Test
-    public void testEditNonExistingEquipment() throws Exception {
-        // given
-        Long equipmentInfoId = 1L;
-
-        EquipmentInfoCreateDto equipmentInfoCreateDto = EquipmentInfoCreateDto.builder()
-                .id(equipmentInfoId)
-                .dataServiceId(2L)
-                .cronId("1 * * * * ?")
-                .enabled(true)
-                .build();
-
-        EquipmentInfo updatedEquipmentInfo = EquipmentInfo.builder()
-                .id(equipmentInfoCreateDto.getId())
-                .dataService(DataService.builder().id(equipmentInfoCreateDto.getId()).build())
-                .cron(Cron.builder().id(equipmentInfoCreateDto.getCronId()).build())
-                .enabled(equipmentInfoCreateDto.isEnabled())
-                .build();
-
-        Locale locale = new Locale("ru");
-        String message = messageSource.getMessage(
-                EQUIPMENT_INFO_NOT_FOUND_EXCEPTION_MESSAGE,
-                new Object[]{equipmentInfoId},
-                locale
-        );
-
-        when(equipmentInfoMapper.toEquipmentInfo(any(EquipmentInfoCreateDto.class))).thenReturn(updatedEquipmentInfo);
-        doThrow(new ResourceNotFoundException(message)).when(equipmentInfoService).edit(eq(updatedEquipmentInfo));
-
-        ErrorResponse expectedResponseBody = new ErrorResponse(404, message);
-
-        // expect
-        mockMvc.perform(put("/api/v1/equipment-info")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(equipmentInfoCreateDto)))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(expectedResponseBody.getStatus()))

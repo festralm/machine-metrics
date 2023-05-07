@@ -20,7 +20,7 @@ public class EquipmentInfoCreateDto {
 
     private Long dataServiceId;
 
-    private String cronId;
+    private Long cronId;
 
     private boolean enabled;
 }

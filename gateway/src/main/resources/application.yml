@@ -35,7 +35,7 @@ spring:
         - id: schedule
           uri: http://127.0.0.1:${app.service.port.schedule}
           predicates:
-            - Path=${app.api.prefix.v1}/cron,${app.api.prefix.v1}/data-service/**,${app.api.prefix.v1}/equipment-info/**
+            - Path=${app.api.prefix.v1}/cron/**,${app.api.prefix.v1}/data-service/**,${app.api.prefix.v1}/equipment-info/**
         - id: statistics
           uri: http://127.0.0.1:${app.service.port.statistics}
           predicates:

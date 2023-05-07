@@ -27,7 +27,7 @@ public class EquipmentInfoValidator implements
                         .addConstraintViolation();
                 valid = false;
             }
-            if (!StringUtils.hasText(equipmentInfoCreateDto.getCronId())) {
+            if (equipmentInfoCreateDto.getCronId() == null || equipmentInfoCreateDto.getCronId() == 0) {
                 context.disableDefaultConstraintViolation();
                 context
                         .buildConstraintViolationWithTemplate("{validation.equipment-info.cron.empty}")

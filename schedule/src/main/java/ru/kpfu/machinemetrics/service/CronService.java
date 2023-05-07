@@ -25,24 +25,11 @@ public class CronService {
     private final MessageSource messageSource;
 
     public List<Cron> getAll() {
-        return cronRepository.findAll();
+        return cronRepository.findAllByOrderByOrder();
     }
 
-    public Cron save(@NotNull Cron cron) {
-        if (!CronExpression.isValidExpression(cron.getId())) {
-            Locale locale = LocaleContextHolder.getLocale();
-            String message = messageSource.getMessage(
-                    CRON_VALIDATION_EXCEPTION_MESSAGE,
-                    new Object[]{cron.getId()},
-                    locale
-            );
-            throw new ValidationException(message);
-        }
-        return cronRepository.save(cron);
-    }
-
-    public void delete(@NotNull String id) {
-        Cron cron = cronRepository.findById(id)
+    private Cron getById(Long id) {
+        return cronRepository.findById(id)
                 .orElseThrow(() -> {
                     Locale locale = LocaleContextHolder.getLocale();
                     String message = messageSource.getMessage(
@@ -52,7 +39,39 @@ public class CronService {
                     );
                     return new ResourceNotFoundException(message);
                 });
-        ;
+    }
+
+    public Cron save(@NotNull Cron cron) {
+        checkExpression(cron.getExpression());
+        return cronRepository.save(cron);
+    }
+
+    public void delete(@NotNull Long id) {
+        // todo if equipment exists
+        Cron cron = getById(id);
         cronRepository.delete(cron);
+    }
+
+    public Cron edit(Long id, Cron updatedCron) {
+        Cron cron = getById(id);
+
+        checkExpression(updatedCron.getExpression());
+        cron.setExpression(updatedCron.getExpression());
+        cron.setOrder(updatedCron.getOrder());
+        cron.setName(updatedCron.getName());
+
+        return cronRepository.save(cron);
+    }
+
+    private void checkExpression(String expression) {
+        if (!CronExpression.isValidExpression(expression)) {
+            Locale locale = LocaleContextHolder.getLocale();
+            String message = messageSource.getMessage(
+                    CRON_VALIDATION_EXCEPTION_MESSAGE,
+                    new Object[]{expression},
+                    locale
+            );
+            throw new ValidationException(message);
+        }
     }
 }

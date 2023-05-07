@@ -2,10 +2,9 @@ package ru.kpfu.machinemetrics.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,13 +20,15 @@ import lombok.Setter;
 public class Cron {
 
     @Id
-    @NotBlank(message = "{validation.cron.empty}")
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @NotNull(message = "{validation.cron.order.empty}")
-    @Column(name = "show_order")
+    @Column(unique = true)
+    private String expression;
+
+    @Column(name = "show_order", unique = true)
     private Integer order;
 
-    @NotBlank(message = "{validation.cron.name.empty}")
+    @Column(unique = true)
     private String name;
 }

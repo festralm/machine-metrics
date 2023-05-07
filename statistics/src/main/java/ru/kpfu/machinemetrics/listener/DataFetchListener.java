@@ -11,7 +11,7 @@ public class DataFetchListener {
 
     private final EquipmentDataService equipmentDataService;
 
-    @RabbitListener(queues = "rk-equipment")
+    @RabbitListener(queues = "rk-equipment-statistics")
     public void listen(String in) {
         System.out.println("Message read from rk-equipment : " + in);
         equipmentDataService.delete(Long.parseLong(in));

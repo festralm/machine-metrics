@@ -48,7 +48,7 @@ public class EquipmentService {
         equipment.setDeleted(true);
         equipmentRepository.save(equipment);
 
-        rabbitTemplate.convertAndSend("rk-equipment", id);
+        rabbitTemplate.convertAndSend("rk-equipment", "", id);
     }
 
     public Equipment edit(Long id, Equipment updatedEquipment) {
