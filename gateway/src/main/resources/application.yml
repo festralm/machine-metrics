@@ -1,13 +1,14 @@
 server:
-  port: 8000
+  port: 8090
 
 app:
   service:
     port:
+      auth: 8070
       equipment: 8080
-      schedule: 9020
-      statistics: 9030
-      user: 9040
+      schedule: 9010
+      statistics: 9020
+      user: 9030
   api:
     prefix:
       v1: /api/v1
@@ -33,15 +34,45 @@ spring:
           uri: http://127.0.0.1:${app.service.port.equipment}
           predicates:
             - Path=${app.api.prefix.v1}/equipment/**
+          filters:
+            - TokenRelay=
+            - RemoveRequestHeader=Cookie
         - id: schedule
           uri: http://127.0.0.1:${app.service.port.schedule}
           predicates:
             - Path=${app.api.prefix.v1}/cron/**,${app.api.prefix.v1}/data-service/**,${app.api.prefix.v1}/equipment-info/**
+          filters:
+            - TokenRelay=
+            - RemoveRequestHeader=Cookie
         - id: statistics
           uri: http://127.0.0.1:${app.service.port.statistics}
           predicates:
             - Path=${app.api.prefix.v1}/equipment-data
+          filters:
+            - TokenRelay=
+            - RemoveRequestHeader=Cookie
         - id: user
           uri: http://127.0.0.1:${app.service.port.user}
           predicates:
             - Path=${app.api.prefix.v1}/user/**
+          filters:
+            - TokenRelay=
+            - RemoveRequestHeader=Cookie
+  security:
+    oauth2:
+      client:
+        registration:
+          gateway:
+            provider: spring
+            client-id: gateway
+            client-secret: secret
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope: openid,equipment.read
+        provider:
+          spring:
+            issuer-uri: http://localhost:${app.service.port.auth}
+
+logging:
+  level:
+    org.springframework.security: DEBUG

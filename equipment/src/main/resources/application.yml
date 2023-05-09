@@ -1,7 +1,17 @@
 server:
   port: 8080
 
+app:
+  service:
+    port:
+      auth: 8070
+
 spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:${app.service.port.auth}
   datasource:
     url: jdbc:postgresql://localhost:5432/equipment
     username: equipment
@@ -19,3 +29,7 @@ spring:
 api:
   prefix:
     v1: /api/v1
+
+logging:
+  level:
+    org.springframework.security: DEBUG
