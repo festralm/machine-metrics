@@ -21,8 +21,8 @@ spring:
     web-application-type: reactive
   cloud:
     gateway:
-      default-filters:
-        - TokenRelay
+#      default-filters:
+#        - TokenRelay
       globalcors:
         corsConfigurations:
           '[/**]':
@@ -58,24 +58,36 @@ spring:
             - Path=${app.api.prefix.v1}/user/**
           filters:
             - RemoveRequestHeader=Cookie
+
   security:
     oauth2:
-      client:
-        provider:
-          keycloak:
-            issuer-uri: http://localhost:8080/realms/Machinemetrics
-            token-uri: http://localhost:8080/realms/Machinemetrics/protocol/openid-connect/token
-            authorization-uri: http://localhost:8080/realms/Machinemetrics/protocol/openid-connect/auth
-            user-info-uri: http://localhost:8080/realms/Machinemetrics/protocol/openid-connect/userinfo
-            user-name-attribute: preferred_username
-        registration:
-          keycloak:
-            provider: keycloak
-            client-id: login-app
-            authorization-grant-type: authorization_code
-            scope:
-              - openid
-            redirect-uri: "{baseUrl}/login/oauth2/code/login-app"
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/Machinemetrics
+          jwk-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
+jwt:
+  auth:
+    converter:
+      resource-id: login-app
+      principal-attribute: preferred_username
+#  security:
+#    oauth2:
+#      client:
+#        provider:
+#          keycloak:
+#            issuer-uri: http://localhost:8080/realms/Machinemetrics
+#            token-uri: http://localhost:8080/realms/Machinemetrics/protocol/openid-connect/token
+#            authorization-uri: http://localhost:8080/realms/Machinemetrics/protocol/openid-connect/auth
+#            user-info-uri: http://localhost:8080/realms/Machinemetrics/protocol/openid-connect/userinfo
+#            user-name-attribute: preferred_username
+#        registration:
+#          keycloak:
+#            provider: keycloak
+#            client-id: login-app
+#            authorization-grant-type: authorization_code
+#            scope:
+#              - openid
+#            redirect-uri: "{baseUrl}/login/oauth2/code/login-app"
 
 logging:
   level:

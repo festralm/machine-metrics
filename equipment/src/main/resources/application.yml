@@ -17,19 +17,7 @@ spring:
     port: 5672
     username: guest
     password: guest
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: http://localhost:8080/realms/Machinemetrics
 
 api:
   prefix:
     v1: /api/v1
-
-
-logging:
-  level:
-    org.springframework.cloud.gateway: DEBUG
-    org.springframework.security: DEBUG
-    org.springframework.web.reactive.function.client: TRACE

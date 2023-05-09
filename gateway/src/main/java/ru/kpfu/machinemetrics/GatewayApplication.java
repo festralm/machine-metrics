@@ -2,13 +2,12 @@ package ru.kpfu.machinemetrics;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
-import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.WebSession;
-import reactor.core.publisher.Mono;
+import ru.kpfu.machinemetrics.config.properties.FrontProperties;
+import ru.kpfu.machinemetrics.config.properties.JwtAuthConverterProperties;
 
+@EnableConfigurationProperties({JwtAuthConverterProperties.class, FrontProperties.class})
 @SpringBootApplication
 @RestController
 public class GatewayApplication {
@@ -17,14 +16,4 @@ public class GatewayApplication {
         SpringApplication.run(GatewayApplication.class, args);
     }
 
-
-    @GetMapping(value = "/token")
-    public Mono<String> getHome(@RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient authorizedClient) {
-        return Mono.just(authorizedClient.getAccessToken().getTokenValue());
-    }
-
-    @GetMapping("/")
-    public Mono<String> index(WebSession session) {
-        return Mono.just(session.getId());
-    }
 }
