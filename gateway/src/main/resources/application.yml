@@ -1,11 +1,10 @@
 server:
-  port: 8090
+  port: 9000
 
 app:
   service:
     port:
-      auth: 8070
-      equipment: 8080
+      equipment: 8090
       schedule: 9010
       statistics: 9020
       user: 9030
@@ -16,10 +15,14 @@ app:
     url: http://localhost:8081
 
 spring:
+  application:
+    name: gateway
   main:
     web-application-type: reactive
   cloud:
     gateway:
+      default-filters:
+        - TokenRelay
       globalcors:
         corsConfigurations:
           '[/**]':
@@ -28,6 +31,7 @@ spring:
             allowedHeaders: "*"
             exposedHeaders:
               - "Location"
+              - "Authorization"
             allowCredentials: true
       routes:
         - id: equipment
@@ -35,44 +39,46 @@ spring:
           predicates:
             - Path=${app.api.prefix.v1}/equipment/**
           filters:
-            - TokenRelay=
             - RemoveRequestHeader=Cookie
         - id: schedule
           uri: http://127.0.0.1:${app.service.port.schedule}
           predicates:
             - Path=${app.api.prefix.v1}/cron/**,${app.api.prefix.v1}/data-service/**,${app.api.prefix.v1}/equipment-info/**
           filters:
-            - TokenRelay=
             - RemoveRequestHeader=Cookie
         - id: statistics
           uri: http://127.0.0.1:${app.service.port.statistics}
           predicates:
             - Path=${app.api.prefix.v1}/equipment-data
           filters:
-            - TokenRelay=
             - RemoveRequestHeader=Cookie
         - id: user
           uri: http://127.0.0.1:${app.service.port.user}
           predicates:
             - Path=${app.api.prefix.v1}/user/**
           filters:
-            - TokenRelay=
             - RemoveRequestHeader=Cookie
   security:
     oauth2:
       client:
-        registration:
-          gateway:
-            provider: spring
-            client-id: gateway
-            client-secret: secret
-            authorization-grant-type: authorization_code
-            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
-            scope: openid,equipment.read
         provider:
-          spring:
-            issuer-uri: http://localhost:${app.service.port.auth}
+          keycloak:
+            issuer-uri: http://localhost:8080/realms/Machinemetrics
+            token-uri: http://localhost:8080/realms/Machinemetrics/protocol/openid-connect/token
+            authorization-uri: http://localhost:8080/realms/Machinemetrics/protocol/openid-connect/auth
+            user-info-uri: http://localhost:8080/realms/Machinemetrics/protocol/openid-connect/userinfo
+            user-name-attribute: preferred_username
+        registration:
+          keycloak:
+            provider: keycloak
+            client-id: login-app
+            authorization-grant-type: authorization_code
+            scope:
+              - openid
+            redirect-uri: "{baseUrl}/login/oauth2/code/login-app"
 
 logging:
   level:
+    org.springframework.cloud.gateway: DEBUG
     org.springframework.security: DEBUG
+    org.springframework.web.reactive.function.client: TRACE

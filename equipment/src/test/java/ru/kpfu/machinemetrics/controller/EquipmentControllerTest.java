@@ -10,7 +10,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.kpfu.machinemetrics.configuration.MessageSourceConfig;
+import ru.kpfu.machinemetrics.config.MessageSourceConfig;
 import ru.kpfu.machinemetrics.dto.EquipmentCreateDto;
 import ru.kpfu.machinemetrics.dto.EquipmentDetailsDto;
 import ru.kpfu.machinemetrics.dto.EquipmentItemDto;
