@@ -4,10 +4,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.web.bind.annotation.RestController;
+import ru.kpfu.machinemetrics.config.properties.AppApiProperties;
 import ru.kpfu.machinemetrics.config.properties.FrontProperties;
 import ru.kpfu.machinemetrics.config.properties.JwtAuthConverterProperties;
 
-@EnableConfigurationProperties({JwtAuthConverterProperties.class, FrontProperties.class})
+@EnableConfigurationProperties({JwtAuthConverterProperties.class, FrontProperties.class, AppApiProperties.class})
 @SpringBootApplication
 @RestController
 public class GatewayApplication {

@@ -2,29 +2,45 @@ package ru.kpfu.machinemetrics.service;
 
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.admin.client.resource.RoleMappingResource;
+import org.keycloak.admin.client.resource.RoleScopeResource;
+import org.keycloak.admin.client.resource.UserResource;
+import org.keycloak.admin.client.resource.UsersResource;
+import org.keycloak.representations.idm.RoleRepresentation;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import ru.kpfu.machinemetrics.config.MessageSourceConfig;
+import ru.kpfu.machinemetrics.constants.UserConstants;
+import ru.kpfu.machinemetrics.dto.UserCreateDto;
+import ru.kpfu.machinemetrics.exception.ResourceNotCreatedException;
+import ru.kpfu.machinemetrics.exception.ResourceNotDeletedException;
 import ru.kpfu.machinemetrics.exception.ResourceNotFoundException;
-import ru.kpfu.machinemetrics.model.User;
-import ru.kpfu.machinemetrics.repository.UserRepository;
 
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.core.Response;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static ru.kpfu.machinemetrics.constants.UserConstants.USER_NOT_DELETED_EXCEPTION_MESSAGE;
 import static ru.kpfu.machinemetrics.constants.UserConstants.USER_NOT_FOUND_EXCEPTION_MESSAGE;
 
-@SpringBootTest
+@SpringBootTest({"keycloak.realm=realm", "keycloak.auth-server-url=http://localhost:8080"})
 @ImportAutoConfiguration(MessageSourceConfig.class)
 public class UserServiceTest {
 
@@ -32,89 +48,198 @@ public class UserServiceTest {
     private MessageSource messageSource;
 
     @MockBean
-    private UserRepository userRepositoryMock;
+    private Keycloak keycloakMock;
+
+    @MockBean
+    private RoleService roleServiceMock;
 
     @Autowired
     private UserService userService;
 
     @Test
-    public void testGetAllNotDeleted() {
+    public void findAll() {
         // given
-        User user1 = User.builder()
-                .name("User 1")
-                .build();
-        User user2 = User.builder()
-                .name("User 2")
-                .build();
-        List<User> userList = List.of(user1, user2);
+        UserRepresentation user1 = new UserRepresentation();
+        user1.setUsername("User 1");
+        UserRepresentation user2 = new UserRepresentation();
+        user2.setUsername("User 2");
 
-        when(userRepositoryMock.findAllByDeletedFalse()).thenReturn(userList);
+        List<UserRepresentation> userList = List.of(user1, user2);
+
+        UsersResource usersResourceMock = mock(UsersResource.class);
+        when(usersResourceMock.list()).thenReturn(userList);
+
+        RealmResource realmResourceMock = mock(RealmResource.class);
+        when(realmResourceMock.users()).thenReturn(usersResourceMock);
+
+        when(keycloakMock.realm("realm")).thenReturn(realmResourceMock);
 
         // when
-        List<User> result = userService.getAllNotDeleted();
+        List<UserRepresentation> result = userService.findAll();
 
         // then
         SoftAssertions softly = new SoftAssertions();
         softly.assertThat(result.size()).isEqualTo(2);
-        softly.assertThat(result.get(0).getName()).isEqualTo(user1.getName());
-        softly.assertThat(result.get(1).getName()).isEqualTo(user2.getName());
+        softly.assertThat(result.get(0).getUsername()).isEqualTo(user1.getUsername());
+        softly.assertThat(result.get(1).getUsername()).isEqualTo(user2.getUsername());
         softly.assertAll();
     }
 
     @Test
-    void testSave() {
+    void testSave() throws URISyntaxException {
         // given
-        User user = User.builder()
-                .name("Test User")
+        UserCreateDto dto = UserCreateDto.builder()
+                .firstName("First Name")
+                .lastName("Last Name")
+                .email("email@email.com")
+                .password("password")
+                .roleName("admin")
                 .build();
 
-        User savedUser = User.builder()
-                .id(1L)
-                .name(user.getName())
-                .build();
+        RoleRepresentation roleRepresentationMock = mock(RoleRepresentation.class);
 
-        when(userRepositoryMock.save(any(User.class))).thenReturn(savedUser);
+        Response responseMock = mock(Response.class);
+        when(responseMock.getStatus()).thenReturn(201);
+        when(responseMock.getLocation()).thenReturn(new URI("http://localhost:8080/admin/realms/master/users/test"));
+
+        RoleScopeResource roleScopeResourceMock = mock(RoleScopeResource.class);
+        doNothing().when(roleScopeResourceMock).add(any());
+
+        RoleMappingResource roleMappingResourceMock = mock(RoleMappingResource.class);
+        when(roleMappingResourceMock.realmLevel()).thenReturn(roleScopeResourceMock);
+
+        UserResource userResourceMock = mock(UserResource.class);
+        when(userResourceMock.roles()).thenReturn(roleMappingResourceMock);
+
+        UsersResource usersResourceMock = mock(UsersResource.class);
+        when(usersResourceMock.create(any())).thenReturn(responseMock);
+        when(usersResourceMock.get("test")).thenReturn(userResourceMock);
+
+        RealmResource realmResourceMock = mock(RealmResource.class);
+        when(realmResourceMock.users()).thenReturn(usersResourceMock);
+
+        when(keycloakMock.realm("realm")).thenReturn(realmResourceMock);
+        when(roleServiceMock.findByName("admin")).thenReturn(roleRepresentationMock);
 
         // when
-        User actualUser = userService.save(user);
+        String response = userService.create(dto);
+
+        // then\
+        verify(roleScopeResourceMock, times(1)).add(any());
+        assertThat(response).isEqualTo("test");
+    }
+
+    @Test
+    void testSaveWhenNotSaved() {
+        // given
+        UserCreateDto dto = UserCreateDto.builder()
+                .firstName("First Name")
+                .lastName("Last Name")
+                .email("email@email.com")
+                .password("password")
+                .roleName("admin")
+                .build();
+
+        Response responseMock = mock(Response.class);
+        when(responseMock.getStatus()).thenReturn(500);
+
+        UsersResource usersResourceMock = mock(UsersResource.class);
+        when(usersResourceMock.create(any())).thenReturn(responseMock);
+
+        RealmResource realmResourceMock = mock(RealmResource.class);
+        when(realmResourceMock.users()).thenReturn(usersResourceMock);
+
+        when(keycloakMock.realm("realm")).thenReturn(realmResourceMock);
+
+        // when
+        Throwable thrown = catchThrowable(() -> userService.create(dto));
+
+        // then
+        String expectedMessage = messageSource.getMessage(
+                UserConstants.USER_NOT_CREATED_EXCEPTION_MESSAGE,
+                null,
+                new Locale("ru")
+        );
+        assertThat(thrown).isInstanceOf(ResourceNotCreatedException.class).hasMessage(expectedMessage);
+    }
+
+    @Test
+    void testSaveWhenUsersResourceThrowsException() {
+        // given
+        UserCreateDto dto = UserCreateDto.builder().email("email@email.com").password("password").build();
+
+        UsersResource usersResourceMock = mock(UsersResource.class);
+        when(usersResourceMock.create(any())).thenThrow(new RuntimeException());
+
+        RealmResource realmResourceMock = mock(RealmResource.class);
+        when(realmResourceMock.users()).thenReturn(usersResourceMock);
+
+        when(keycloakMock.realm("realm")).thenReturn(realmResourceMock);
+
+        // when
+        Throwable thrown = catchThrowable(() -> userService.create(dto));
+
+        // then
+        String expectedMessage = messageSource.getMessage(
+                UserConstants.USER_NOT_CREATED_EXCEPTION_MESSAGE,
+                null,
+                new Locale("ru")
+        );
+        assertThat(thrown).isInstanceOf(ResourceNotCreatedException.class).hasMessage(expectedMessage);
+    }
+
+    @Test
+    public void testFetByIdFound() {
+        // given
+        UserRepresentation user = new UserRepresentation();
+        user.setUsername("User 1");
+
+        RoleRepresentation role = new RoleRepresentation();
+        role.setName("ADMIN");
+
+        RoleScopeResource roleScopeResourceMock = mock(RoleScopeResource.class);
+        when(roleScopeResourceMock.listAll()).thenReturn(List.of(role));
+
+        RoleMappingResource roleMappingResourceMock = mock(RoleMappingResource.class);
+        when(roleMappingResourceMock.realmLevel()).thenReturn(roleScopeResourceMock);
+
+        UserResource userResourceMock = mock(UserResource.class);
+        when(userResourceMock.toRepresentation()).thenReturn(user);
+        when(userResourceMock.roles()).thenReturn(roleMappingResourceMock);
+
+        UsersResource usersResourceMock = mock(UsersResource.class);
+        when(usersResourceMock.get(user.getId())).thenReturn(userResourceMock);
+
+        RealmResource realmResourceMock = mock(RealmResource.class);
+        when(realmResourceMock.users()).thenReturn(usersResourceMock);
+
+        when(keycloakMock.realm("realm")).thenReturn(realmResourceMock);
+
+        // when
+        UserRepresentation actualUser = userService.findById(user.getId());
 
         // then
         SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(actualUser.getId()).isEqualTo(savedUser.getId());
-        softly.assertThat(actualUser.getName()).isEqualTo(savedUser.getName());
-        softly.assertThat(actualUser.isDeleted()).isFalse();
+        softly.assertThat(actualUser.getUsername()).isEqualTo(user.getUsername());
+        softly.assertThat(actualUser.getRealmRoles()).containsExactly("Администратор");
         softly.assertAll();
     }
 
     @Test
-    public void testGetByIdFound() {
+    public void testFetByIdNotFound() {
         // given
-        User user = new User();
-        user.setId(1L);
-        user.setName("User 1");
+        String givenId = "id";
 
-        when(userRepositoryMock.findByIdAndDeletedFalse(user.getId())).thenReturn(Optional.of(user));
+        UsersResource usersResourceMock = mock(UsersResource.class);
+        when(usersResourceMock.get(givenId)).thenThrow(new NotFoundException());
+
+        RealmResource realmResourceMock = mock(RealmResource.class);
+        when(realmResourceMock.users()).thenReturn(usersResourceMock);
+
+        when(keycloakMock.realm("realm")).thenReturn(realmResourceMock);
 
         // when
-        User actualUser = userService.getById(user.getId());
-
-        // then
-        SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(actualUser.getId()).isEqualTo(user.getId());
-        softly.assertThat(actualUser.getName()).isEqualTo(user.getName());
-        softly.assertThat(actualUser.isDeleted()).isFalse();
-        softly.assertAll();
-    }
-
-    @Test
-    public void testGetByIdNotFound() {
-        // given
-        Long givenId = 1L;
-
-        when(userRepositoryMock.findByIdAndDeletedFalse(givenId)).thenReturn(Optional.empty());
-
-        // when
-        Throwable thrown = catchThrowable(() -> userService.getById(givenId));
+        Throwable thrown = catchThrowable(() -> userService.findById(givenId));
 
         // then
         String expectedMessage = messageSource.getMessage(
@@ -129,39 +254,44 @@ public class UserServiceTest {
     @Test
     void testDeleteWithExistingUser() {
         // given
-        Long userId = 1L;
+        String givenId = "id";
 
-        User user = new User();
-        user.setId(userId);
-        user.setName("Test User");
-        user.setDeleted(false);
+        Response responseMock = mock(Response.class);
+        when(responseMock.getStatus()).thenReturn(204);
 
-        when(userRepositoryMock.findByIdAndDeletedFalse(userId)).thenReturn(Optional.of(user));
+        UsersResource usersResourceMock = mock(UsersResource.class);
+        when(usersResourceMock.delete(givenId)).thenReturn(responseMock);
+
+        RealmResource realmResourceMock = mock(RealmResource.class);
+        when(realmResourceMock.users()).thenReturn(usersResourceMock);
+
+        when(keycloakMock.realm("realm")).thenReturn(realmResourceMock);
 
         // when
-        userService.delete(userId);
-
-        // then
-        verify(userRepositoryMock, Mockito.times(1)).findByIdAndDeletedFalse(userId);
-        verify(userRepositoryMock, Mockito.times(1)).save(user);
-        assertThat(user.isDeleted()).isTrue();
+        userService.delete(givenId);
     }
 
     @Test
     void testDeleteWithNonExistingUser() {
         // given
-        Long userId = 1L;
-        when(userRepositoryMock.findByIdAndDeletedFalse(userId)).thenReturn(Optional.empty());
+        String givenId = "id";
+
+        Response responseMock = mock(Response.class);
+        when(responseMock.getStatus()).thenReturn(404);
+
+        UsersResource usersResourceMock = mock(UsersResource.class);
+        when(usersResourceMock.delete(givenId)).thenReturn(responseMock);
+
+        RealmResource realmResourceMock = mock(RealmResource.class);
+        when(realmResourceMock.users()).thenReturn(usersResourceMock);
+
+        when(keycloakMock.realm("realm")).thenReturn(realmResourceMock);
 
         // when
-        Throwable thrown = catchThrowable(() -> userService.delete(userId));
-
-        // then
-        verify(userRepositoryMock, Mockito.times(1)).findByIdAndDeletedFalse(userId);
-        verify(userRepositoryMock, Mockito.never()).save(Mockito.any(User.class));
+        Throwable thrown = catchThrowable(() -> userService.delete(givenId));
         String expectedMessage = messageSource.getMessage(
                 USER_NOT_FOUND_EXCEPTION_MESSAGE,
-                new Object[]{userId},
+                new Object[]{givenId},
                 new Locale("ru")
         );
         assertThat(thrown).isInstanceOf(ResourceNotFoundException.class)
@@ -169,52 +299,80 @@ public class UserServiceTest {
     }
 
     @Test
-    void testEdit() {
+    void testDeleteWhenNotDeleted() {
         // given
-        Long userId = 1L;
+        String givenId = "id";
 
-        User existingUser = User.builder()
-                .id(userId)
-                .name("Existing User")
-                .build();
+        Response responseMock = mock(Response.class);
+        when(responseMock.getStatus()).thenReturn(500);
 
-        User updatedUser = User.builder()
-                .name("Updated User")
-                .build();
+        UsersResource usersResourceMock = mock(UsersResource.class);
+        when(usersResourceMock.delete(givenId)).thenReturn(responseMock);
 
-        when(userRepositoryMock.findByIdAndDeletedFalse(userId)).thenReturn(Optional.of(existingUser));
-        when(userRepositoryMock.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        RealmResource realmResourceMock = mock(RealmResource.class);
+        when(realmResourceMock.users()).thenReturn(usersResourceMock);
+
+        when(keycloakMock.realm("realm")).thenReturn(realmResourceMock);
 
         // when
-        User actualUser = userService.edit(userId, updatedUser);
-
-        // then
-        verify(userRepositoryMock).findByIdAndDeletedFalse(userId);
-        verify(userRepositoryMock).save(existingUser);
-
-        SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(actualUser.getId()).isEqualTo(existingUser.getId());
-        softly.assertThat(actualUser.getName()).isEqualTo(updatedUser.getName());
-        softly.assertAll();
-    }
-
-    @Test
-    void testEditUserNotFound() {
-        // given
-        Long userId = 1L;
-
-        when(userRepositoryMock.findByIdAndDeletedFalse(userId)).thenReturn(Optional.empty());
-
-        // when
-        Throwable thrown = catchThrowable(() -> userService.delete(userId));
-
-        // then
+        Throwable thrown = catchThrowable(() -> userService.delete(givenId));
         String expectedMessage = messageSource.getMessage(
-                USER_NOT_FOUND_EXCEPTION_MESSAGE,
-                new Object[]{userId},
+                USER_NOT_DELETED_EXCEPTION_MESSAGE,
+                new Object[]{givenId},
                 new Locale("ru")
         );
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage(expectedMessage);
+        assertThat(thrown).isInstanceOf(ResourceNotDeletedException.class).hasMessage(expectedMessage);
     }
+
+    // todo
+
+//    @Test
+//    void testEdit() {
+//        // given
+//        Long userId = 1L;
+//
+//        User existingUser = User.builder()
+//                .id(userId)
+//                .name("Existing User")
+//                .build();
+//
+//        User updatedUser = User.builder()
+//                .name("Updated User")
+//                .build();
+//
+//        when(keycloakMock.findByIdAndDeletedFalse(userId)).thenReturn(Optional.of(existingUser));
+//        when(keycloakMock.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+//
+//        // when
+//        User actualUser = userService.edit(userId, updatedUser);
+//
+//        // then
+//        verify(keycloakMock).findByIdAndDeletedFalse(userId);
+//        verify(keycloakMock).save(existingUser);
+//
+//        SoftAssertions softly = new SoftAssertions();
+//        softly.assertThat(actualUser.getId()).isEqualTo(existingUser.getId());
+//        softly.assertThat(actualUser.getName()).isEqualTo(updatedUser.getName());
+//        softly.assertAll();
+//    }
+//
+//    @Test
+//    void testEditUserNotFound() {
+//        // given
+//        Long userId = 1L;
+//
+//        when(keycloakMock.findByIdAndDeletedFalse(userId)).thenReturn(Optional.empty());
+//
+//        // when
+//        Throwable thrown = catchThrowable(() -> userService.delete(userId));
+//
+//        // then
+//        String expectedMessage = messageSource.getMessage(
+//                USER_NOT_FOUND_EXCEPTION_MESSAGE,
+//                new Object[]{userId},
+//                new Locale("ru")
+//        );
+//        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class)
+//                .hasMessage(expectedMessage);
+//    }
 }

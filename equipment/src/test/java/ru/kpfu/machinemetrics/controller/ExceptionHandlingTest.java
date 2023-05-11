@@ -11,6 +11,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.kpfu.machinemetrics.config.MessageSourceConfig;
+import ru.kpfu.machinemetrics.constants.GeneralConstants;
 import ru.kpfu.machinemetrics.dto.ErrorResponse;
 import ru.kpfu.machinemetrics.mapper.EquipmentMapper;
 import ru.kpfu.machinemetrics.service.EquipmentService;
@@ -44,7 +45,7 @@ public class ExceptionHandlingTest {
     public void testInternalServerError() throws Exception {
         when(equipmentServiceMock.getAllNotDeleted()).thenThrow(new RuntimeException());
 
-        String message = messageSource.getMessage("exception.general", null, new Locale("ru"));
+        String message = messageSource.getMessage(GeneralConstants.EXCEPTION_GENERAL, null, new Locale("ru"));
         ErrorResponse expectedResponseBody = new ErrorResponse(500, message);
 
         mockMvc.perform(get("/api/v1/equipment"))

@@ -2,6 +2,7 @@ package ru.kpfu.machinemetrics.validation.annotation;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
+import ru.kpfu.machinemetrics.constants.GeneralConstants;
 import ru.kpfu.machinemetrics.validation.validator.EquipmentInfoValidator;
 
 import java.lang.annotation.Documented;
@@ -18,7 +19,7 @@ import static java.lang.annotation.ElementType.TYPE;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface EquipmentInfoConstraint {
 
-    String message() default "{exception.general}";
+    String message() default GeneralConstants.EXCEPTION_GENERAL;
 
     Class<?>[] groups() default {};
 

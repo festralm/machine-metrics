@@ -14,8 +14,16 @@ import lombok.Setter;
 @AllArgsConstructor
 public class UserCreateDto {
 
-    @NotBlank(message = "{validation.user.name.empty}")
-    private String name;
+    @NotBlank(message = "{validation.user.first-name.empty}")
+    private String firstName;
 
-    private String surname;
+    @NotBlank(message = "{validation.user.last-name.empty}")
+    private String lastName;
+
+    private String email;
+
+    private String password;
+
+    @NotBlank(message = "{validation.user.role.empty}")
+    private  String roleName;
 }

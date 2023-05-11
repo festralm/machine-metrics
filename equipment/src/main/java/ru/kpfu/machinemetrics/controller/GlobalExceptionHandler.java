@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import ru.kpfu.machinemetrics.constants.GeneralConstants;
 import ru.kpfu.machinemetrics.dto.ErrorResponse;
 import ru.kpfu.machinemetrics.exception.ResourceNotFoundException;
 import ru.kpfu.machinemetrics.exception.ValidationException;
@@ -52,7 +53,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleOtherExceptions(Exception e) {
         Locale locale = LocaleContextHolder.getLocale();
-        String errorMessage = messageSource.getMessage("exception.general", null, locale);
+        String errorMessage = messageSource.getMessage(GeneralConstants.EXCEPTION_GENERAL, null, locale);
         ErrorResponse error = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), errorMessage);
         log.error(errorMessage, e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);

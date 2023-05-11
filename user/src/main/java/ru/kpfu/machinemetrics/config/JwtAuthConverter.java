@@ -1,4 +1,4 @@
-package ru.kpfu.machinemetrics.config.config;
+package ru.kpfu.machinemetrics.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.converter.Converter;
@@ -10,8 +10,7 @@ import org.springframework.security.oauth2.jwt.JwtClaimNames;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Mono;
-import ru.kpfu.machinemetrics.config.properties.JwtAuthConverterProperties;
+import ru.kpfu.machinemetrics.properties.JwtAuthConverterProperties;
 
 import java.util.Collection;
 import java.util.Map;
@@ -21,18 +20,18 @@ import java.util.stream.Stream;
 
 @Component
 @RequiredArgsConstructor
-public class JwtAuthConverter implements Converter<Jwt, Mono<AbstractAuthenticationToken>> {
+public class JwtAuthConverter implements Converter<Jwt, AbstractAuthenticationToken> {
 
     private final JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
 
     private final JwtAuthConverterProperties properties;
 
     @Override
-    public Mono<AbstractAuthenticationToken> convert(Jwt jwt) {
+    public AbstractAuthenticationToken convert(Jwt jwt) {
         Collection<GrantedAuthority> authorities = Stream.concat(
                 jwtGrantedAuthoritiesConverter.convert(jwt).stream(),
                 extractResourceRoles(jwt).stream()).collect(Collectors.toSet());
-        return Mono.just(new JwtAuthenticationToken(jwt, authorities, getPrincipalClaimName(jwt)));
+        return new JwtAuthenticationToken(jwt, authorities, getPrincipalClaimName(jwt));
     }
 
     private String getPrincipalClaimName(Jwt jwt) {
