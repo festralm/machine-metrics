@@ -2,8 +2,6 @@ server:
   port: 8090
 
 spring:
-  application:
-    name: equipment
   datasource:
     url: jdbc:postgresql://localhost:5432/equipment
     username: equipment

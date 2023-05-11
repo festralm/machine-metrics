@@ -21,8 +21,6 @@ spring:
     web-application-type: reactive
   cloud:
     gateway:
-#      default-filters:
-#        - TokenRelay
       globalcors:
         corsConfigurations:
           '[/**]':

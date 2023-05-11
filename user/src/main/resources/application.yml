@@ -23,7 +23,7 @@ keycloak:
   realm: master
   resource: admin-cli
   auth-server-url: http://localhost:8080
-  client-secret: SSHRgyIdMZiQaT2VS8TEjYvbkE2V0vDZ
+  client-secret: ${KEYCLOAK_SECRET}
 
 logging:
   level:

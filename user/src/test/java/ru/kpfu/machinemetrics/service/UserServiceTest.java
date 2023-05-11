@@ -61,8 +61,15 @@ public class UserServiceTest {
         // given
         UserRepresentation user1 = new UserRepresentation();
         user1.setUsername("User 1");
+        user1.setId("id1");
+
         UserRepresentation user2 = new UserRepresentation();
         user2.setUsername("User 2");
+        user2.setId("id2");
+
+        UserRepresentation user3 = new UserRepresentation();
+        user3.setUsername("User 3");
+        user3.setId("id3");
 
         List<UserRepresentation> userList = List.of(user1, user2);
 
@@ -75,7 +82,7 @@ public class UserServiceTest {
         when(keycloakMock.realm("realm")).thenReturn(realmResourceMock);
 
         // when
-        List<UserRepresentation> result = userService.findAll();
+        List<UserRepresentation> result = userService.findAll("id3");
 
         // then
         SoftAssertions softly = new SoftAssertions();
@@ -108,8 +115,13 @@ public class UserServiceTest {
         RoleMappingResource roleMappingResourceMock = mock(RoleMappingResource.class);
         when(roleMappingResourceMock.realmLevel()).thenReturn(roleScopeResourceMock);
 
+        UserRepresentation user = new UserRepresentation();
+        user.setUsername("User 1");
+        user.setId("id1");
+
         UserResource userResourceMock = mock(UserResource.class);
         when(userResourceMock.roles()).thenReturn(roleMappingResourceMock);
+        when(userResourceMock.toRepresentation()).thenReturn(user);
 
         UsersResource usersResourceMock = mock(UsersResource.class);
         when(usersResourceMock.create(any())).thenReturn(responseMock);
@@ -122,11 +134,11 @@ public class UserServiceTest {
         when(roleServiceMock.findByName("admin")).thenReturn(roleRepresentationMock);
 
         // when
-        String response = userService.create(dto);
+        UserRepresentation response = userService.create(dto);
 
-        // then\
+        // then
         verify(roleScopeResourceMock, times(1)).add(any());
-        assertThat(response).isEqualTo("test");
+        assertThat(response.getUsername()).isEqualTo(user.getUsername());
     }
 
     @Test
