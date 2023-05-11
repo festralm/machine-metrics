@@ -1,16 +1,32 @@
 server:
-  port: 9040
+  port: 9030
+
+app:
+  api:
+    prefix:
+      v1: /api/v1
 
 spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/users
-    username: users
-    password: ${POSTGRES_PASSWORD}
-  jpa:
-    show-sql: true
-    hibernate:
-      ddl-auto: update
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/master
+          jwk-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
+jwt:
+  auth:
+    converter:
+      resource-id: login-app
+      principal-attribute: preferred_username
 
-api:
-  prefix:
-    v1: /api/v1
+keycloak:
+  realm: master
+  resource: admin-cli
+  auth-server-url: http://localhost:8080
+  client-secret: ${KEYCLOAK_SECRET}
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web.reactive.function.client: TRACE

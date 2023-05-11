@@ -5,6 +5,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.kpfu.machinemetrics.exception.ResourceNotFoundException;
 import ru.kpfu.machinemetrics.model.Equipment;
 import ru.kpfu.machinemetrics.repository.EquipmentRepository;
@@ -15,6 +16,7 @@ import java.util.Locale;
 import static ru.kpfu.machinemetrics.constants.EquipmentConstants.EQUIPMENT_NOT_FOUND_EXCEPTION_MESSAGE;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class EquipmentService {
 
