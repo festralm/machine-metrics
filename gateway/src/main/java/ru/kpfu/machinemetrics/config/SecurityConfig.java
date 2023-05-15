@@ -45,6 +45,16 @@ public class SecurityConfig {
                 .pathMatchers(HttpMethod.DELETE, appApiProperties.getV1() + "/country/**")
                 .hasAnyAuthority(Roles.ADMIN.value)
 
+
+                .pathMatchers(HttpMethod.GET, appApiProperties.getV1() + "/schedule/**")
+                .hasAnyAuthority(Roles.ADMIN.value, Roles.MODERATOR.value)
+
+                .pathMatchers(HttpMethod.POST, appApiProperties.getV1() + "/schedule/**")
+                .hasAnyAuthority(Roles.ADMIN.value, Roles.MODERATOR.value)
+
+                .pathMatchers(HttpMethod.DELETE, appApiProperties.getV1() + "/schedule/**")
+                .hasAnyAuthority(Roles.ADMIN.value)
+
                 .pathMatchers(HttpMethod.GET, appApiProperties.getV1() + "/purpose/**")
                 .hasAnyAuthority(Roles.ADMIN.value, Roles.MODERATOR.value)
 

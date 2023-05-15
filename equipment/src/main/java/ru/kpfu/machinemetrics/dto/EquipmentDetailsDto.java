@@ -8,7 +8,6 @@ import lombok.Setter;
 import ru.kpfu.machinemetrics.model.Country;
 import ru.kpfu.machinemetrics.model.Purpose;
 import ru.kpfu.machinemetrics.model.Status;
-import ru.kpfu.machinemetrics.model.Unit;
 import ru.kpfu.machinemetrics.model.UsageType;
 
 import java.time.Instant;
@@ -91,7 +90,7 @@ public class EquipmentDetailsDto {
 
     private String installationLocation;
 
-    private Unit unit;
+    private UnitDto unit;
 
     private String responsiblePerson;
 
