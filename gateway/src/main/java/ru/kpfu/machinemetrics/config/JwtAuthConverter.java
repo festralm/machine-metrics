@@ -1,4 +1,4 @@
-package ru.kpfu.machinemetrics.config.config;
+package ru.kpfu.machinemetrics.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.converter.Converter;
@@ -11,7 +11,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
-import ru.kpfu.machinemetrics.config.properties.JwtAuthConverterProperties;
+import ru.kpfu.machinemetrics.properties.JwtAuthConverterProperties;
 
 import java.util.Collection;
 import java.util.Map;

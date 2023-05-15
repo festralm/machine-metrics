@@ -25,5 +25,5 @@ public class UserCreateDto {
     private String password;
 
     @NotBlank(message = "{validation.user.role.empty}")
-    private  String roleName;
+    private String roleName;
 }

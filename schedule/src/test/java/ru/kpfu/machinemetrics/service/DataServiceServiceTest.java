@@ -163,24 +163,4 @@ public class DataServiceServiceTest {
         assertThat(thrown).isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage(expectedMessage);
     }
-
-    @Test
-    void testEditDataServiceNotFound() {
-        // given
-        Long dataServiceId = 1L;
-
-        when(dataServiceRepository.findById(dataServiceId)).thenReturn(Optional.empty());
-
-        // when
-        Throwable thrown = catchThrowable(() -> dataServiceService.delete(dataServiceId));
-
-        // then
-        String expectedMessage = messageSource.getMessage(
-                DATA_SERVICE_NOT_FOUND_EXCEPTION_MESSAGE,
-                new Object[]{dataServiceId},
-                new Locale("ru")
-        );
-        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage(expectedMessage);
-    }
 }

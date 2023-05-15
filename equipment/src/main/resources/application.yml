@@ -16,6 +16,8 @@ spring:
     username: guest
     password: guest
 
-api:
-  prefix:
-    v1: /api/v1
+app:
+  photo-save-directory: C:\Uni\machinemetrics\equipment\src\main\resources\photo
+  api:
+    prefix:
+      v1: /api/v1

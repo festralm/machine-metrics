@@ -35,7 +35,7 @@ spring:
         - id: equipment
           uri: http://127.0.0.1:${app.service.port.equipment}
           predicates:
-            - Path=${app.api.prefix.v1}/equipment/**
+            - Path=${app.api.prefix.v1}/equipment/**,${app.api.prefix.v1}/country/**,${app.api.prefix.v1}/purpose/**,${app.api.prefix.v1}/status/**,${app.api.prefix.v1}/unit/**,${app.api.prefix.v1}/usage-type/**,${app.api.prefix.v1}/photo/**
           filters:
             - RemoveRequestHeader=Cookie
         - id: schedule

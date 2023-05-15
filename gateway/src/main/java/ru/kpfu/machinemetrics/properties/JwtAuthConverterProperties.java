@@ -1,4 +1,4 @@
-package ru.kpfu.machinemetrics.config.properties;
+package ru.kpfu.machinemetrics.properties;
 
 import lombok.Getter;
 import lombok.Setter;

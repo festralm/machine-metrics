@@ -8,9 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.server.SecurityWebFilterChain;
 import ru.kpfu.machinemetrics.properties.AppApiProperties;
 
 @Configuration
@@ -20,17 +18,6 @@ public class SecurityConfig {
 
     private final AppApiProperties appApiProperties;
     private final JwtAuthConverter jwtAuthConverter;
-
-    @Getter
-    @AllArgsConstructor
-    private enum Roles {
-        USER("ROLE_USER"),
-        ADMIN("ROLE_ADMIN"),
-        MODERATOR("ROLE_MODERATOR");
-
-        private String value;
-    }
-
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -71,5 +58,16 @@ public class SecurityConfig {
                 .disable();
 
         return http.build();
+    }
+
+
+    @Getter
+    @AllArgsConstructor
+    private enum Roles {
+        USER("ROLE_USER"),
+        ADMIN("ROLE_ADMIN"),
+        MODERATOR("ROLE_MODERATOR");
+
+        private String value;
     }
 }

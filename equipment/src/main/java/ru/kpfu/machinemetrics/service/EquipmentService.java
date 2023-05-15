@@ -6,12 +6,16 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import ru.kpfu.machinemetrics.exception.ResourceNotFoundException;
 import ru.kpfu.machinemetrics.model.Equipment;
 import ru.kpfu.machinemetrics.repository.EquipmentRepository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static ru.kpfu.machinemetrics.constants.EquipmentConstants.EQUIPMENT_NOT_FOUND_EXCEPTION_MESSAGE;
 
@@ -23,12 +27,15 @@ public class EquipmentService {
     private final EquipmentRepository equipmentRepository;
     private final MessageSource messageSource;
     private final RabbitTemplate rabbitTemplate;
+    private final PhotoService photoService;
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     public List<Equipment> getAllNotDeleted() {
         return equipmentRepository.findAllByDeletedFalse();
     }
 
     public Equipment save(Equipment equipment) {
+        equipment.setLastOperationDate(Instant.now());
         return equipmentRepository.save(equipment);
     }
 
@@ -50,23 +57,75 @@ public class EquipmentService {
         equipment.setDeleted(true);
         equipmentRepository.save(equipment);
 
+        deleteUnusedPhotos();
+
         rabbitTemplate.convertAndSend("rk-equipment", "", id);
     }
 
     public Equipment edit(Long id, Equipment updatedEquipment) {
         Equipment equipment = getById(id);
 
-        equipment.setPhotoPath(updatedEquipment.getPhotoPath());
-        equipment.setInventoryNumber(updatedEquipment.getInventoryNumber());
         equipment.setName(updatedEquipment.getName());
+        equipment.setInventoryNumber(updatedEquipment.getInventoryNumber());
+        equipment.setAcquisitionSource(updatedEquipment.getAcquisitionSource());
         equipment.setCost(updatedEquipment.getCost());
-        equipment.setSource(updatedEquipment.getSource());
-        equipment.setDepartment(updatedEquipment.getDepartment());
+        equipment.setInitialCost(updatedEquipment.getInitialCost());
+        equipment.setResidualCost(updatedEquipment.getResidualCost());
+        equipment.setAdName(updatedEquipment.getAdName());
+        equipment.setIpAddress(updatedEquipment.getIpAddress());
+        equipment.setKfuDevelopmentProgramApplication(updatedEquipment.getKfuDevelopmentProgramApplication());
+        equipment.setWarrantyServiceForRepresentativesOfAForeignParty(
+                updatedEquipment.isWarrantyServiceForRepresentativesOfAForeignParty()
+        );
+        equipment.setKfuDevelopmentProgramPriorityDirection(
+                updatedEquipment.getKfuDevelopmentProgramPriorityDirection()
+        );
+        equipment.setRussiaDevelopmentPriorityDirection(
+                updatedEquipment.getRussiaDevelopmentPriorityDirection()
+        );
+        equipment.setArea(updatedEquipment.getArea());
+        equipment.setResearchObjects(updatedEquipment.getResearchObjects());
+        equipment.setIndicators(updatedEquipment.getIndicators());
+        equipment.setAdditionalFeatures(updatedEquipment.getAdditionalFeatures());
+        equipment.setPurpose(updatedEquipment.getPurpose());
+        equipment.setUsageType(updatedEquipment.getUsageType());
+        equipment.setVerificationRequired(updatedEquipment.isVerificationRequired());
+        equipment.setType(updatedEquipment.getType());
+        equipment.setFactoryNumber(updatedEquipment.getFactoryNumber());
+        equipment.setManufacturerCountry(updatedEquipment.getManufacturerCountry());
+        equipment.setManufactureYear(updatedEquipment.getManufactureYear());
+        equipment.setManufacturer(updatedEquipment.getManufacturer());
+        equipment.setDeliveryDate(updatedEquipment.getDeliveryDate());
+        equipment.setSupplier(updatedEquipment.getSupplier());
+        equipment.setCommissioningDate(updatedEquipment.getCommissioningDate());
+        equipment.setBrand(updatedEquipment.getBrand());
+        equipment.setProvidingServicesToThirdPartiesPossibility(
+                updatedEquipment.isProvidingServicesToThirdPartiesPossibility()
+        );
+        equipment.setCollectiveFederalCenterUse(updatedEquipment.isCollectiveFederalCenterUse());
+        equipment.setUnique(updatedEquipment.isUnique());
+        equipment.setCollectiveInterdisciplinaryCenterUse(updatedEquipment.isCollectiveInterdisciplinaryCenterUse());
+        equipment.setPortalPublicationCardReadiness(updatedEquipment.isPortalPublicationCardReadiness());
+        equipment.setInstallationLocation(updatedEquipment.getInstallationLocation());
+        equipment.setUnit(updatedEquipment.getUnit());
         equipment.setResponsiblePerson(updatedEquipment.getResponsiblePerson());
         equipment.setStatus(updatedEquipment.getStatus());
-        equipment.setReceiptDate(updatedEquipment.getReceiptDate());
-        equipment.setLastOperationDate(updatedEquipment.getLastOperationDate());
+        equipment.setLastOperationDate(Instant.now());
+        equipment.setPhotoPath(updatedEquipment.getPhotoPath());
 
+        deleteUnusedPhotos();
         return equipmentRepository.save(equipment);
+    }
+
+    private void deleteUnusedPhotos() {
+        List<String> photoNames = getAllNotDeleted()
+                .stream()
+                .map(Equipment::getPhotoPath)
+                .filter(StringUtils::hasText)
+                .toList();
+
+        executorService.submit(() -> {
+            photoService.deleteUnusedPhotos(photoNames);
+        });
     }
 }

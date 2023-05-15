@@ -1,4 +1,4 @@
-package ru.kpfu.machinemetrics.config.config;
+package ru.kpfu.machinemetrics.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
-import ru.kpfu.machinemetrics.config.properties.FrontProperties;
+import ru.kpfu.machinemetrics.properties.FrontProperties;
 
 import java.util.List;
 
