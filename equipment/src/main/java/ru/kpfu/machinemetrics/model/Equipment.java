@@ -1,17 +1,21 @@
 package ru.kpfu.machinemetrics.model;
 
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 
 @Entity
 @Getter
@@ -25,32 +29,105 @@ public class Equipment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String photoPath;
+    private String name;
 
     private String inventoryNumber;
 
-    private String name;
+    private String acquisitionSource;
 
-    private BigDecimal cost;
+    private Double cost;
 
-    private String source;
+    private Double initialCost;
 
-    // todo many to one ?
-    private String department;
+    private Double residualCost;
 
-    // todo many to one ?
+    private String adName;
+
+    private String ipAddress;
+
+    @ElementCollection
+    @CollectionTable(name = "kfu_development_program_application")
+    @Column(name = "value")
+    private List<String> kfuDevelopmentProgramApplication;
+
+    @Column(columnDefinition = "boolean default false")
+    private boolean warrantyServiceForRepresentativesOfAForeignParty;
+
+    @ElementCollection
+    @CollectionTable(name = "kfu_development_program_priority_direction")
+    @Column(name = "value")
+    private List<String> kfuDevelopmentProgramPriorityDirection;
+
+    @ElementCollection
+    @CollectionTable(name = "russia_development_priority_direction")
+    @Column(name = "value")
+    private List<String> russiaDevelopmentPriorityDirection;
+
+    private String area;
+
+    private String researchObjects;
+
+    private String indicators;
+
+    private String additionalFeatures;
+
+    @ManyToOne
+    private Purpose purpose;
+
+    @ManyToOne
+    private UsageType usageType;
+
+    @Column(columnDefinition = "boolean default false")
+    private boolean verificationRequired;
+
+    private String type;
+
+    private String factoryNumber;
+
+    @ManyToOne
+    private Country manufacturerCountry;
+
+    private Integer manufactureYear;
+
+    private String manufacturer;
+
+    private String supplier;
+
+    private Instant deliveryDate;
+
+    private Instant commissioningDate;
+
+    private String brand;
+
+    @Column(columnDefinition = "boolean default false")
+    private boolean providingServicesToThirdPartiesPossibility;
+
+    @Column(columnDefinition = "boolean default false")
+    private boolean collectiveFederalCenterUse;
+
+    @Column(name = "is_unique", columnDefinition = "boolean default false")
+    private boolean unique;
+
+    @Column(columnDefinition = "boolean default false")
+    private boolean collectiveInterdisciplinaryCenterUse;
+
+    @Column(columnDefinition = "boolean default false")
+    private boolean portalPublicationCardReadiness;
+
+    private String installationLocation;
+
+    @ManyToOne
+    private Unit unit;
+
     private String responsiblePerson;
 
-    // todo many to one ?
-    private String status;
-
-    private Instant receiptDate;
+    @ManyToOne
+    private Status status;
 
     private Instant lastOperationDate;
 
-    // todo ... another params
+    private String photoPath;
 
+    @Column(columnDefinition = "boolean default false")
     private boolean deleted;
-
-    private String cronExpression;
 }

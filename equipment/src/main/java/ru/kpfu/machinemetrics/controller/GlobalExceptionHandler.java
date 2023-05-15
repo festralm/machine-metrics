@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import ru.kpfu.machinemetrics.constants.GeneralConstants;
 import ru.kpfu.machinemetrics.dto.ErrorResponse;
 import ru.kpfu.machinemetrics.exception.ResourceNotFoundException;
-import ru.kpfu.machinemetrics.exception.ValidationException;
 
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -40,14 +39,6 @@ public class GlobalExceptionHandler {
         ErrorResponse error = new ErrorResponse(HttpStatus.NOT_FOUND.value(), errorMessage);
         log.error(errorMessage, e);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
-    }
-
-    @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(ValidationException e) {
-        String errorMessage = e.getMessage();
-        ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), errorMessage);
-        log.error(errorMessage, e);
-        return ResponseEntity.badRequest().body(error);
     }
 
     @ExceptionHandler(Exception.class)

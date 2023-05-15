@@ -20,9 +20,7 @@ import ru.kpfu.machinemetrics.mapper.EquipmentMapper;
 import ru.kpfu.machinemetrics.model.Equipment;
 import ru.kpfu.machinemetrics.service.EquipmentService;
 
-import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -114,57 +112,51 @@ public class EquipmentControllerTest {
     public void testCreate() throws Exception {
         // given
         EquipmentCreateDto equipmentCreateDto = EquipmentCreateDto.builder()
-                .photoPath("path/to/photo")
-                .inventoryNumber("INV123")
-                .name("Equipment 1")
-                .cost(BigDecimal.valueOf(1000.00))
-                .source("Supplier A")
-                .department("Department 1")
-                .responsiblePerson("John Doe")
-                .status("Operational")
-                .receiptDate(Instant.now())
-                .lastOperationDate(Instant.now())
+                .name("name 1")
+                .inventoryNumber("inventoryNumber 1")
+                .acquisitionSource("acquisitionSource 1")
+                .cost(100.0)
+                .initialCost(200.0)
+                .residualCost(300.0)
+                .adName("adName 1")
+                .ipAddress("ipAddress 1")
                 .build();
 
         Equipment equipment = Equipment.builder()
-                .photoPath(equipmentCreateDto.getPhotoPath())
-                .inventoryNumber(equipmentCreateDto.getInventoryNumber())
                 .name(equipmentCreateDto.getName())
+                .inventoryNumber(equipmentCreateDto.getInventoryNumber())
+                .acquisitionSource(equipmentCreateDto.getAcquisitionSource())
                 .cost(equipmentCreateDto.getCost())
-                .source(equipmentCreateDto.getSource())
-                .department(equipmentCreateDto.getDepartment())
-                .responsiblePerson(equipmentCreateDto.getResponsiblePerson())
-                .status(equipmentCreateDto.getStatus())
-                .receiptDate(equipmentCreateDto.getReceiptDate())
-                .lastOperationDate(equipmentCreateDto.getLastOperationDate())
+                .initialCost(equipmentCreateDto.getInitialCost())
+                .residualCost(equipmentCreateDto.getResidualCost())
+                .adName(equipmentCreateDto.getAdName())
+                .ipAddress(equipmentCreateDto.getIpAddress())
+                .deleted(false)
                 .build();
 
         Equipment savedEquipment = Equipment.builder()
                 .id(1L)
-                .photoPath(equipment.getPhotoPath())
-                .inventoryNumber(equipment.getInventoryNumber())
                 .name(equipment.getName())
+                .inventoryNumber(equipment.getInventoryNumber())
+                .acquisitionSource(equipment.getAcquisitionSource())
                 .cost(equipment.getCost())
-                .source(equipment.getSource())
-                .department(equipment.getDepartment())
-                .responsiblePerson(equipment.getResponsiblePerson())
-                .status(equipment.getStatus())
-                .receiptDate(equipment.getReceiptDate())
-                .lastOperationDate(equipment.getLastOperationDate())
+                .initialCost(equipment.getInitialCost())
+                .residualCost(equipment.getResidualCost())
+                .adName(equipment.getAdName())
+                .ipAddress(equipment.getIpAddress())
+                .deleted(false)
                 .build();
 
         EquipmentDetailsDto savedEquipmentDetailsDto = EquipmentDetailsDto.builder()
                 .id(savedEquipment.getId())
-                .photoPath(savedEquipment.getPhotoPath())
-                .inventoryNumber(savedEquipment.getInventoryNumber())
                 .name(savedEquipment.getName())
+                .inventoryNumber(savedEquipment.getInventoryNumber())
+                .acquisitionSource(savedEquipment.getAcquisitionSource())
                 .cost(savedEquipment.getCost())
-                .source(savedEquipment.getSource())
-                .department(savedEquipment.getDepartment())
-                .responsiblePerson(savedEquipment.getResponsiblePerson())
-                .status(savedEquipment.getStatus())
-                .receiptDate(savedEquipment.getReceiptDate())
-                .lastOperationDate(savedEquipment.getLastOperationDate())
+                .initialCost(savedEquipment.getInitialCost())
+                .residualCost(savedEquipment.getResidualCost())
+                .adName(savedEquipment.getAdName())
+                .ipAddress(savedEquipment.getIpAddress())
                 .build();
 
         when(equipmentMapperMock.toEquipment(any(EquipmentCreateDto.class))).thenReturn(equipment);
@@ -178,14 +170,14 @@ public class EquipmentControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").value(savedEquipmentDetailsDto.getId()))
-                .andExpect(jsonPath("$.photoPath").value(savedEquipmentDetailsDto.getPhotoPath()))
-                .andExpect(jsonPath("$.inventoryNumber").value(savedEquipmentDetailsDto.getInventoryNumber()))
                 .andExpect(jsonPath("$.name").value(savedEquipmentDetailsDto.getName()))
+                .andExpect(jsonPath("$.inventoryNumber").value(savedEquipmentDetailsDto.getInventoryNumber()))
+                .andExpect(jsonPath("$.acquisitionSource").value(savedEquipmentDetailsDto.getAcquisitionSource()))
                 .andExpect(jsonPath("$.cost").value(savedEquipmentDetailsDto.getCost()))
-                .andExpect(jsonPath("$.source").value(savedEquipmentDetailsDto.getSource()))
-                .andExpect(jsonPath("$.department").value(savedEquipmentDetailsDto.getDepartment()))
-                .andExpect(jsonPath("$.responsiblePerson").value(savedEquipmentDetailsDto.getResponsiblePerson()))
-                .andExpect(jsonPath("$.status").value(savedEquipmentDetailsDto.getStatus()))
+                .andExpect(jsonPath("$.initialCost").value(savedEquipmentDetailsDto.getInitialCost()))
+                .andExpect(jsonPath("$.residualCost").value(savedEquipmentDetailsDto.getResidualCost()))
+                .andExpect(jsonPath("$.adName").value(savedEquipmentDetailsDto.getAdName()))
+                .andExpect(jsonPath("$.ipAddress").value(savedEquipmentDetailsDto.getIpAddress()))
                 .andExpect(header().string("Location", "/equipment/" + savedEquipmentDetailsDto.getId()))
                 .andDo(result -> {
                     String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
@@ -195,16 +187,14 @@ public class EquipmentControllerTest {
                     SoftAssertions softly = new SoftAssertions();
                     softly.assertThat(actualEquipmentCreateDto).isNotNull();
                     softly.assertThat(actualEquipmentCreateDto.getId()).isEqualTo(savedEquipmentDetailsDto.getId());
-                    softly.assertThat(actualEquipmentCreateDto.getPhotoPath()).isEqualTo(savedEquipmentDetailsDto.getPhotoPath());
-                    softly.assertThat(actualEquipmentCreateDto.getInventoryNumber()).isEqualTo(savedEquipmentDetailsDto.getInventoryNumber());
                     softly.assertThat(actualEquipmentCreateDto.getName()).isEqualTo(savedEquipmentDetailsDto.getName());
+                    softly.assertThat(actualEquipmentCreateDto.getInventoryNumber()).isEqualTo(savedEquipmentDetailsDto.getInventoryNumber());
+                    softly.assertThat(actualEquipmentCreateDto.getAcquisitionSource()).isEqualTo(savedEquipmentDetailsDto.getAcquisitionSource());
                     softly.assertThat(actualEquipmentCreateDto.getCost()).isEqualTo(savedEquipmentDetailsDto.getCost());
-                    softly.assertThat(actualEquipmentCreateDto.getSource()).isEqualTo(savedEquipmentDetailsDto.getSource());
-                    softly.assertThat(actualEquipmentCreateDto.getDepartment()).isEqualTo(savedEquipmentDetailsDto.getDepartment());
-                    softly.assertThat(actualEquipmentCreateDto.getResponsiblePerson()).isEqualTo(savedEquipmentDetailsDto.getResponsiblePerson());
-                    softly.assertThat(actualEquipmentCreateDto.getStatus()).isEqualTo(savedEquipmentDetailsDto.getStatus());
-                    softly.assertThat(actualEquipmentCreateDto.getReceiptDate()).isEqualTo(savedEquipmentDetailsDto.getReceiptDate());
-                    softly.assertThat(actualEquipmentCreateDto.getLastOperationDate()).isEqualTo(savedEquipmentDetailsDto.getLastOperationDate());
+                    softly.assertThat(actualEquipmentCreateDto.getInitialCost()).isEqualTo(savedEquipmentDetailsDto.getInitialCost());
+                    softly.assertThat(actualEquipmentCreateDto.getResidualCost()).isEqualTo(savedEquipmentDetailsDto.getResidualCost());
+                    softly.assertThat(actualEquipmentCreateDto.getAdName()).isEqualTo(savedEquipmentDetailsDto.getAdName());
+                    softly.assertThat(actualEquipmentCreateDto.getIpAddress()).isEqualTo(savedEquipmentDetailsDto.getIpAddress());
                     softly.assertAll();
                 });
     }
@@ -214,9 +204,277 @@ public class EquipmentControllerTest {
         // given
         EquipmentCreateDto equipmentCreateDto = EquipmentCreateDto.builder()
                 .name("")
+                .inventoryNumber("inventoryNumber 1")
+                .acquisitionSource("acquisitionSource 1")
+                .cost(100.0)
+                .initialCost(200.0)
+                .residualCost(300.0)
+                .adName("adName 1")
+                .ipAddress("ipAddress 1")
                 .build();
 
         String message = messageSource.getMessage("validation.equipment.name.empty", null, new Locale("ru"));
+        ErrorResponse expectedResponseBody = new ErrorResponse(400, "\"" + message + "\"");
+
+        // expect
+        mockMvc.perform(post("/api/v1/equipment")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(equipmentCreateDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(expectedResponseBody.getStatus()))
+                .andExpect(jsonPath("$.message").value(expectedResponseBody.getMessage()))
+                .andDo(result -> {
+
+                    String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+                    ErrorResponse actualResponseBody = objectMapper.readValue(response, ErrorResponse.class);
+
+                    SoftAssertions softly = new SoftAssertions();
+                    softly.assertThat(actualResponseBody).isNotNull();
+                    softly.assertThat(actualResponseBody.getStatus()).isEqualTo(expectedResponseBody.getStatus());
+                    softly.assertThat(actualResponseBody.getMessage()).isEqualTo(expectedResponseBody.getMessage());
+                    softly.assertAll();
+                });
+    }
+
+    @Test
+    public void testCreateWithEmptyInventoryNumber() throws Exception {
+        // given
+        EquipmentCreateDto equipmentCreateDto = EquipmentCreateDto.builder()
+                .name("name 1")
+                .acquisitionSource("acquisitionSource 1")
+                .cost(100.0)
+                .initialCost(200.0)
+                .residualCost(300.0)
+                .adName("adName 1")
+                .ipAddress("ipAddress 1")
+                .build();
+
+        String message = messageSource.getMessage("validation.equipment.inventory-number.empty", null, new Locale("ru"));
+        ErrorResponse expectedResponseBody = new ErrorResponse(400, "\"" + message + "\"");
+
+        // expect
+        mockMvc.perform(post("/api/v1/equipment")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(equipmentCreateDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(expectedResponseBody.getStatus()))
+                .andExpect(jsonPath("$.message").value(expectedResponseBody.getMessage()))
+                .andDo(result -> {
+
+                    String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+                    ErrorResponse actualResponseBody = objectMapper.readValue(response, ErrorResponse.class);
+
+                    SoftAssertions softly = new SoftAssertions();
+                    softly.assertThat(actualResponseBody).isNotNull();
+                    softly.assertThat(actualResponseBody.getStatus()).isEqualTo(expectedResponseBody.getStatus());
+                    softly.assertThat(actualResponseBody.getMessage()).isEqualTo(expectedResponseBody.getMessage());
+                    softly.assertAll();
+                });
+    }
+
+    @Test
+    public void testCreateWithEmptyAcquisitionSource() throws Exception {
+        // given
+        EquipmentCreateDto equipmentCreateDto = EquipmentCreateDto.builder()
+                .name("name 1")
+                .inventoryNumber("inventoryNumber 1")
+                .acquisitionSource("   ")
+                .cost(100.0)
+                .initialCost(200.0)
+                .residualCost(300.0)
+                .adName("adName 1")
+                .ipAddress("ipAddress 1")
+                .build();
+
+        String message = messageSource.getMessage("validation.equipment.acquisition-source.empty", null, new Locale("ru"));
+        ErrorResponse expectedResponseBody = new ErrorResponse(400, "\"" + message + "\"");
+
+        // expect
+        mockMvc.perform(post("/api/v1/equipment")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(equipmentCreateDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(expectedResponseBody.getStatus()))
+                .andExpect(jsonPath("$.message").value(expectedResponseBody.getMessage()))
+                .andDo(result -> {
+
+                    String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+                    ErrorResponse actualResponseBody = objectMapper.readValue(response, ErrorResponse.class);
+
+                    SoftAssertions softly = new SoftAssertions();
+                    softly.assertThat(actualResponseBody).isNotNull();
+                    softly.assertThat(actualResponseBody.getStatus()).isEqualTo(expectedResponseBody.getStatus());
+                    softly.assertThat(actualResponseBody.getMessage()).isEqualTo(expectedResponseBody.getMessage());
+                    softly.assertAll();
+                });
+    }
+
+    @Test
+    public void testCreateWithEmptyCost() throws Exception {
+        // given
+        EquipmentCreateDto equipmentCreateDto = EquipmentCreateDto.builder()
+                .name("name 1")
+                .inventoryNumber("inventoryNumber 1")
+                .acquisitionSource("acquisitionSource 1")
+                .initialCost(200.0)
+                .residualCost(300.0)
+                .adName("adName 1")
+                .ipAddress("ipAddress 1")
+                .build();
+
+        String message = messageSource.getMessage("validation.equipment.cost.empty", null, new Locale("ru"));
+        ErrorResponse expectedResponseBody = new ErrorResponse(400, "\"" + message + "\"");
+
+        // expect
+        mockMvc.perform(post("/api/v1/equipment")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(equipmentCreateDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(expectedResponseBody.getStatus()))
+                .andExpect(jsonPath("$.message").value(expectedResponseBody.getMessage()))
+                .andDo(result -> {
+
+                    String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+                    ErrorResponse actualResponseBody = objectMapper.readValue(response, ErrorResponse.class);
+
+                    SoftAssertions softly = new SoftAssertions();
+                    softly.assertThat(actualResponseBody).isNotNull();
+                    softly.assertThat(actualResponseBody.getStatus()).isEqualTo(expectedResponseBody.getStatus());
+                    softly.assertThat(actualResponseBody.getMessage()).isEqualTo(expectedResponseBody.getMessage());
+                    softly.assertAll();
+                });
+    }
+
+    @Test
+    public void testCreateWithEmptyInitialCost() throws Exception {
+        // given
+        EquipmentCreateDto equipmentCreateDto = EquipmentCreateDto.builder()
+                .name("name 1")
+                .inventoryNumber("inventoryNumber 1")
+                .acquisitionSource("acquisitionSource 1")
+                .cost(100.0)
+                .residualCost(300.0)
+                .adName("adName 1")
+                .ipAddress("ipAddress 1")
+                .build();
+
+        String message = messageSource.getMessage("validation.equipment.initial-cost.empty", null, new Locale("ru"));
+        ErrorResponse expectedResponseBody = new ErrorResponse(400, "\"" + message + "\"");
+
+        // expect
+        mockMvc.perform(post("/api/v1/equipment")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(equipmentCreateDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(expectedResponseBody.getStatus()))
+                .andExpect(jsonPath("$.message").value(expectedResponseBody.getMessage()))
+                .andDo(result -> {
+
+                    String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+                    ErrorResponse actualResponseBody = objectMapper.readValue(response, ErrorResponse.class);
+
+                    SoftAssertions softly = new SoftAssertions();
+                    softly.assertThat(actualResponseBody).isNotNull();
+                    softly.assertThat(actualResponseBody.getStatus()).isEqualTo(expectedResponseBody.getStatus());
+                    softly.assertThat(actualResponseBody.getMessage()).isEqualTo(expectedResponseBody.getMessage());
+                    softly.assertAll();
+                });
+    }
+
+    @Test
+    public void testCreateWithEmptyResidualCost() throws Exception {
+        // given
+        EquipmentCreateDto equipmentCreateDto = EquipmentCreateDto.builder()
+                .name("name 1")
+                .inventoryNumber("inventoryNumber 1")
+                .acquisitionSource("acquisitionSource 1")
+                .cost(100.0)
+                .initialCost(200.0)
+                .adName("adName 1")
+                .ipAddress("ipAddress 1")
+                .build();
+
+        String message = messageSource.getMessage("validation.equipment.residual-cost.empty", null, new Locale("ru"));
+        ErrorResponse expectedResponseBody = new ErrorResponse(400, "\"" + message + "\"");
+
+        // expect
+        mockMvc.perform(post("/api/v1/equipment")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(equipmentCreateDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(expectedResponseBody.getStatus()))
+                .andExpect(jsonPath("$.message").value(expectedResponseBody.getMessage()))
+                .andDo(result -> {
+
+                    String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+                    ErrorResponse actualResponseBody = objectMapper.readValue(response, ErrorResponse.class);
+
+                    SoftAssertions softly = new SoftAssertions();
+                    softly.assertThat(actualResponseBody).isNotNull();
+                    softly.assertThat(actualResponseBody.getStatus()).isEqualTo(expectedResponseBody.getStatus());
+                    softly.assertThat(actualResponseBody.getMessage()).isEqualTo(expectedResponseBody.getMessage());
+                    softly.assertAll();
+                });
+    }
+
+    @Test
+    public void testCreateWithEmptyAdName() throws Exception {
+        // given
+        EquipmentCreateDto equipmentCreateDto = EquipmentCreateDto.builder()
+                .name("name 1")
+                .inventoryNumber("inventoryNumber 1")
+                .acquisitionSource("acquisitionSource 1")
+                .cost(100.0)
+                .initialCost(200.0)
+                .residualCost(200.0)
+                .adName("")
+                .ipAddress("ipAddress 1")
+                .build();
+
+        String message = messageSource.getMessage("validation.equipment.ad-name.empty", null, new Locale("ru"));
+        ErrorResponse expectedResponseBody = new ErrorResponse(400, "\"" + message + "\"");
+
+        // expect
+        mockMvc.perform(post("/api/v1/equipment")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(equipmentCreateDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(expectedResponseBody.getStatus()))
+                .andExpect(jsonPath("$.message").value(expectedResponseBody.getMessage()))
+                .andDo(result -> {
+
+                    String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+                    ErrorResponse actualResponseBody = objectMapper.readValue(response, ErrorResponse.class);
+
+                    SoftAssertions softly = new SoftAssertions();
+                    softly.assertThat(actualResponseBody).isNotNull();
+                    softly.assertThat(actualResponseBody.getStatus()).isEqualTo(expectedResponseBody.getStatus());
+                    softly.assertThat(actualResponseBody.getMessage()).isEqualTo(expectedResponseBody.getMessage());
+                    softly.assertAll();
+                });
+    }
+
+    @Test
+    public void testCreateWithEmptyIpAddress() throws Exception {
+        // given
+        EquipmentCreateDto equipmentCreateDto = EquipmentCreateDto.builder()
+                .name("name 1")
+                .inventoryNumber("inventoryNumber 1")
+                .acquisitionSource("acquisitionSource 1")
+                .cost(100.0)
+                .initialCost(200.0)
+                .residualCost(200.0)
+                .adName("adName 1")
+                .build();
+
+        String message = messageSource.getMessage("validation.equipment.ip-address.empty", null, new Locale("ru"));
         ErrorResponse expectedResponseBody = new ErrorResponse(400, "\"" + message + "\"");
 
         // expect
@@ -245,30 +503,14 @@ public class EquipmentControllerTest {
         // given
         Equipment equipment = Equipment.builder()
                 .id(1L)
-                .photoPath("path/to/photo")
                 .inventoryNumber("INV123")
                 .name("Equipment 1")
-                .cost(BigDecimal.valueOf(1000.00))
-                .source("Supplier A")
-                .department("Department 1")
-                .responsiblePerson("John Doe")
-                .status("Operational")
-                .receiptDate(Instant.now())
-                .lastOperationDate(Instant.now())
                 .build();
 
         EquipmentDetailsDto equipmentDetailsDto = EquipmentDetailsDto.builder()
                 .id(equipment.getId())
-                .photoPath(equipment.getPhotoPath())
                 .inventoryNumber(equipment.getInventoryNumber())
                 .name(equipment.getName())
-                .cost(equipment.getCost())
-                .source(equipment.getSource())
-                .department(equipment.getDepartment())
-                .responsiblePerson(equipment.getResponsiblePerson())
-                .status(equipment.getStatus())
-                .receiptDate(equipment.getReceiptDate())
-                .lastOperationDate(equipment.getLastOperationDate())
                 .build();
 
         when(equipmentServiceMock.getById(equipment.getId())).thenReturn(equipment);
@@ -279,14 +521,8 @@ public class EquipmentControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").value(equipment.getId()))
-                .andExpect(jsonPath("$.photoPath").value(equipment.getPhotoPath()))
                 .andExpect(jsonPath("$.inventoryNumber").value(equipment.getInventoryNumber()))
                 .andExpect(jsonPath("$.name").value(equipment.getName()))
-                .andExpect(jsonPath("$.cost").value(equipment.getCost()))
-                .andExpect(jsonPath("$.source").value(equipment.getSource()))
-                .andExpect(jsonPath("$.department").value(equipment.getDepartment()))
-                .andExpect(jsonPath("$.responsiblePerson").value(equipment.getResponsiblePerson()))
-                .andExpect(jsonPath("$.status").value(equipment.getStatus()))
                 .andDo(result -> {
                     String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
                     EquipmentDetailsDto actualEquipmentDetailsDto = objectMapper.readValue(response,
@@ -295,16 +531,8 @@ public class EquipmentControllerTest {
                     SoftAssertions softly = new SoftAssertions();
                     softly.assertThat(actualEquipmentDetailsDto).isNotNull();
                     softly.assertThat(actualEquipmentDetailsDto.getId()).isEqualTo(equipment.getId());
-                    softly.assertThat(actualEquipmentDetailsDto.getPhotoPath()).isEqualTo(equipment.getPhotoPath());
                     softly.assertThat(actualEquipmentDetailsDto.getInventoryNumber()).isEqualTo(equipment.getInventoryNumber());
                     softly.assertThat(actualEquipmentDetailsDto.getName()).isEqualTo(equipment.getName());
-                    softly.assertThat(actualEquipmentDetailsDto.getCost()).isEqualByComparingTo(equipment.getCost());
-                    softly.assertThat(actualEquipmentDetailsDto.getSource()).isEqualTo(equipment.getSource());
-                    softly.assertThat(actualEquipmentDetailsDto.getDepartment()).isEqualTo(equipment.getDepartment());
-                    softly.assertThat(actualEquipmentDetailsDto.getResponsiblePerson()).isEqualTo(equipment.getResponsiblePerson());
-                    softly.assertThat(actualEquipmentDetailsDto.getStatus()).isEqualTo(equipment.getStatus());
-                    softly.assertThat(actualEquipmentDetailsDto.getReceiptDate()).isEqualTo(equipment.getReceiptDate());
-                    softly.assertThat(actualEquipmentDetailsDto.getLastOperationDate()).isEqualTo(equipment.getLastOperationDate());
                     softly.assertAll();
                 });
     }
@@ -394,57 +622,51 @@ public class EquipmentControllerTest {
         Long equipmentId = 1L;
 
         EquipmentCreateDto equipmentCreateDto = EquipmentCreateDto.builder()
-                .photoPath("path/to/photo")
-                .inventoryNumber("INV123")
-                .name("Equipment 1")
-                .cost(BigDecimal.valueOf(1000.00))
-                .source("Supplier A")
-                .department("Department 1")
-                .responsiblePerson("John Doe")
-                .status("Operational")
-                .receiptDate(Instant.now())
-                .lastOperationDate(Instant.now())
+                .name("name 1")
+                .inventoryNumber("inventoryNumber 1")
+                .acquisitionSource("acquisitionSource 1")
+                .cost(100.0)
+                .initialCost(200.0)
+                .residualCost(300.0)
+                .adName("adName 1")
+                .ipAddress("ipAddress 1")
                 .build();
 
         Equipment updatedEquipment = Equipment.builder()
-                .photoPath(equipmentCreateDto.getPhotoPath())
-                .inventoryNumber(equipmentCreateDto.getInventoryNumber())
                 .name(equipmentCreateDto.getName())
+                .inventoryNumber(equipmentCreateDto.getInventoryNumber())
+                .acquisitionSource(equipmentCreateDto.getAcquisitionSource())
                 .cost(equipmentCreateDto.getCost())
-                .source(equipmentCreateDto.getSource())
-                .department(equipmentCreateDto.getDepartment())
-                .responsiblePerson(equipmentCreateDto.getResponsiblePerson())
-                .status(equipmentCreateDto.getStatus())
-                .receiptDate(equipmentCreateDto.getReceiptDate())
-                .lastOperationDate(equipmentCreateDto.getLastOperationDate())
+                .initialCost(equipmentCreateDto.getInitialCost())
+                .residualCost(equipmentCreateDto.getResidualCost())
+                .adName(equipmentCreateDto.getAdName())
+                .ipAddress(equipmentCreateDto.getIpAddress())
+                .deleted(false)
                 .build();
 
         Equipment editedEquipment = Equipment.builder()
-                .id(equipmentId)
-                .photoPath(updatedEquipment.getPhotoPath())
-                .inventoryNumber(updatedEquipment.getInventoryNumber())
+                .id(1L)
                 .name(updatedEquipment.getName())
+                .inventoryNumber(updatedEquipment.getInventoryNumber())
+                .acquisitionSource(updatedEquipment.getAcquisitionSource())
                 .cost(updatedEquipment.getCost())
-                .source(updatedEquipment.getSource())
-                .department(updatedEquipment.getDepartment())
-                .responsiblePerson(updatedEquipment.getResponsiblePerson())
-                .status(updatedEquipment.getStatus())
-                .receiptDate(updatedEquipment.getReceiptDate())
-                .lastOperationDate(updatedEquipment.getLastOperationDate())
+                .initialCost(updatedEquipment.getInitialCost())
+                .residualCost(updatedEquipment.getResidualCost())
+                .adName(updatedEquipment.getAdName())
+                .ipAddress(updatedEquipment.getIpAddress())
+                .deleted(false)
                 .build();
 
         EquipmentDetailsDto editedEquipmentDetailsDto = EquipmentDetailsDto.builder()
                 .id(editedEquipment.getId())
-                .photoPath(editedEquipment.getPhotoPath())
-                .inventoryNumber(editedEquipment.getInventoryNumber())
                 .name(editedEquipment.getName())
+                .inventoryNumber(editedEquipment.getInventoryNumber())
+                .acquisitionSource(editedEquipment.getAcquisitionSource())
                 .cost(editedEquipment.getCost())
-                .source(editedEquipment.getSource())
-                .department(editedEquipment.getDepartment())
-                .responsiblePerson(editedEquipment.getResponsiblePerson())
-                .status(editedEquipment.getStatus())
-                .receiptDate(editedEquipment.getReceiptDate())
-                .lastOperationDate(editedEquipment.getLastOperationDate())
+                .initialCost(editedEquipment.getInitialCost())
+                .residualCost(editedEquipment.getResidualCost())
+                .adName(editedEquipment.getAdName())
+                .ipAddress(editedEquipment.getIpAddress())
                 .build();
 
         when(equipmentMapperMock.toEquipment(any(EquipmentCreateDto.class))).thenReturn(updatedEquipment);
@@ -457,15 +679,15 @@ public class EquipmentControllerTest {
                         .content(objectMapper.writeValueAsString(equipmentCreateDto)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").value(equipmentId))
-                .andExpect(jsonPath("$.photoPath").value(editedEquipmentDetailsDto.getPhotoPath()))
-                .andExpect(jsonPath("$.inventoryNumber").value(editedEquipmentDetailsDto.getInventoryNumber()))
+                .andExpect(jsonPath("$.id").value(editedEquipmentDetailsDto.getId()))
                 .andExpect(jsonPath("$.name").value(editedEquipmentDetailsDto.getName()))
+                .andExpect(jsonPath("$.inventoryNumber").value(editedEquipmentDetailsDto.getInventoryNumber()))
+                .andExpect(jsonPath("$.acquisitionSource").value(editedEquipmentDetailsDto.getAcquisitionSource()))
                 .andExpect(jsonPath("$.cost").value(editedEquipmentDetailsDto.getCost()))
-                .andExpect(jsonPath("$.source").value(editedEquipmentDetailsDto.getSource()))
-                .andExpect(jsonPath("$.department").value(editedEquipmentDetailsDto.getDepartment()))
-                .andExpect(jsonPath("$.responsiblePerson").value(editedEquipmentDetailsDto.getResponsiblePerson()))
-                .andExpect(jsonPath("$.status").value(editedEquipmentDetailsDto.getStatus()))
+                .andExpect(jsonPath("$.initialCost").value(editedEquipmentDetailsDto.getInitialCost()))
+                .andExpect(jsonPath("$.residualCost").value(editedEquipmentDetailsDto.getResidualCost()))
+                .andExpect(jsonPath("$.adName").value(editedEquipmentDetailsDto.getAdName()))
+                .andExpect(jsonPath("$.ipAddress").value(editedEquipmentDetailsDto.getIpAddress()))
                 .andDo(result -> {
                     String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
                     EquipmentDetailsDto actualEquipmentDetailsDto = objectMapper.readValue(response,
@@ -474,16 +696,14 @@ public class EquipmentControllerTest {
                     SoftAssertions softly = new SoftAssertions();
                     softly.assertThat(actualEquipmentDetailsDto).isNotNull();
                     softly.assertThat(actualEquipmentDetailsDto.getId()).isEqualTo(editedEquipmentDetailsDto.getId());
-                    softly.assertThat(actualEquipmentDetailsDto.getPhotoPath()).isEqualTo(editedEquipmentDetailsDto.getPhotoPath());
-                    softly.assertThat(actualEquipmentDetailsDto.getInventoryNumber()).isEqualTo(editedEquipmentDetailsDto.getInventoryNumber());
                     softly.assertThat(actualEquipmentDetailsDto.getName()).isEqualTo(editedEquipmentDetailsDto.getName());
-                    softly.assertThat(actualEquipmentDetailsDto.getCost()).isEqualByComparingTo(editedEquipmentDetailsDto.getCost());
-                    softly.assertThat(actualEquipmentDetailsDto.getSource()).isEqualTo(editedEquipmentDetailsDto.getSource());
-                    softly.assertThat(actualEquipmentDetailsDto.getDepartment()).isEqualTo(editedEquipmentDetailsDto.getDepartment());
-                    softly.assertThat(actualEquipmentDetailsDto.getResponsiblePerson()).isEqualTo(editedEquipmentDetailsDto.getResponsiblePerson());
-                    softly.assertThat(actualEquipmentDetailsDto.getStatus()).isEqualTo(editedEquipmentDetailsDto.getStatus());
-                    softly.assertThat(actualEquipmentDetailsDto.getReceiptDate()).isEqualTo(editedEquipmentDetailsDto.getReceiptDate());
-                    softly.assertThat(actualEquipmentDetailsDto.getLastOperationDate()).isEqualTo(editedEquipmentDetailsDto.getLastOperationDate());
+                    softly.assertThat(actualEquipmentDetailsDto.getInventoryNumber()).isEqualTo(editedEquipmentDetailsDto.getInventoryNumber());
+                    softly.assertThat(actualEquipmentDetailsDto.getAcquisitionSource()).isEqualTo(editedEquipmentDetailsDto.getAcquisitionSource());
+                    softly.assertThat(actualEquipmentDetailsDto.getCost()).isEqualTo(editedEquipmentDetailsDto.getCost());
+                    softly.assertThat(actualEquipmentDetailsDto.getInitialCost()).isEqualTo(editedEquipmentDetailsDto.getInitialCost());
+                    softly.assertThat(actualEquipmentDetailsDto.getResidualCost()).isEqualTo(editedEquipmentDetailsDto.getResidualCost());
+                    softly.assertThat(actualEquipmentDetailsDto.getAdName()).isEqualTo(editedEquipmentDetailsDto.getAdName());
+                    softly.assertThat(actualEquipmentDetailsDto.getIpAddress()).isEqualTo(editedEquipmentDetailsDto.getIpAddress());
                     softly.assertAll();
                 });
     }
@@ -493,31 +713,27 @@ public class EquipmentControllerTest {
         // given
         Long equipmentId = 1L;
 
-
         EquipmentCreateDto equipmentCreateDto = EquipmentCreateDto.builder()
-                .photoPath("path/to/photo")
-                .inventoryNumber("INV123")
-                .name("Equipment 1")
-                .cost(BigDecimal.valueOf(1000.00))
-                .source("Supplier A")
-                .department("Department 1")
-                .responsiblePerson("John Doe")
-                .status("Operational")
-                .receiptDate(Instant.now())
-                .lastOperationDate(Instant.now())
+                .name("name 1")
+                .inventoryNumber("inventoryNumber 1")
+                .acquisitionSource("acquisitionSource 1")
+                .cost(100.0)
+                .initialCost(200.0)
+                .residualCost(300.0)
+                .adName("adName 1")
+                .ipAddress("ipAddress 1")
                 .build();
 
         Equipment updatedEquipment = Equipment.builder()
-                .photoPath(equipmentCreateDto.getPhotoPath())
-                .inventoryNumber(equipmentCreateDto.getInventoryNumber())
                 .name(equipmentCreateDto.getName())
+                .inventoryNumber(equipmentCreateDto.getInventoryNumber())
+                .acquisitionSource(equipmentCreateDto.getAcquisitionSource())
                 .cost(equipmentCreateDto.getCost())
-                .source(equipmentCreateDto.getSource())
-                .department(equipmentCreateDto.getDepartment())
-                .responsiblePerson(equipmentCreateDto.getResponsiblePerson())
-                .status(equipmentCreateDto.getStatus())
-                .receiptDate(equipmentCreateDto.getReceiptDate())
-                .lastOperationDate(equipmentCreateDto.getLastOperationDate())
+                .initialCost(equipmentCreateDto.getInitialCost())
+                .residualCost(equipmentCreateDto.getResidualCost())
+                .adName(equipmentCreateDto.getAdName())
+                .ipAddress(equipmentCreateDto.getIpAddress())
+                .deleted(false)
                 .build();
 
         Locale locale = new Locale("ru");

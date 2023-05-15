@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public class RoleService {
     public static final Map<String, String> ALLOWED_ROLES = Map.of(
             "ADMIN", "Администратор",
-            "MODERATOR",  "Модератор",
+            "MODERATOR", "Модератор",
             "USER", "Пользователь"
     );
 

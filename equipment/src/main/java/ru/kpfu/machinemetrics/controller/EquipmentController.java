@@ -22,7 +22,7 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "${api.prefix.v1}/equipment")
+@RequestMapping(value = "${app.api.prefix.v1}/equipment")
 @RequiredArgsConstructor
 public class EquipmentController {
 
