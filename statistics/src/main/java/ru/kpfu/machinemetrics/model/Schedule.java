@@ -24,9 +24,9 @@ public class Schedule {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String startTime;
+    private Long startTime;
 
-    private String endTime;
+    private Long endTime;
 
     private Instant date;
 }

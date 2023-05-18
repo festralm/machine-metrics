@@ -233,7 +233,8 @@ public class EquipmentMapperTest {
         softly.assertThat(dto.getPortalPublicationCardReadiness())
                 .isEqualTo(equipment.isPortalPublicationCardReadiness());
         softly.assertThat(dto.getInstallationLocation()).isEqualTo(equipment.getInstallationLocation());
-        softly.assertThat(dto.getUnit()).isEqualTo(equipment.getUnit());
+        softly.assertThat(dto.getUnit().getName()).isEqualTo(equipment.getUnit().getName());
+        softly.assertThat(dto.getUnit().getId()).isEqualTo(equipment.getUnit().getId());
         softly.assertThat(dto.getResponsiblePerson()).isEqualTo(equipment.getResponsiblePerson());
         softly.assertThat(dto.getStatus()).isEqualTo(equipment.getStatus());
         softly.assertThat(dto.getLastOperationDate()).isNull();
@@ -294,7 +295,8 @@ public class EquipmentMapperTest {
             softly.assertThat(dto.getCost()).isEqualTo(equipment.getCost());
             softly.assertThat(dto.getDeliveryDate()).isEqualTo(equipment.getDeliveryDate());
             softly.assertThat(dto.getInstallationLocation()).isEqualTo(equipment.getInstallationLocation());
-            softly.assertThat(dto.getUnit()).isEqualTo(equipment.getUnit().getName());
+            softly.assertThat(dto.getUnit().getId()).isEqualTo(equipment.getUnit().getId());
+            softly.assertThat(dto.getUnit().getName()).isEqualTo(equipment.getUnit().getName());
             softly.assertThat(dto.getResponsiblePerson()).isEqualTo(equipment.getResponsiblePerson());
             softly.assertThat(dto.getStatus()).isEqualTo(equipment.getStatus().getName());
             softly.assertThat(dto.getLastOperationDate()).isEqualTo(equipment.getLastOperationDate());

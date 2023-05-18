@@ -26,3 +26,4 @@ app:
   api:
     prefix:
       v1: /api/v1
+  default-zone: "+3"
