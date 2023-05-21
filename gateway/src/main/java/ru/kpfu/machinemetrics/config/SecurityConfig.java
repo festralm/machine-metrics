@@ -115,13 +115,13 @@ public class SecurityConfig {
                 .pathMatchers(HttpMethod.DELETE, appApiProperties.getV1() + "/data-service/**")
                 .hasAnyAuthority(Roles.ADMIN.value)
 
-                .pathMatchers(HttpMethod.GET, appApiProperties.getV1() + "/equipment-info/**")
+                .pathMatchers(HttpMethod.GET, appApiProperties.getV1() + "/equipment-schedule/**")
                 .hasAnyAuthority(Roles.USER.value, Roles.ADMIN.value, Roles.MODERATOR.value)
 
-                .pathMatchers(HttpMethod.POST, appApiProperties.getV1() + "/equipment-info/**")
+                .pathMatchers(HttpMethod.POST, appApiProperties.getV1() + "/equipment-schedule/**")
                 .hasAnyAuthority(Roles.ADMIN.value, Roles.MODERATOR.value)
 
-                .pathMatchers(HttpMethod.DELETE, appApiProperties.getV1() + "/equipment-info/**")
+                .pathMatchers(HttpMethod.DELETE, appApiProperties.getV1() + "/equipment-schedule/**")
                 .hasAnyAuthority(Roles.ADMIN.value)
 
                 .pathMatchers(HttpMethod.GET, appApiProperties.getV1() + "/equipment-data/**")

@@ -8,6 +8,18 @@ influxdb:
   org: Alia
 
 spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/random-1
+    username: random-1
+    password: ${POSTGRES_PASSWORD}
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  quartz:
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: always
   rabbitmq:
     host: localhost
     port: 5672

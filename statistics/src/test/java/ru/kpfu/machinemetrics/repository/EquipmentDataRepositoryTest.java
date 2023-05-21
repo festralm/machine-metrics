@@ -45,7 +45,7 @@ public class EquipmentDataRepositoryTest {
 
         String expectedQuery = "from(bucket: \"bucket\") " +
                 "|> range(start: time(v: 2023-03-24T01:00:00Z), stop: time(v: 2023-04-24T01:00:00Z)) " +
-                "|> filter(fn: (r) => r[\"_measurement\"] == \"equipment_data\")" +
+                "|> filter(fn: (r) => r[\"_measurement\"] == \"equipment_statistics\")" +
                 "|> filter(fn: (r) => r[\"equipment_id\"] == \"1\")" +
                 "|> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")";
 
@@ -76,7 +76,7 @@ public class EquipmentDataRepositoryTest {
 
         String expectedQuery = "from(bucket: \"bucket\") " +
                 "|> range(start: time(v: 2023-03-24T01:00:00Z), stop: time(v: 2023-04-24T01:00:00Z)) " +
-                "|> filter(fn: (r) => r[\"_measurement\"] == \"equipment_data\")" +
+                "|> filter(fn: (r) => r[\"_measurement\"] == \"equipment_statistics\")" +
                 "|> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")";
 
         QueryApi queryApiMock = mock(QueryApi.class);

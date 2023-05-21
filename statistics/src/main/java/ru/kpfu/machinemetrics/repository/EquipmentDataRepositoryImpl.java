@@ -55,7 +55,7 @@ public class EquipmentDataRepositoryImpl implements EquipmentDataRepository {
         String query = String.format(
                 "from(bucket: \"%s\") " +
                         "|> range(start: time(v: %s), stop: time(v: %s)) " +
-                        "|> filter(fn: (r) => r[\"_measurement\"] == \"equipment_data\")" +
+                        "|> filter(fn: (r) => r[\"_measurement\"] == \"equipment_statistics\")" +
                         (
                                 equipmentId == null ?
                                         "" :
