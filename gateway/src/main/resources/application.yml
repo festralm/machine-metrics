@@ -47,7 +47,7 @@ spring:
         - id: statistics
           uri: http://127.0.0.1:${app.service.port.statistics}
           predicates:
-            - Path=${app.api.prefix.v1}/equipment-data
+            - Path=${app.api.prefix.v1}/equipment-data,${app.api.prefix.v1}/schedule/**
           filters:
             - RemoveRequestHeader=Cookie
         - id: user

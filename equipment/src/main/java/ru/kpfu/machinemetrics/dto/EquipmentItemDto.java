@@ -29,7 +29,7 @@ public class EquipmentItemDto {
 
     private String installationLocation;
 
-    private String unit;
+    private UnitDto unit;
 
     private String responsiblePerson;
 

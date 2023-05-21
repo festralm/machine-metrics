@@ -15,7 +15,7 @@ import ru.kpfu.machinemetrics.model.UsageType;
 
 import java.util.List;
 
-@Mapper
+@Mapper(uses = {UnitMapper.class})
 public interface EquipmentMapper {
 
     @Mapping(source = "purpose", target = "purpose", qualifiedByName = "mapToPurpose")
@@ -49,7 +49,6 @@ public interface EquipmentMapper {
 
     List<EquipmentItemDto> toEquipmentItemDtos(List<Equipment> equipments);
 
-    @Mapping(target = "unit", source = "unit.name")
     @Mapping(target = "status", source = "status.name")
     EquipmentItemDto toEquipmentItemDto(Equipment equipments);
 }

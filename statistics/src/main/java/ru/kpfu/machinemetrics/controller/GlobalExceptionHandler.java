@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import ru.kpfu.machinemetrics.constants.GeneralConstants;
 import ru.kpfu.machinemetrics.dto.ErrorResponse;
+import ru.kpfu.machinemetrics.exception.CannotDeleteScheduleException;
 import ru.kpfu.machinemetrics.exception.ResourceNotFoundException;
+import ru.kpfu.machinemetrics.exception.ScheduleIsAlreadyCreatedException;
 import ru.kpfu.machinemetrics.exception.ValidationException;
 
 import java.util.Locale;
@@ -40,6 +42,22 @@ public class GlobalExceptionHandler {
         ErrorResponse error = new ErrorResponse(HttpStatus.NOT_FOUND.value(), errorMessage);
         log.error(errorMessage, e);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(ScheduleIsAlreadyCreatedException.class)
+    public ResponseEntity<ErrorResponse> handleScheduleIsAlreadyCreatedException(ScheduleIsAlreadyCreatedException e) {
+        String errorMessage = e.getMessage();
+        ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), errorMessage);
+        log.error(errorMessage, e);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(CannotDeleteScheduleException.class)
+    public ResponseEntity<ErrorResponse> handleCannotDeleteScheduleException(CannotDeleteScheduleException e) {
+        String errorMessage = e.getMessage();
+        ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), errorMessage);
+        log.error(errorMessage, e);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
     @ExceptionHandler(ValidationException.class)

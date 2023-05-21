@@ -11,7 +11,7 @@ import ru.kpfu.machinemetrics.service.EquipmentDataService;
 import java.time.Instant;
 
 @RestController
-@RequestMapping(value = "${api.prefix.v1}/equipment-data")
+@RequestMapping(value = "${app.api.prefix.v1}/equipment-data")
 @RequiredArgsConstructor
 public class EquipmentDataController {
 

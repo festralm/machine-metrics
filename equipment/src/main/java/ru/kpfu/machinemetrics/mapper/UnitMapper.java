@@ -12,12 +12,12 @@ import java.util.List;
 @Mapper
 public interface UnitMapper {
 
-    @Mapping(source = "parent", target = "parent", qualifiedByName = "mapToUnit")
+    @Mapping(source = "parent", target = "parent", qualifiedByName = "mapToParent")
     Unit toUnit(UnitCreateDto dto);
 
-    @Named("mapToUnit")
+    @Named("mapToParent")
     @Mapping(source = ".", target = "id")
-    Unit mapToUnit(Long id);
+    Unit mapToParent(Long id);
 
     List<UnitDto> toUnitDtos(List<Unit> units);
 
