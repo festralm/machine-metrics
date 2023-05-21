@@ -22,14 +22,14 @@ public class EquipmentInfoValidator implements
             if (equipmentInfoCreateDto.getDataServiceId() == null || equipmentInfoCreateDto.getDataServiceId() < 1L) {
                 context.disableDefaultConstraintViolation();
                 context
-                        .buildConstraintViolationWithTemplate("{validation.equipment-info.data-service.empty}")
+                        .buildConstraintViolationWithTemplate("{validation.equipment-schedule.data-service.empty}")
                         .addConstraintViolation();
                 valid = false;
             }
             if (equipmentInfoCreateDto.getCronId() == null || equipmentInfoCreateDto.getCronId() == 0) {
                 context.disableDefaultConstraintViolation();
                 context
-                        .buildConstraintViolationWithTemplate("{validation.equipment-info.cron.empty}")
+                        .buildConstraintViolationWithTemplate("{validation.equipment-schedule.cron.empty}")
                         .addConstraintViolation();
                 valid = false;
             }

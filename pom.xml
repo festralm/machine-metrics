@@ -6,9 +6,11 @@
     <artifactId>machinemetrics</artifactId>
     <version>1.0.0</version>
     <modules>
+        <module>influxd-spring-boot-starter</module>
         <module>equipment</module>
         <module>gateway</module>
         <module>random-data</module>
+        <module>random-data-2</module>
         <module>schedule</module>
         <module>statistics</module>
         <module>user</module>

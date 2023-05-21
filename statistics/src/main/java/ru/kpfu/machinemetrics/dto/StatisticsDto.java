@@ -3,7 +3,6 @@ package ru.kpfu.machinemetrics.dto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import ru.kpfu.machinemetrics.model.EquipmentData;
 
 import java.time.Instant;
 import java.util.List;

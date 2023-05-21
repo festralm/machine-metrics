@@ -15,7 +15,7 @@ import ru.kpfu.machinemetrics.validation.annotation.EquipmentInfoConstraint;
 @AllArgsConstructor
 @EquipmentInfoConstraint
 public class EquipmentInfoCreateDto {
-    @NotNull(message = "{validation.equipment-info.id.empty}")
+    @NotNull(message = "{validation.equipment-schedule.id.empty}")
     private Long id;
 
     private Long dataServiceId;

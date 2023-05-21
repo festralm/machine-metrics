@@ -4,6 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import ru.kpfu.machinemetrics.dto.EquipmentInfoCreateDto;
+import ru.kpfu.machinemetrics.dto.EquipmentScheduleRabbitMqDto;
 import ru.kpfu.machinemetrics.model.Cron;
 import ru.kpfu.machinemetrics.model.DataService;
 import ru.kpfu.machinemetrics.model.EquipmentInfo;
@@ -22,4 +23,7 @@ public interface EquipmentInfoMapper {
     @Named("mapToCron")
     @Mapping(source = ".", target = "id")
     Cron mapToCron(String id);
+
+    @Mapping(source = "cron.expression", target = "cron")
+    EquipmentScheduleRabbitMqDto toEquipmentRabbitMqDto(EquipmentInfo equipmentInfo);
 }
