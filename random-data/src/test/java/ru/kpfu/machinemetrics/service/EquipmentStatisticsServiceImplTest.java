@@ -22,7 +22,7 @@ public class EquipmentStatisticsServiceImplTest {
     private EquipmentStatisticsRepository equipmentStatisticsRepositoryMock;
 
     @Test
-    public void testGenerateData() {
+    public void testProcess() {
         // given
         doNothing().when(equipmentStatisticsRepositoryMock).save(any());
 

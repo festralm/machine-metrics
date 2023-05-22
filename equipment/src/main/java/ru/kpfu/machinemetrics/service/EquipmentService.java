@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -30,8 +32,12 @@ public class EquipmentService {
     private final PhotoService photoService;
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-    public List<Equipment> getAllNotDeleted() {
-        return equipmentRepository.findAllByDeletedFalse();
+    public Page<Equipment> getAllNotDeleted(Pageable pageable) {
+        return equipmentRepository.findAllByDeletedFalseOrderByName(pageable);
+    }
+
+    public Page<Equipment> search(String name, Pageable pageable) {
+        return equipmentRepository.searchAllByNameContainingOrderByName(name, pageable);
     }
 
     public Equipment save(Equipment equipment) {
@@ -118,14 +124,12 @@ public class EquipmentService {
     }
 
     private void deleteUnusedPhotos() {
-        List<String> photoNames = getAllNotDeleted()
+        List<String> photoNames = equipmentRepository.findAllByDeletedFalseOrderByName()
                 .stream()
                 .map(Equipment::getPhotoPath)
                 .filter(StringUtils::hasText)
                 .toList();
 
-        executorService.submit(() -> {
-            photoService.deleteUnusedPhotos(photoNames);
-        });
+        executorService.submit(() -> photoService.deleteUnusedPhotos(photoNames));
     }
 }

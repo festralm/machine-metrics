@@ -3,6 +3,8 @@ package ru.kpfu.machinemetrics.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import ru.kpfu.machinemetrics.dto.EquipmentCreateDto;
 import ru.kpfu.machinemetrics.dto.EquipmentDetailsDto;
 import ru.kpfu.machinemetrics.dto.EquipmentItemDto;
@@ -14,6 +16,7 @@ import ru.kpfu.machinemetrics.model.Unit;
 import ru.kpfu.machinemetrics.model.UsageType;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Mapper(uses = {UnitMapper.class})
 public interface EquipmentMapper {
@@ -47,7 +50,13 @@ public interface EquipmentMapper {
 
     EquipmentDetailsDto toEquipmentDetailsDto(Equipment equipment);
 
-    List<EquipmentItemDto> toEquipmentItemDtos(List<Equipment> equipments);
+    default Page<EquipmentItemDto> toEquipmentItemDtos(Page<Equipment> equipments) {
+        List<EquipmentItemDto> dtos = equipments.getContent().stream()
+                .map(this::toEquipmentItemDto)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(dtos, equipments.getPageable(), equipments.getTotalElements());
+    }
 
     @Mapping(target = "status", source = "status.name")
     EquipmentItemDto toEquipmentItemDto(Equipment equipments);

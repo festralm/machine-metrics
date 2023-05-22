@@ -9,6 +9,9 @@ import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import ru.kpfu.machinemetrics.config.MessageSourceConfig;
 import ru.kpfu.machinemetrics.exception.ResourceNotFoundException;
 import ru.kpfu.machinemetrics.model.Equipment;
@@ -53,18 +56,43 @@ public class EquipmentServiceTest {
         Equipment equipment2 = Equipment.builder()
                 .name("Equipment 2")
                 .build();
-        List<Equipment> equipmentList = List.of(equipment1, equipment2);
+        Page<Equipment> equipmentPage = new PageImpl<>(List.of(equipment1, equipment2));
 
-        when(equipmentRepositoryMock.findAllByDeletedFalse()).thenReturn(equipmentList);
+        when(equipmentRepositoryMock.findAllByDeletedFalseOrderByName(any(Pageable.class))).thenReturn(equipmentPage);
 
         // when
-        List<Equipment> result = equipmentService.getAllNotDeleted();
+        Page<Equipment> result = equipmentService.getAllNotDeleted(Pageable.unpaged());
 
         // then
         SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(result.size()).isEqualTo(2);
-        softly.assertThat(result.get(0).getName()).isEqualTo(equipment1.getName());
-        softly.assertThat(result.get(1).getName()).isEqualTo(equipment2.getName());
+        softly.assertThat(result.getTotalElements()).isEqualTo(2);
+        softly.assertThat(result.getContent().get(0).getName()).isEqualTo(equipment1.getName());
+        softly.assertThat(result.getContent().get(1).getName()).isEqualTo(equipment2.getName());
+        softly.assertAll();
+    }
+
+    @Test
+    public void testSearch() {
+        // given
+        Equipment equipment1 = Equipment.builder()
+                .name("Equipment 1")
+                .build();
+        Equipment equipment2 = Equipment.builder()
+                .name("Equipment 2")
+                .build();
+        Page<Equipment> equipmentPage = new PageImpl<>(List.of(equipment1, equipment2));
+
+        when(equipmentRepositoryMock.searchAllByNameContainingOrderByName(eq("test"), any(Pageable.class)))
+                .thenReturn(equipmentPage);
+
+        // when
+        Page<Equipment> result = equipmentService.search("test", Pageable.unpaged());
+
+        // then
+        SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(result.getTotalElements()).isEqualTo(2);
+        softly.assertThat(result.getContent().get(0).getName()).isEqualTo(equipment1.getName());
+        softly.assertThat(result.getContent().get(1).getName()).isEqualTo(equipment2.getName());
         softly.assertAll();
     }
 

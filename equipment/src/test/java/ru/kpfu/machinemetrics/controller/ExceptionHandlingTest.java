@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.kpfu.machinemetrics.config.MessageSourceConfig;
@@ -19,6 +20,7 @@ import ru.kpfu.machinemetrics.service.EquipmentService;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -43,7 +45,7 @@ public class ExceptionHandlingTest {
 
     @Test
     public void testInternalServerError() throws Exception {
-        when(equipmentServiceMock.getAllNotDeleted()).thenThrow(new RuntimeException());
+        when(equipmentServiceMock.getAllNotDeleted(any(Pageable.class))).thenThrow(new RuntimeException());
 
         String message = messageSource.getMessage(GeneralConstants.EXCEPTION_GENERAL, null, new Locale("ru"));
         ErrorResponse expectedResponseBody = new ErrorResponse(500, message);

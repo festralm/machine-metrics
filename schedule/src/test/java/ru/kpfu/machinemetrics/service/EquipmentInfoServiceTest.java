@@ -137,7 +137,7 @@ public class EquipmentInfoServiceTest {
         softly.assertThat(actualEquipmentInfo.getDataService().getId()).isEqualTo(savedEquipmentInfo.getDataService().getId());
         softly.assertThat(actualEquipmentInfo.getCron().getId()).isEqualTo(savedEquipmentInfo.getCron().getId());
         softly.assertThat(actualEquipmentInfo.getEnabled()).isEqualTo(savedEquipmentInfo.getEnabled());
-        verify(rabbitTemplate, times(1)).convertAndSend(eq("rk-name1"), any(EquipmentScheduleRabbitMqDto.class));
+        verify(rabbitTemplate, times(1)).convertAndSend(eq("rk-name1-delete"), eq(1L));
         verify(rabbitTemplate, times(1)).convertAndSend(eq("rk-name2"), any(EquipmentScheduleRabbitMqDto.class));
     }
 

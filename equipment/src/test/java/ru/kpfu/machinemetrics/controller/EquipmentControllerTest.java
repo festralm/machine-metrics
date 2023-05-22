@@ -8,6 +8,8 @@ import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.kpfu.machinemetrics.config.MessageSourceConfig;
@@ -21,7 +23,6 @@ import ru.kpfu.machinemetrics.model.Equipment;
 import ru.kpfu.machinemetrics.service.EquipmentService;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -70,7 +71,7 @@ public class EquipmentControllerTest {
                 .id(1L)
                 .name("Equipment 2")
                 .build();
-        List<Equipment> equipmentList = List.of(equipment1, equipment2);
+        final PageImpl<Equipment> equipmentPage = new PageImpl<>(List.of(equipment1, equipment2));
 
         EquipmentItemDto equipmentItemDto1 = EquipmentItemDto.builder()
                 .id(equipment1.getId())
@@ -80,32 +81,60 @@ public class EquipmentControllerTest {
                 .id(equipment2.getId())
                 .name(equipment2.getName())
                 .build();
-        List<EquipmentItemDto> expectedEquipmentItemDtoList = List.of(equipmentItemDto1, equipmentCreateDto2);
+        PageImpl<EquipmentItemDto> expectedEquipmentItemDtoPage = new PageImpl<>(List.of(equipmentItemDto1, equipmentCreateDto2));
 
-        when(equipmentServiceMock.getAllNotDeleted()).thenReturn(equipmentList);
-        when(equipmentMapperMock.toEquipmentItemDtos(eq(equipmentList))).thenReturn(expectedEquipmentItemDtoList);
+        when(equipmentServiceMock.getAllNotDeleted(any(Pageable.class))).thenReturn(equipmentPage);
+        when(equipmentMapperMock.toEquipmentItemDtos(eq(equipmentPage))).thenReturn(expectedEquipmentItemDtoPage);
 
         // expect
         mockMvc.perform(get("/api/v1/equipment"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].id").value(equipment1.getId()))
-                .andExpect(jsonPath("$[0].name").value(equipment1.getName()))
-                .andExpect(jsonPath("$[1].id").value(equipment2.getId()))
-                .andExpect(jsonPath("$[1].name").value(equipment2.getName()))
-                .andDo(result -> {
-                    String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
-                    List<EquipmentItemDto> actualList = Arrays.asList(objectMapper.readValue(response,
-                            EquipmentItemDto[].class));
+                .andExpect(jsonPath("$.totalElements").value(2))
+                .andExpect(jsonPath("$.content[0].id").value(equipment1.getId()))
+                .andExpect(jsonPath("$.content[0].name").value(equipment1.getName()))
+                .andExpect(jsonPath("$.content[1].id").value(equipment2.getId()))
+                .andExpect(jsonPath("$.content[1].name").value(equipment2.getName()));
+    }
 
-                    SoftAssertions softly = new SoftAssertions();
-                    softly.assertThat(actualList).isNotNull();
-                    softly.assertThat(actualList).hasSize(2);
-                    softly.assertThat(actualList.get(0).getName()).isEqualTo(equipment1.getName());
-                    softly.assertThat(actualList.get(1).getName()).isEqualTo(equipment2.getName());
-                    softly.assertAll();
-                });
+    @Test
+    public void testSearch() throws Exception {
+        // given
+        Equipment equipment1 = Equipment.builder()
+                .id(0L)
+                .name("Equipment 1")
+                .build();
+        Equipment equipment2 = Equipment.builder()
+                .id(1L)
+                .name("Equipment 2")
+                .build();
+        final PageImpl<Equipment> equipmentPage = new PageImpl<>(List.of(equipment1, equipment2));
+
+        EquipmentItemDto equipmentItemDto1 = EquipmentItemDto.builder()
+                .id(equipment1.getId())
+                .name(equipment1.getName())
+                .build();
+        EquipmentItemDto equipmentCreateDto2 = EquipmentItemDto.builder()
+                .id(equipment2.getId())
+                .name(equipment2.getName())
+                .build();
+        PageImpl<EquipmentItemDto> expectedEquipmentItemDtoPage = new PageImpl<>(List.of(equipmentItemDto1, equipmentCreateDto2));
+
+        when(equipmentServiceMock.search(eq("test"), any(Pageable.class))).thenReturn(equipmentPage);
+        when(equipmentMapperMock.toEquipmentItemDtos(eq(equipmentPage))).thenReturn(expectedEquipmentItemDtoPage);
+
+        // expect
+        mockMvc.perform(get("/api/v1/equipment/search")
+                        .param("name", "test")
+                        .param("size", "10")
+                        .param("page", "1"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.totalElements").value(2))
+                .andExpect(jsonPath("$.content[0].id").value(equipment1.getId()))
+                .andExpect(jsonPath("$.content[0].name").value(equipment1.getName()))
+                .andExpect(jsonPath("$.content[1].id").value(equipment2.getId()))
+                .andExpect(jsonPath("$.content[1].name").value(equipment2.getName()));
     }
 
     @Test
