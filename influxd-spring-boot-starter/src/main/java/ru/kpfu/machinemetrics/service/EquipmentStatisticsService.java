@@ -25,5 +25,6 @@ public abstract class EquipmentStatisticsService {
         equipmentStatisticsRepository.save(point);
 
     }
+
     public abstract EquipmentInfluxDbData getEquipmentInfluxDbData(Long equipmentId);
 }

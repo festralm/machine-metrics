@@ -4,6 +4,8 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import ru.kpfu.machinemetrics.dto.EquipmentCreateDto;
 import ru.kpfu.machinemetrics.dto.EquipmentDetailsDto;
 import ru.kpfu.machinemetrics.dto.EquipmentItemDto;
@@ -275,18 +277,18 @@ public class EquipmentMapperTest {
                 .lastOperationDate(Instant.now())
                 .deleted(false)
                 .build();
-        List<Equipment> equipments = List.of(equipment1, equipment2);
+        Page<Equipment> equipments = new PageImpl<>(List.of(equipment1, equipment2));
 
         // when
-        List<EquipmentItemDto> dtos = equipmentMapper.toEquipmentItemDtos(equipments);
+        Page<EquipmentItemDto> dtos = equipmentMapper.toEquipmentItemDtos(equipments);
 
         // then
         SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(dtos).hasSize(equipments.size());
+        softly.assertThat(dtos.getTotalElements()).isEqualTo(equipments.getTotalElements());
 
-        for (int i = 0; i < dtos.size(); i++) {
-            EquipmentItemDto dto = dtos.get(i);
-            Equipment equipment = equipments.get(i);
+        for (int i = 0; i < dtos.getTotalElements(); i++) {
+            EquipmentItemDto dto = dtos.getContent().get(i);
+            Equipment equipment = equipments.getContent().get(i);
 
             softly.assertThat(dto.getId()).isEqualTo(equipment.getId());
             softly.assertThat(dto.getName()).isEqualTo(equipment.getName());
