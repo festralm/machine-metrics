@@ -22,7 +22,7 @@ import ru.kpfu.machinemetrics.model.Schedule;
 import ru.kpfu.machinemetrics.service.ScheduleService;
 
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -41,8 +41,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ru.kpfu.machinemetrics.constants.ScheduleConstants.SCHEDULE_CREATED_EXCEPTION_MESSAGE;
+import static ru.kpfu.machinemetrics.constants.ScheduleConstants.SCHEDULE_DATE_NOT_EMPTY_EXCEPTION_MESSAGE;
 import static ru.kpfu.machinemetrics.constants.ScheduleConstants.SCHEDULE_DELETE_EXCEPTION_MESSAGE;
+import static ru.kpfu.machinemetrics.constants.ScheduleConstants.SCHEDULE_END_TIME_EMPTY_EXCEPTION_MESSAGE;
+import static ru.kpfu.machinemetrics.constants.ScheduleConstants.SCHEDULE_END_TIME_NOT_EMPTY_EXCEPTION_MESSAGE;
+import static ru.kpfu.machinemetrics.constants.ScheduleConstants.SCHEDULE_END_TIME_NOT_VALID_EXCEPTION_MESSAGE;
 import static ru.kpfu.machinemetrics.constants.ScheduleConstants.SCHEDULE_NOT_FOUND_EXCEPTION_MESSAGE;
+import static ru.kpfu.machinemetrics.constants.ScheduleConstants.SCHEDULE_START_TIME_EMPTY_EXCEPTION_MESSAGE;
+import static ru.kpfu.machinemetrics.constants.ScheduleConstants.SCHEDULE_START_TIME_NOT_EMPTY_EXCEPTION_MESSAGE;
+import static ru.kpfu.machinemetrics.constants.ScheduleConstants.SCHEDULE_START_TIME_NOT_VALID_EXCEPTION_MESSAGE;
+import static ru.kpfu.machinemetrics.constants.ScheduleConstants.SCHEDULE_WEEKDAY_BOUNDARY_EXCEPTION_MESSAGE;
 
 @WebMvcTest(ScheduleController.class)
 @ImportAutoConfiguration(MessageSourceConfig.class)
@@ -68,34 +76,40 @@ public class ScheduleControllerTest {
         // given
         Schedule schedule1 = Schedule.builder()
                 .id(1L)
-                .startTime("11:00")
-                .endTime("18:00")
-                .date(Instant.now())
+                .weekday(1)
+                .date(OffsetDateTime.now())
+                .equipmentId(1L)
+                .startTime(11 * 60L)
+                .endTime(18 * 60L)
                 .build();
         Schedule schedule2 = Schedule.builder()
                 .id(2L)
-                .startTime("12:00")
-                .endTime("19:00")
-                .date(Instant.now())
+                .weekday(2)
+                .date(OffsetDateTime.now())
+                .equipmentId(2L)
+                .isWorkday(false)
                 .build();
         List<Schedule> scheduleList = List.of(schedule1, schedule2);
 
         ScheduleDto scheduleDto1 = ScheduleDto.builder()
                 .id(schedule1.getId())
-                .startTime(schedule1.getStartTime())
-                .endTime(schedule1.getEndTime())
+                .weekday(schedule1.getWeekday())
                 .date(schedule1.getDate())
+                .equipmentId(schedule1.getEquipmentId())
+                .startTime("11:00")
+                .endTime("18:00")
                 .build();
 
         ScheduleDto scheduleDto2 = ScheduleDto.builder()
                 .id(schedule2.getId())
-                .startTime(schedule2.getStartTime())
-                .endTime(schedule2.getEndTime())
+                .weekday(schedule2.getWeekday())
                 .date(schedule2.getDate())
+                .equipmentId(schedule2.getEquipmentId())
+                .isWorkday(schedule2.getIsWorkday())
                 .build();
         List<ScheduleDto> scheduleDtoList = List.of(scheduleDto1, scheduleDto2);
 
-        when(scheduleServiceMock.getAll()).thenReturn(scheduleList);
+        when(scheduleServiceMock.listNotDefault()).thenReturn(scheduleList);
         when(scheduleMapperMock.toScheduleDtos(scheduleList)).thenReturn(scheduleDtoList);
 
         // expect
@@ -104,27 +118,32 @@ public class ScheduleControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].id").value(scheduleDto1.getId()))
+                .andExpect(jsonPath("$[0].weekday").value(scheduleDto1.getWeekday()))
+                .andExpect(jsonPath("$[0].equipmentId").value(scheduleDto1.getEquipmentId()))
                 .andExpect(jsonPath("$[0].startTime").value(scheduleDto1.getStartTime()))
                 .andExpect(jsonPath("$[0].endTime").value(scheduleDto1.getEndTime()))
                 .andExpect(jsonPath("$[1].id").value(scheduleDto2.getId()))
-                .andExpect(jsonPath("$[1].startTime").value(scheduleDto2.getStartTime()))
-                .andExpect(jsonPath("$[1].endTime").value(scheduleDto2.getEndTime()))
+                .andExpect(jsonPath("$[1].weekday").value(scheduleDto2.getWeekday()))
+                .andExpect(jsonPath("$[1].equipmentId").value(scheduleDto2.getEquipmentId()))
+                .andExpect(jsonPath("$[1].isWorkday").value(scheduleDto2.getIsWorkday()))
                 .andDo(result -> {
                     String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
-                    List<Schedule> actualList = Arrays.asList(objectMapper.readValue(response,
-                            Schedule[].class));
+                    List<ScheduleDto> actualList = Arrays.asList(objectMapper.readValue(response, ScheduleDto[].class));
 
                     SoftAssertions softly = new SoftAssertions();
                     softly.assertThat(actualList).isNotNull();
                     softly.assertThat(actualList).hasSize(2);
                     softly.assertThat(actualList.get(0).getId()).isEqualTo(scheduleDto1.getId());
+                    softly.assertThat(actualList.get(0).getWeekday()).isEqualTo(scheduleDto1.getWeekday());
+                    softly.assertThat(actualList.get(0).getDate()).isEqualTo(scheduleDto1.getDate());
+                    softly.assertThat(actualList.get(0).getEquipmentId()).isEqualTo(scheduleDto1.getEquipmentId());
                     softly.assertThat(actualList.get(0).getStartTime()).isEqualTo(scheduleDto1.getStartTime());
                     softly.assertThat(actualList.get(0).getEndTime()).isEqualTo(scheduleDto1.getEndTime());
-                    softly.assertThat(actualList.get(0).getDate()).isEqualTo(scheduleDto1.getDate());
                     softly.assertThat(actualList.get(1).getId()).isEqualTo(scheduleDto2.getId());
-                    softly.assertThat(actualList.get(1).getStartTime()).isEqualTo(scheduleDto2.getStartTime());
-                    softly.assertThat(actualList.get(1).getEndTime()).isEqualTo(scheduleDto2.getEndTime());
+                    softly.assertThat(actualList.get(1).getWeekday()).isEqualTo(scheduleDto2.getWeekday());
                     softly.assertThat(actualList.get(1).getDate()).isEqualTo(scheduleDto2.getDate());
+                    softly.assertThat(actualList.get(1).getEquipmentId()).isEqualTo(scheduleDto2.getEquipmentId());
+                    softly.assertThat(actualList.get(1).getIsWorkday()).isEqualTo(scheduleDto2.getIsWorkday());
                     softly.assertAll();
                 });
     }
@@ -133,29 +152,29 @@ public class ScheduleControllerTest {
     public void testCreate() throws Exception {
         // given
         ScheduleCreateDto dto = ScheduleCreateDto.builder()
+                .weekday(1)
                 .startTime("11:00")
                 .endTime("18:00")
-                .date(Instant.now())
                 .build();
 
         Schedule schedule = Schedule.builder()
-                .startTime(dto.getStartTime())
-                .endTime(dto.getEndTime())
-                .date(dto.getDate())
+                .weekday(dto.getWeekday())
+                .startTime(11 * 60L)
+                .endTime(18 * 60L)
                 .build();
 
         Schedule savedSchedule = Schedule.builder()
                 .id(1L)
+                .weekday(schedule.getWeekday())
                 .startTime(schedule.getStartTime())
                 .endTime(schedule.getEndTime())
-                .date(schedule.getDate())
                 .build();
 
         ScheduleDto savedScheduleDto = ScheduleDto.builder()
                 .id(savedSchedule.getId())
-                .startTime(savedSchedule.getStartTime())
-                .endTime(savedSchedule.getEndTime())
-                .date(savedSchedule.getDate())
+                .weekday(savedSchedule.getWeekday())
+                .startTime("11:00")
+                .endTime("18:00")
                 .build();
 
         when(scheduleMapperMock.toSchedule(any())).thenReturn(schedule);
@@ -169,19 +188,20 @@ public class ScheduleControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").value(savedScheduleDto.getId()))
+                .andExpect(jsonPath("$.weekday").value(savedScheduleDto.getWeekday()))
                 .andExpect(jsonPath("$.startTime").value(savedScheduleDto.getStartTime()))
                 .andExpect(jsonPath("$.endTime").value(savedScheduleDto.getEndTime()))
                 .andExpect(header().string("Location", "/schedule"))
                 .andDo(result -> {
                     String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
-                    Schedule actualScheduleCreate = objectMapper.readValue(response, Schedule.class);
+                    ScheduleDto actualScheduleDto = objectMapper.readValue(response, ScheduleDto.class);
 
                     SoftAssertions softly = new SoftAssertions();
-                    softly.assertThat(actualScheduleCreate).isNotNull();
-                    softly.assertThat(actualScheduleCreate.getId()).isEqualTo(savedScheduleDto.getId());
-                    softly.assertThat(actualScheduleCreate.getStartTime()).isEqualTo(savedScheduleDto.getStartTime());
-                    softly.assertThat(actualScheduleCreate.getEndTime()).isEqualTo(savedScheduleDto.getEndTime());
-                    softly.assertThat(actualScheduleCreate.getDate()).isEqualTo(savedScheduleDto.getDate());
+                    softly.assertThat(actualScheduleDto).isNotNull();
+                    softly.assertThat(actualScheduleDto.getId()).isEqualTo(savedScheduleDto.getId());
+                    softly.assertThat(actualScheduleDto.getWeekday()).isEqualTo(savedScheduleDto.getWeekday());
+                    softly.assertThat(actualScheduleDto.getStartTime()).isEqualTo(savedScheduleDto.getStartTime());
+                    softly.assertThat(actualScheduleDto.getEndTime()).isEqualTo(savedScheduleDto.getEndTime());
                     softly.assertAll();
                 });
     }
@@ -192,13 +212,15 @@ public class ScheduleControllerTest {
         Long scheduleId = 1L;
 
         ScheduleCreateDto dto = ScheduleCreateDto.builder()
+                .weekday(1)
                 .startTime("11:00")
                 .endTime("18:00")
                 .build();
 
-        Schedule updatedSchedule = Schedule.builder()
-                .startTime(dto.getStartTime())
-                .endTime(dto.getEndTime())
+        Schedule schedule = Schedule.builder()
+                .weekday(dto.getWeekday())
+                .startTime(11 * 60L)
+                .endTime(18 * 60L)
                 .build();
 
         Locale locale = new Locale("ru");
@@ -208,9 +230,9 @@ public class ScheduleControllerTest {
                 locale
         );
 
-        when(scheduleMapperMock.toSchedule(any(ScheduleCreateDto.class))).thenReturn(updatedSchedule);
+        when(scheduleMapperMock.toSchedule(any(ScheduleCreateDto.class))).thenReturn(schedule);
         doThrow(new ScheduleIsAlreadyCreatedException(message)).when(scheduleServiceMock).edit(eq(scheduleId),
-                eq(updatedSchedule));
+                eq(schedule));
 
         ErrorResponse expectedResponseBody = new ErrorResponse(400, message);
 
@@ -235,14 +257,20 @@ public class ScheduleControllerTest {
     }
 
     @Test
-    public void testCreateWithEmptyStartTime() throws Exception {
+    public void testCreateWithDateWhenWeekdayIsNotEmpty() throws Exception {
         // given
         ScheduleCreateDto scheduleCreateDto = ScheduleCreateDto.builder()
+                .startTime("11:00")
                 .endTime("18:00")
-                .date(Instant.now())
+                .date(OffsetDateTime.now())
+                .weekday(2)
                 .build();
 
-        String message = messageSource.getMessage("validation.schedule.start-time.empty", null, new Locale("ru"));
+        String message = messageSource.getMessage(
+                SCHEDULE_DATE_NOT_EMPTY_EXCEPTION_MESSAGE,
+                null,
+                new Locale("ru")
+        );
         ErrorResponse expectedResponseBody = new ErrorResponse(400, "\"" + message + "\"");
 
         // expect
@@ -267,16 +295,268 @@ public class ScheduleControllerTest {
     }
 
     @Test
-    public void testCreateWithEmptyEndTime() throws Exception {
+    public void testCreateWithWeekdayMoreThan7() throws Exception {
         // given
         ScheduleCreateDto scheduleCreateDto = ScheduleCreateDto.builder()
+                .weekday(8)
                 .startTime("11:00")
-                .endTime("")
-                .date(Instant.now())
+                .endTime("18:00")
                 .build();
 
-        String message = messageSource.getMessage("validation.schedule.end-time.empty", null, new Locale("ru"));
+        String message = messageSource.getMessage(
+                SCHEDULE_WEEKDAY_BOUNDARY_EXCEPTION_MESSAGE,
+                null,
+                new Locale("ru")
+        );
         ErrorResponse expectedResponseBody = new ErrorResponse(400, "\"" + message + "\"");
+
+        // expect
+        mockMvc.perform(post("/api/v1/schedule")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(scheduleCreateDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(expectedResponseBody.getStatus()))
+                .andExpect(jsonPath("$.message").value(expectedResponseBody.getMessage()))
+                .andDo(result -> {
+
+                    String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+                    ErrorResponse actualResponseBody = objectMapper.readValue(response, ErrorResponse.class);
+
+                    SoftAssertions softly = new SoftAssertions();
+                    softly.assertThat(actualResponseBody).isNotNull();
+                    softly.assertThat(actualResponseBody.getStatus()).isEqualTo(expectedResponseBody.getStatus());
+                    softly.assertThat(actualResponseBody.getMessage()).isEqualTo(expectedResponseBody.getMessage());
+                    softly.assertAll();
+                });
+    }
+
+    @Test
+    public void testCreateWithWorkdayIsEmptyAndSoAreTimes() throws Exception {
+        // given
+        ScheduleCreateDto scheduleCreateDto = ScheduleCreateDto.builder()
+                .weekday(5)
+                .build();
+
+        String message1 = messageSource.getMessage(
+                SCHEDULE_START_TIME_EMPTY_EXCEPTION_MESSAGE,
+                null,
+                new Locale("ru")
+        );
+        String message2 = messageSource.getMessage(
+                SCHEDULE_END_TIME_EMPTY_EXCEPTION_MESSAGE,
+                null,
+                new Locale("ru")
+        );
+
+        // expect
+        mockMvc.perform(post("/api/v1/schedule")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(scheduleCreateDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").isNotEmpty())
+                .andDo(result -> {
+
+                    String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+                    ErrorResponse actualResponseBody = objectMapper.readValue(response, ErrorResponse.class);
+
+                    SoftAssertions softly = new SoftAssertions();
+                    softly.assertThat(actualResponseBody).isNotNull();
+                    softly.assertThat(actualResponseBody.getStatus()).isEqualTo(400);
+                    softly.assertThat(actualResponseBody.getMessage().split(", ")).containsExactlyInAnyOrder(
+                            "\"" + message1 + "\"",
+                            "\"" + message2 + "\""
+                    );
+                    ;
+                    softly.assertAll();
+                });
+    }
+
+    @Test
+    public void testCreateWithWorkdayIsNotEmptyAndSoAreTimes() throws Exception {
+        // given
+        ScheduleCreateDto scheduleCreateDto = ScheduleCreateDto.builder()
+                .weekday(5)
+                .isWorkday(true)
+                .startTime("11:00")
+                .endTime("12:00")
+                .build();
+
+        String message1 = messageSource.getMessage(
+                SCHEDULE_START_TIME_NOT_EMPTY_EXCEPTION_MESSAGE,
+                null,
+                new Locale("ru")
+        );
+        String message2 = messageSource.getMessage(
+                SCHEDULE_END_TIME_NOT_EMPTY_EXCEPTION_MESSAGE,
+                null,
+                new Locale("ru")
+        );
+
+        // expect
+        mockMvc.perform(post("/api/v1/schedule")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(scheduleCreateDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").isNotEmpty())
+                .andDo(result -> {
+
+                    String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+                    ErrorResponse actualResponseBody = objectMapper.readValue(response, ErrorResponse.class);
+
+                    SoftAssertions softly = new SoftAssertions();
+                    softly.assertThat(actualResponseBody).isNotNull();
+                    softly.assertThat(actualResponseBody.getStatus()).isEqualTo(400);
+                    softly.assertThat(actualResponseBody.getMessage().split(", ")).containsExactlyInAnyOrder(
+                            "\"" + message1 + "\"",
+                            "\"" + message2 + "\""
+                    );
+                    softly.assertAll();
+                });
+    }
+
+    @Test
+    public void testCreateWitStartTimeIsNotValid() throws Exception {
+        // given
+        ScheduleCreateDto scheduleCreateDto = ScheduleCreateDto.builder()
+                .weekday(5)
+                .startTime("11:0")
+                .endTime("12:00")
+                .build();
+
+        String message = messageSource.getMessage(
+                SCHEDULE_START_TIME_NOT_VALID_EXCEPTION_MESSAGE,
+                null,
+                new Locale("ru")
+        );
+        ErrorResponse expectedResponseBody = new ErrorResponse(
+                400,
+                "\"" + message + "\""
+        );
+
+        // expect
+        mockMvc.perform(post("/api/v1/schedule")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(scheduleCreateDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(expectedResponseBody.getStatus()))
+                .andExpect(jsonPath("$.message").value(expectedResponseBody.getMessage()))
+                .andDo(result -> {
+
+                    String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+                    ErrorResponse actualResponseBody = objectMapper.readValue(response, ErrorResponse.class);
+
+                    SoftAssertions softly = new SoftAssertions();
+                    softly.assertThat(actualResponseBody).isNotNull();
+                    softly.assertThat(actualResponseBody.getStatus()).isEqualTo(expectedResponseBody.getStatus());
+                    softly.assertThat(actualResponseBody.getMessage()).isEqualTo(expectedResponseBody.getMessage());
+                    softly.assertAll();
+                });
+    }
+
+    @Test
+    public void testCreateWitEndTimeIsNotValid() throws Exception {
+        // given
+        ScheduleCreateDto scheduleCreateDto = ScheduleCreateDto.builder()
+                .weekday(5)
+                .startTime("11:00")
+                .endTime("blabla")
+                .build();
+
+        String message = messageSource.getMessage(
+                SCHEDULE_END_TIME_NOT_VALID_EXCEPTION_MESSAGE,
+                null,
+                new Locale("ru")
+        );
+        ErrorResponse expectedResponseBody = new ErrorResponse(
+                400,
+                "\"" + message + "\""
+        );
+
+        // expect
+        mockMvc.perform(post("/api/v1/schedule")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(scheduleCreateDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(expectedResponseBody.getStatus()))
+                .andExpect(jsonPath("$.message").value(expectedResponseBody.getMessage()))
+                .andDo(result -> {
+
+                    String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+                    ErrorResponse actualResponseBody = objectMapper.readValue(response, ErrorResponse.class);
+
+                    SoftAssertions softly = new SoftAssertions();
+                    softly.assertThat(actualResponseBody).isNotNull();
+                    softly.assertThat(actualResponseBody.getStatus()).isEqualTo(expectedResponseBody.getStatus());
+                    softly.assertThat(actualResponseBody.getMessage()).isEqualTo(expectedResponseBody.getMessage());
+                    softly.assertAll();
+                });
+    }
+
+    @Test
+    public void testCreateWitStartTimeIsNotValid2() throws Exception {
+        // given
+        ScheduleCreateDto scheduleCreateDto = ScheduleCreateDto.builder()
+                .weekday(5)
+                .startTime("11:rg")
+                .endTime("12:00")
+                .build();
+
+        String message = messageSource.getMessage(
+                SCHEDULE_START_TIME_NOT_VALID_EXCEPTION_MESSAGE,
+                null,
+                new Locale("ru")
+        );
+        ErrorResponse expectedResponseBody = new ErrorResponse(
+                400,
+                "\"" + message + "\""
+        );
+
+        // expect
+        mockMvc.perform(post("/api/v1/schedule")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(scheduleCreateDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(expectedResponseBody.getStatus()))
+                .andExpect(jsonPath("$.message").value(expectedResponseBody.getMessage()))
+                .andDo(result -> {
+
+                    String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+                    ErrorResponse actualResponseBody = objectMapper.readValue(response, ErrorResponse.class);
+
+                    SoftAssertions softly = new SoftAssertions();
+                    softly.assertThat(actualResponseBody).isNotNull();
+                    softly.assertThat(actualResponseBody.getStatus()).isEqualTo(expectedResponseBody.getStatus());
+                    softly.assertThat(actualResponseBody.getMessage()).isEqualTo(expectedResponseBody.getMessage());
+                    softly.assertAll();
+                });
+    }
+
+    @Test
+    public void testCreateWitEndTimeIsNotValid2() throws Exception {
+        // given
+        ScheduleCreateDto scheduleCreateDto = ScheduleCreateDto.builder()
+                .weekday(5)
+                .startTime("11:00")
+                .endTime("60:60")
+                .build();
+
+        String message = messageSource.getMessage(
+                SCHEDULE_END_TIME_NOT_VALID_EXCEPTION_MESSAGE,
+                null,
+                new Locale("ru")
+        );
+        ErrorResponse expectedResponseBody = new ErrorResponse(
+                400,
+                "\"" + message + "\""
+        );
 
         // expect
         mockMvc.perform(post("/api/v1/schedule")
@@ -385,29 +665,29 @@ public class ScheduleControllerTest {
         Long scheduleId = 1L;
 
         ScheduleCreateDto dto = ScheduleCreateDto.builder()
+                .date(OffsetDateTime.now())
                 .startTime("11:00")
                 .endTime("18:00")
-                .date(Instant.now())
                 .build();
 
         Schedule updatedSchedule = Schedule.builder()
-                .startTime(dto.getStartTime())
-                .endTime(dto.getEndTime())
                 .date(dto.getDate())
+                .startTime(11 * 60L)
+                .endTime(18 * 60L)
                 .build();
 
         Schedule editedSchedule = Schedule.builder()
                 .id(1L)
+                .date(updatedSchedule.getDate())
                 .startTime(updatedSchedule.getStartTime())
                 .endTime(updatedSchedule.getEndTime())
-                .date(updatedSchedule.getDate())
                 .build();
 
         ScheduleDto editedScheduleDto = ScheduleDto.builder()
                 .id(editedSchedule.getId())
-                .startTime(editedSchedule.getStartTime())
-                .endTime(editedSchedule.getEndTime())
                 .date(editedSchedule.getDate())
+                .startTime("11:00")
+                .endTime("18:00")
                 .build();
 
         when(scheduleMapperMock.toSchedule(any(ScheduleCreateDto.class))).thenReturn(updatedSchedule);
@@ -431,9 +711,9 @@ public class ScheduleControllerTest {
                     SoftAssertions softly = new SoftAssertions();
                     softly.assertThat(actualScheduleDto).isNotNull();
                     softly.assertThat(actualScheduleDto.getId()).isEqualTo(editedScheduleDto.getId());
+                    softly.assertThat(actualScheduleDto.getDate()).isEqualTo(editedScheduleDto.getDate());
                     softly.assertThat(actualScheduleDto.getStartTime()).isEqualTo(editedScheduleDto.getStartTime());
                     softly.assertThat(actualScheduleDto.getEndTime()).isEqualTo(editedScheduleDto.getEndTime());
-                    softly.assertThat(actualScheduleDto.getDate()).isEqualTo(editedScheduleDto.getDate());
                     softly.assertAll();
                 });
     }
@@ -444,15 +724,15 @@ public class ScheduleControllerTest {
         Long scheduleId = 1L;
 
         ScheduleCreateDto dto = ScheduleCreateDto.builder()
+                .weekday(3)
                 .startTime("11:00")
                 .endTime("18:00")
-                .date(Instant.now())
                 .build();
 
         Schedule updatedSchedule = Schedule.builder()
-                .startTime(dto.getStartTime())
-                .endTime(dto.getEndTime())
-                .date(dto.getDate())
+                .weekday(dto.getWeekday())
+                .startTime(11 * 60L)
+                .endTime(18 * 60L)
                 .build();
 
         Locale locale = new Locale("ru");

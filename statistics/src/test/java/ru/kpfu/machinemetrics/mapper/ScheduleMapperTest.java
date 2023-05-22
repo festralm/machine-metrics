@@ -8,7 +8,7 @@ import ru.kpfu.machinemetrics.dto.ScheduleCreateDto;
 import ru.kpfu.machinemetrics.dto.ScheduleDto;
 import ru.kpfu.machinemetrics.model.Schedule;
 
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @SpringBootTest
@@ -21,9 +21,12 @@ public class ScheduleMapperTest {
     public void testToSchedule() {
         // given
         ScheduleCreateDto dto = ScheduleCreateDto.builder()
-                .startTime("11:00")
+                .weekday(1)
+                .date(OffsetDateTime.now())
+                .equipmentId(1L)
+                .isWorkday(null)
+                .startTime("01:00")
                 .endTime("18:00")
-                .date(Instant.now())
                 .build();
 
         // when
@@ -31,9 +34,12 @@ public class ScheduleMapperTest {
 
         // then
         SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(schedule.getStartTime()).isEqualTo(dto.getStartTime());
-        softly.assertThat(schedule.getEndTime()).isEqualTo(dto.getEndTime());
+        softly.assertThat(schedule.getWeekday()).isEqualTo(dto.getWeekday());
         softly.assertThat(schedule.getDate()).isEqualTo(dto.getDate());
+        softly.assertThat(schedule.getEquipmentId()).isEqualTo(dto.getEquipmentId());
+        softly.assertThat(schedule.getIsWorkday()).isEqualTo(dto.getIsWorkday());
+        softly.assertThat(schedule.getStartTime()).isEqualTo(60);
+        softly.assertThat(schedule.getEndTime()).isEqualTo(18 * 60);
         softly.assertAll();
     }
 
@@ -42,9 +48,11 @@ public class ScheduleMapperTest {
         // given
         Schedule schedule = Schedule.builder()
                 .id(1L)
-                .startTime("11:00")
-                .endTime("18:00")
-                .date(Instant.now())
+                .weekday(2)
+                .date(OffsetDateTime.now())
+                .equipmentId(2L)
+                .startTime(60L)
+                .endTime(18 * 60L)
                 .build();
 
         // when
@@ -53,26 +61,32 @@ public class ScheduleMapperTest {
         // then
         SoftAssertions softly = new SoftAssertions();
         softly.assertThat(dto.getId()).isEqualTo(schedule.getId());
-        softly.assertThat(dto.getStartTime()).isEqualTo(schedule.getStartTime());
-        softly.assertThat(dto.getEndTime()).isEqualTo(schedule.getEndTime());
+        softly.assertThat(dto.getWeekday()).isEqualTo(schedule.getWeekday());
         softly.assertThat(dto.getDate()).isEqualTo(schedule.getDate());
+        softly.assertThat(dto.getEquipmentId()).isEqualTo(schedule.getEquipmentId());
+        softly.assertThat(dto.getStartTime()).isEqualTo("01:00");
+        softly.assertThat(dto.getEndTime()).isEqualTo("18:00");
         softly.assertAll();
     }
 
     @Test
-    public void testToScheduleItemDtos() {
+    public void testToScheduleDtos() {
         // given
         Schedule schedule1 = Schedule.builder()
                 .id(1L)
-                .startTime("11:00")
-                .endTime("18:00")
-                .date(Instant.now())
+                .weekday(1)
+                .date(OffsetDateTime.now())
+                .equipmentId(1L)
+                .startTime(60L)
+                .endTime(18 * 60L)
                 .build();
         Schedule schedule2 = Schedule.builder()
                 .id(2L)
-                .startTime("12:00")
-                .endTime("19:00")
-                .date(Instant.now())
+                .weekday(2)
+                .date(OffsetDateTime.now())
+                .equipmentId(2L)
+                .startTime(2 * 60L + 30)
+                .endTime(17 * 60L + 15)
                 .build();
         List<Schedule> schedules = List.of(schedule1, schedule2);
 
@@ -88,10 +102,14 @@ public class ScheduleMapperTest {
             Schedule schedule = schedules.get(i);
 
             softly.assertThat(dto.getId()).isEqualTo(schedule.getId());
-            softly.assertThat(dto.getStartTime()).isEqualTo(schedule.getStartTime());
-            softly.assertThat(dto.getEndTime()).isEqualTo(schedule.getEndTime());
+            softly.assertThat(dto.getWeekday()).isEqualTo(schedule.getWeekday());
             softly.assertThat(dto.getDate()).isEqualTo(schedule.getDate());
+            softly.assertThat(dto.getEquipmentId()).isEqualTo(schedule.getEquipmentId());
         }
+        softly.assertThat(dtos.get(0).getStartTime()).isEqualTo("01:00");
+        softly.assertThat(dtos.get(0).getEndTime()).isEqualTo("18:00");
+        softly.assertThat(dtos.get(1).getStartTime()).isEqualTo("02:30");
+        softly.assertThat(dtos.get(1).getEndTime()).isEqualTo("17:15");
 
         softly.assertAll();
     }

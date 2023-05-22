@@ -10,7 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.Instant;
+import java.time.OffsetDateTime;
 
 @Entity
 @Getter
@@ -24,9 +24,15 @@ public class Schedule {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private Integer weekday;
+
+    private OffsetDateTime date;
+
+    private Long equipmentId;
+
+    private Boolean isWorkday;
+
     private Long startTime;
 
     private Long endTime;
-
-    private Instant date;
 }

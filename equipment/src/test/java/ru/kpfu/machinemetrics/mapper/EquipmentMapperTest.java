@@ -16,7 +16,7 @@ import ru.kpfu.machinemetrics.model.Status;
 import ru.kpfu.machinemetrics.model.Unit;
 import ru.kpfu.machinemetrics.model.UsageType;
 
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @SpringBootTest
@@ -59,9 +59,9 @@ public class EquipmentMapperTest {
                 .manufacturerCountry(1L)
                 .manufactureYear(2000)
                 .manufacturer("manufacturer 1")
-                .deliveryDate(Instant.now())
+                .deliveryDate(OffsetDateTime.now())
                 .supplier("supplier 1")
-                .commissioningDate(Instant.now())
+                .commissioningDate(OffsetDateTime.now())
                 .brand("brand 1")
                 .providingServicesToThirdPartiesPossibility(true)
                 .collectiveFederalCenterUse(false)
@@ -168,9 +168,9 @@ public class EquipmentMapperTest {
                 .manufacturerCountry(Country.builder().id(1L).name("manufacturerCountry 1").build())
                 .manufactureYear(2000)
                 .manufacturer("manufacturer 1")
-                .deliveryDate(Instant.now())
+                .deliveryDate(OffsetDateTime.now())
                 .supplier("supplier 1")
-                .commissioningDate(Instant.now())
+                .commissioningDate(OffsetDateTime.now())
                 .brand("brand 1")
                 .providingServicesToThirdPartiesPossibility(true)
                 .collectiveFederalCenterUse(false)
@@ -253,12 +253,12 @@ public class EquipmentMapperTest {
                 .inventoryNumber("inventoryNumber 1")
                 .acquisitionSource("acquisitionSource 1")
                 .cost(100.0)
-                .deliveryDate(Instant.now())
+                .deliveryDate(OffsetDateTime.now())
                 .installationLocation("installationLocation 1")
                 .unit(Unit.builder().id(1L).name("unit 1").build())
                 .responsiblePerson("responsiblePerson 1")
                 .status(Status.builder().id(1L).name("status 1").build())
-                .lastOperationDate(Instant.now())
+                .lastOperationDate(OffsetDateTime.now())
                 .photoPath("photoPath 1")
                 .deleted(false)
                 .build();
@@ -268,13 +268,13 @@ public class EquipmentMapperTest {
                 .inventoryNumber("inventoryNumber 2")
                 .acquisitionSource("acquisitionSource 2")
                 .cost(200.0)
-                .deliveryDate(Instant.now())
+                .deliveryDate(OffsetDateTime.now())
                 .installationLocation("installationLocation 2")
                 .unit(Unit.builder().id(1L).name("unit 2").build())
                 .responsiblePerson("responsiblePerson 2")
                 .status(Status.builder().id(1L).name("status 2").build())
                 .photoPath("photoPath 2")
-                .lastOperationDate(Instant.now())
+                .lastOperationDate(OffsetDateTime.now())
                 .deleted(false)
                 .build();
         Page<Equipment> equipments = new PageImpl<>(List.of(equipment1, equipment2));

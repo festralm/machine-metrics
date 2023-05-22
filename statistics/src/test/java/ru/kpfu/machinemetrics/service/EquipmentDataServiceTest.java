@@ -12,7 +12,7 @@ import ru.kpfu.machinemetrics.model.EquipmentData;
 import ru.kpfu.machinemetrics.repository.EquipmentDataRepository;
 
 import java.time.Duration;
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.time.Period;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -38,9 +38,9 @@ public class EquipmentDataServiceTest {
     void testGetData() {
         // given
         Long givenId = 1L;
-        final Instant now = Instant.now();
-        Instant givenStart = now.minusSeconds(60 * 60 * 4);
-        Instant givenStop = now;
+        final OffsetDateTime now = OffsetDateTime.now();
+        OffsetDateTime givenStart = now.minusSeconds(60 * 60 * 4);
+        OffsetDateTime givenStop = now;
 
         List<EquipmentData> givenList = List.of(
                 EquipmentData.builder().equipmentId(givenId).time(givenStart).enabled(true).build(),
@@ -74,14 +74,14 @@ public class EquipmentDataServiceTest {
     @Test
     void testGetDataWithNullData() {
         // given
-        final Instant now = Instant.now();
-        final Instant expectedStart =
-                ZonedDateTime.now().truncatedTo(ChronoUnit.DAYS).minus(Period.ofMonths(1)).toInstant();
-        final Instant expectedEnd = Instant.now();
+        final OffsetDateTime now = OffsetDateTime.now();
+        final OffsetDateTime expectedStart =
+                ZonedDateTime.now().truncatedTo(ChronoUnit.DAYS).minus(Period.ofMonths(1)).toOffsetDateTime();
+        final OffsetDateTime expectedEnd = OffsetDateTime.now();
         Long hoursBetween = Duration.between(expectedStart, expectedEnd).toHours();
-        Instant givenTime1 = now.minusSeconds(60 * 60 * 10);
-        Instant givenTime2 = now.minusSeconds(60 * 60 * 6);
-        Instant givenTime3 = now.minusSeconds(60 * 60 * 3);
+        OffsetDateTime givenTime1 = now.minusSeconds(60 * 60 * 10);
+        OffsetDateTime givenTime2 = now.minusSeconds(60 * 60 * 6);
+        OffsetDateTime givenTime3 = now.minusSeconds(60 * 60 * 3);
         List<EquipmentData> givenList = List.of(
                 EquipmentData.builder().equipmentId(1L).time(givenTime1).enabled(true).build(),
                 EquipmentData.builder().equipmentId(1L).time(givenTime2).enabled(false).build(),

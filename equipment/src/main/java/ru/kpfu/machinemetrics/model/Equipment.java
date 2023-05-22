@@ -14,7 +14,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Entity
@@ -93,9 +93,9 @@ public class Equipment {
 
     private String supplier;
 
-    private Instant deliveryDate;
+    private OffsetDateTime deliveryDate;
 
-    private Instant commissioningDate;
+    private OffsetDateTime commissioningDate;
 
     private String brand;
 
@@ -124,7 +124,7 @@ public class Equipment {
     @ManyToOne
     private Status status;
 
-    private Instant lastOperationDate;
+    private OffsetDateTime lastOperationDate;
 
     private String photoPath;
 

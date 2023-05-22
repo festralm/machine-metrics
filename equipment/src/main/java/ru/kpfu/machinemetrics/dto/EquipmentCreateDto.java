@@ -8,7 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Setter
@@ -74,11 +74,11 @@ public class EquipmentCreateDto {
 
     private String manufacturer;
 
-    private Instant deliveryDate;
+    private OffsetDateTime deliveryDate;
 
     private String supplier;
 
-    private Instant commissioningDate;
+    private OffsetDateTime commissioningDate;
 
     private String brand;
 

@@ -9,11 +9,13 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import ru.kpfu.machinemetrics.model.EquipmentData;
+import ru.kpfu.machinemetrics.properties.AppProperties;
 import ru.kpfu.machinemetrics.properties.InfluxDbProperties;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Comparator;
 import java.util.List;
@@ -28,9 +30,10 @@ public class EquipmentDataRepositoryImpl implements EquipmentDataRepository {
 
     private final InfluxDBClient influxDBClient;
     private final InfluxDbProperties influxDbProperties;
+    private final AppProperties appProperties;
 
     @org.jetbrains.annotations.NotNull
-    private static List<EquipmentData> mapResult(List<FluxTable> result) {
+    private static List<EquipmentData> mapResult(List<FluxTable> result, ZoneOffset zoneOffset) {
         return result.stream()
                 .flatMap(fluxTable -> fluxTable.getRecords().stream()
                         .map(
@@ -38,7 +41,7 @@ public class EquipmentDataRepositoryImpl implements EquipmentDataRepository {
                                         .equipmentId(Long.parseLong((String) Objects.requireNonNull(fluxRecord.getValueByKey("equipment_id"))))
                                         .u((Double) fluxRecord.getValueByKey("u"))
                                         .enabled((Boolean) fluxRecord.getValueByKey("enabled"))
-                                        .time(fluxRecord.getTime())
+                                        .time(fluxRecord.getTime().atOffset(zoneOffset))
                                         .build()
                         )
                 )
@@ -70,7 +73,7 @@ public class EquipmentDataRepositoryImpl implements EquipmentDataRepository {
 
         // todo use another method
         List<FluxTable> result = queryApi.query(query, influxDbProperties.getOrg());
-        return mapResult(result);
+        return mapResult(result, ZoneOffset.of(appProperties.getDefaultZone()));
     }
 
     @Override

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.kpfu.machinemetrics.dto.StatisticsDto;
 import ru.kpfu.machinemetrics.service.EquipmentDataService;
 
-import java.time.Instant;
+import java.time.OffsetDateTime;
 
 @RestController
 @RequestMapping(value = "${app.api.prefix.v1}/equipment-data")
@@ -19,8 +19,8 @@ public class EquipmentDataController {
 
     @GetMapping
     public StatisticsDto listFiltered(@RequestParam(required = false) Long id,
-                                      @RequestParam(required = false) Instant start,
-                                      @RequestParam(required = false) Instant stop) {
+                                      @RequestParam(required = false) OffsetDateTime start,
+                                      @RequestParam(required = false) OffsetDateTime stop) {
         return equipmentDataService.getData(id, start, stop);
     }
 }

@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Setter
@@ -17,7 +17,7 @@ public class StatisticsDto {
     private Long downHours;
     private Long totalHours;
     private Double upPercent;
-    private Instant start;
-    private Instant end;
+    private OffsetDateTime start;
+    private OffsetDateTime end;
     private List<ScheduleDto> schedules;
 }

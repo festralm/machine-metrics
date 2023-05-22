@@ -11,8 +11,11 @@ import ru.kpfu.machinemetrics.exception.ScheduleIsAlreadyCreatedException;
 import ru.kpfu.machinemetrics.model.Schedule;
 import ru.kpfu.machinemetrics.repository.ScheduleRepository;
 
+import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 import static ru.kpfu.machinemetrics.constants.ScheduleConstants.SCHEDULE_CREATED_EXCEPTION_MESSAGE;
 import static ru.kpfu.machinemetrics.constants.ScheduleConstants.SCHEDULE_DELETE_EXCEPTION_MESSAGE;
@@ -26,12 +29,27 @@ public class ScheduleService {
 
     private final MessageSource messageSource;
 
-    public List<Schedule> getAll() {
-        return scheduleRepository.findAll();
+    public List<Schedule> listDefault() {
+        return scheduleRepository.findAllByDateAndEquipmentId(null, null);
+    }
+
+    public List<Schedule> listNotDefault() {
+        return scheduleRepository.findAllNotDefault();
+    }
+
+    public List<Schedule> listByEquipmentId(Long id) {
+        return scheduleRepository.findAllByEquipmentId(id);
     }
 
     public Schedule save(@NotNull Schedule schedule) {
-        if (schedule.getDate() == null && scheduleRepository.findByDate(null).isPresent()) {
+        final OffsetDateTime date = schedule.getDate() != null ? schedule.getDate().truncatedTo(ChronoUnit.DAYS) : null;
+        if (
+                scheduleRepository.findByDateAndEquipmentIdAndWeekday(
+                        date,
+                        schedule.getEquipmentId(),
+                        schedule.getWeekday()
+                ).isPresent()
+        ) {
             Locale locale = LocaleContextHolder.getLocale();
             String message = messageSource.getMessage(
                     SCHEDULE_CREATED_EXCEPTION_MESSAGE,
@@ -40,6 +58,7 @@ public class ScheduleService {
             );
             throw new ScheduleIsAlreadyCreatedException(message);
         }
+        schedule.setDate(date);
         return scheduleRepository.save(schedule);
     }
 
@@ -71,11 +90,20 @@ public class ScheduleService {
     }
 
     public Schedule edit(Long id, Schedule updatedSchedule) {
+        final OffsetDateTime date = updatedSchedule.getDate() != null
+                ? updatedSchedule.getDate().truncatedTo(ChronoUnit.DAYS)
+                : null;
+
         Schedule schedule = getById(id);
-        var optionalDefaultSchedule = scheduleRepository.findByDate(null);
+
+        var optionalDefaultSchedule = scheduleRepository.findByDateAndEquipmentIdAndWeekday(
+                null,
+                null,
+                updatedSchedule.getWeekday()
+        );
         if (optionalDefaultSchedule.isPresent()) {
             final Schedule defaultSchedule = optionalDefaultSchedule.get();
-            if (updatedSchedule.getDate() == null && !defaultSchedule.getId().equals(id)) {
+            if (date == null && !defaultSchedule.getId().equals(id)) {
                 Locale locale = LocaleContextHolder.getLocale();
                 String message = messageSource.getMessage(
                         SCHEDULE_CREATED_EXCEPTION_MESSAGE,
@@ -84,19 +112,35 @@ public class ScheduleService {
                 );
                 throw new ScheduleIsAlreadyCreatedException(message);
             }
-            if (schedule.getDate() == null && updatedSchedule.getDate() != null) {
-                Locale locale = LocaleContextHolder.getLocale();
-                String message = messageSource.getMessage(
-                        SCHEDULE_DELETE_EXCEPTION_MESSAGE,
-                        new Object[]{id},
-                        locale
-                );
-                throw new CannotDeleteScheduleException(message);
-            }
         }
+        if (schedule.getDate() == null && date != null) {
+            Locale locale = LocaleContextHolder.getLocale();
+            String message = messageSource.getMessage(
+                    SCHEDULE_DELETE_EXCEPTION_MESSAGE,
+                    new Object[]{id},
+                    locale
+            );
+            throw new CannotDeleteScheduleException(message);
+        }
+        final Optional<Schedule> existingSchedule = scheduleRepository.findByDateAndEquipmentIdAndWeekday(
+                date,
+                updatedSchedule.getEquipmentId(),
+                updatedSchedule.getWeekday()
+        );
+        if (existingSchedule.isPresent() && !existingSchedule.get().getId().equals(id)) {
+            Locale locale = LocaleContextHolder.getLocale();
+            String message = messageSource.getMessage(
+                    SCHEDULE_CREATED_EXCEPTION_MESSAGE,
+                    new Object[]{},
+                    locale
+            );
+            throw new ScheduleIsAlreadyCreatedException(message);
+        }
+        schedule.setWeekday(updatedSchedule.getWeekday());
+        schedule.setDate(date);
+        schedule.setEquipmentId(updatedSchedule.getEquipmentId());
         schedule.setStartTime(updatedSchedule.getStartTime());
         schedule.setEndTime(updatedSchedule.getEndTime());
-        schedule.setDate(updatedSchedule.getDate());
 
         return scheduleRepository.save(schedule);
     }

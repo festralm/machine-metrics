@@ -10,7 +10,7 @@ import ru.kpfu.machinemetrics.model.Purpose;
 import ru.kpfu.machinemetrics.model.Status;
 import ru.kpfu.machinemetrics.model.UsageType;
 
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Setter
@@ -70,11 +70,11 @@ public class EquipmentDetailsDto {
 
     private String manufacturer;
 
-    private Instant deliveryDate;
+    private OffsetDateTime deliveryDate;
 
     private String supplier;
 
-    private Instant commissioningDate;
+    private OffsetDateTime commissioningDate;
 
     private String brand;
 
@@ -96,7 +96,7 @@ public class EquipmentDetailsDto {
 
     private Status status;
 
-    private Instant lastOperationDate;
+    private OffsetDateTime lastOperationDate;
 
     private String photoPath;
 }
