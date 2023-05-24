@@ -1,5 +1,6 @@
 package ru.kpfu.machinemetrics.repository;
 
+import com.influxdb.Cancellable;
 import com.influxdb.client.DeleteApi;
 import com.influxdb.client.InfluxDBClient;
 import com.influxdb.client.QueryApi;
@@ -20,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 ;
 
@@ -55,9 +58,17 @@ public class EquipmentDataRepositoryImpl implements EquipmentDataRepository {
             latch.countDown();
         };
 
-        addLastPreviousRecord(start, equipmentId, queryApi, result, onComplete);
+        BiConsumer<Cancellable, FluxRecord> onNext = (cancellable, fluxRecord) -> {
+            result.add(mapFluxRecord(ZoneOffset.of(appProperties.getDefaultZone()), fluxRecord));
+        };
 
-        addRecordsInPeriod(start, stop, equipmentId, queryApi, result, onComplete);
+        Consumer<Throwable> onError = throwable -> {
+            throw new RuntimeException();
+        };
+
+        addLastPreviousRecord(start, equipmentId, queryApi, onNext, onError, onComplete);
+
+        addRecordsInPeriod(start, stop, equipmentId, queryApi, onNext, onError, onComplete);
 
         try {
             latch.await();
@@ -72,8 +83,8 @@ public class EquipmentDataRepositoryImpl implements EquipmentDataRepository {
             String stop,
             Long equipmentId,
             QueryApi queryApi,
-            List<EquipmentData> result,
-            Runnable onComplete
+            BiConsumer<Cancellable, FluxRecord> onNext,
+            Consumer<Throwable> onError, Runnable onComplete
     ) {
         String query = String.format(
                 "from(bucket: \"%s\") " +
@@ -94,13 +105,8 @@ public class EquipmentDataRepositoryImpl implements EquipmentDataRepository {
         queryApi.query(
                 query,
                 influxDbProperties.getOrg(),
-                (cancellable, fluxRecord) -> {
-                    result.add(mapFluxRecord(ZoneOffset.of(appProperties.getDefaultZone()), fluxRecord));
-                },
-                throwable -> {
-                    // Handle errors
-                    System.err.println("Error occurred: " + throwable.getMessage());
-                },
+                onNext,
+                onError,
                 onComplete
         );
     }
@@ -109,20 +115,20 @@ public class EquipmentDataRepositoryImpl implements EquipmentDataRepository {
             @NotNull String start,
             Long equipmentId,
             QueryApi queryApi,
-            List<EquipmentData> result,
-            Runnable onComplete
+            BiConsumer<Cancellable, FluxRecord> onNext,
+            Consumer<Throwable> onError, Runnable onComplete
     ) {
         String query = String.format(
-                "from(bucket: \"%s\")\n" +
-                        "   |> range(start: -inf, stop: time(v: %s))\n" +
-                        "   |> filter(fn: (r) => r[\"_measurement\"] == \"equipment_statistics\")\n" +
+                "from(bucket: \"%s\") " +
+                        "|> range(start: -inf, stop: time(v: %s)) " +
+                        "|> filter(fn: (r) => r[\"_measurement\"] == \"equipment_statistics\")" +
                         (
                                 equipmentId == null ?
                                         "" :
                                         "|> filter(fn: (r) => r[\"equipment_id\"] == \"%s\")"
                         ) +
-                        "   |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n" +
-                        "   |> last(column: \"_time\")   ",
+                        "|> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")" +
+                        "|> last(column: \"_time\")",
                 influxDbProperties.getBucket(),
                 start,
                 equipmentId
@@ -131,13 +137,8 @@ public class EquipmentDataRepositoryImpl implements EquipmentDataRepository {
         queryApi.query(
                 query,
                 influxDbProperties.getOrg(),
-                (cancellable, fluxRecord) -> {
-                    result.add(mapFluxRecord(ZoneOffset.of(appProperties.getDefaultZone()), fluxRecord));
-                },
-                throwable -> {
-                    // Handle errors
-                    System.err.println("Error occurred: " + throwable.getMessage());
-                },
+                onNext,
+                onError,
                 onComplete
         );
     }
