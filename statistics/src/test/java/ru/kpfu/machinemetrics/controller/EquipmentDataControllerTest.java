@@ -10,12 +10,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.kpfu.machinemetrics.config.MessageSourceConfig;
+import ru.kpfu.machinemetrics.dto.EquipmentDataDto;
 import ru.kpfu.machinemetrics.dto.StatisticsDto;
 import ru.kpfu.machinemetrics.model.EquipmentData;
 import ru.kpfu.machinemetrics.service.EquipmentDataService;
 
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.eq;
@@ -42,12 +43,12 @@ public class EquipmentDataControllerTest {
     public void testListFiltered() throws Exception {
         // given
         Long givenId = 1L;
-        Instant givenStart = Instant.now().minusSeconds(1_000_000);
-        Instant givenStop = Instant.now();
+        OffsetDateTime givenStart = OffsetDateTime.now().minusSeconds(1_000_000);
+        OffsetDateTime givenStop = OffsetDateTime.now();
 
-        List<EquipmentData> givenList = List.of(
-                EquipmentData.builder().equipmentId(givenId).enabled(true).build(),
-                EquipmentData.builder().equipmentId(givenId).enabled(false).build()
+        List<EquipmentDataDto> givenList = List.of(
+                EquipmentDataDto.builder().equipmentId(givenId).enabled(true).build(),
+                EquipmentDataDto.builder().equipmentId(givenId).enabled(false).build()
         );
 
         StatisticsDto givenDto = StatisticsDto.builder()

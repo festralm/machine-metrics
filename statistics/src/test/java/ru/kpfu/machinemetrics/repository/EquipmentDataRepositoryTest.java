@@ -13,10 +13,13 @@ import ru.kpfu.machinemetrics.model.EquipmentData;
 import ru.kpfu.machinemetrics.properties.InfluxDbProperties;
 
 import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -43,7 +46,14 @@ public class EquipmentDataRepositoryTest {
         String givenStart = "2023-03-24T01:00:00Z";
         String givenStop = "2023-04-24T01:00:00Z";
 
-        String expectedQuery = "from(bucket: \"bucket\") " +
+        String expectedPreviousQuery = "from(bucket: \"bucket\") " +
+                "|> range(start: -inf, stop: time(v: 2023-03-24T01:00:00Z)) " +
+                "|> filter(fn: (r) => r[\"_measurement\"] == \"equipment_statistics\")" +
+                "|> filter(fn: (r) => r[\"equipment_id\"] == \"1\")" +
+                "|> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")"+
+                "|> last(column: \"_time\")";
+
+        String expectedGetAllQuery = "from(bucket: \"bucket\") " +
                 "|> range(start: time(v: 2023-03-24T01:00:00Z), stop: time(v: 2023-04-24T01:00:00Z)) " +
                 "|> filter(fn: (r) => r[\"_measurement\"] == \"equipment_statistics\")" +
                 "|> filter(fn: (r) => r[\"equipment_id\"] == \"1\")" +
@@ -52,9 +62,14 @@ public class EquipmentDataRepositoryTest {
         QueryApi queryApiMock = mock(QueryApi.class);
         when(influxDBClientMock.getQueryApi()).thenReturn(queryApiMock);
 
-        doReturn(List.of())
+        doAnswer(invocation -> {
+            Runnable runnable = invocation.getArgument(4);
+            runnable.run();
+
+            return null;
+        })
                 .when(queryApiMock)
-                .query(any(String.class), any(String.class));
+                .query(any(String.class), any(String.class), any(), any(), any(Runnable.class));
 
         // when
         List<EquipmentData> result = equipmentDataRepository.getData(givenStart, givenStop, givenId);
@@ -65,7 +80,12 @@ public class EquipmentDataRepositoryTest {
         softly.assertThat(result).isEmpty();
         softly.assertAll();
         verify(influxDBClientMock, times(1)).getQueryApi();
-        verify(queryApiMock, times(1)).query(eq(expectedQuery), eq("org"));
+        verify(queryApiMock, times(1)).query(
+                eq(expectedPreviousQuery), eq("org"), any(), any(), any(Runnable.class)
+        );
+        verify(queryApiMock, times(1)).query(
+                eq(expectedGetAllQuery), eq("org"), any(), any(), any(Runnable.class)
+        );
     }
 
     @Test
@@ -74,7 +94,13 @@ public class EquipmentDataRepositoryTest {
         String givenStart = "2023-03-24T01:00:00Z";
         String givenStop = "2023-04-24T01:00:00Z";
 
-        String expectedQuery = "from(bucket: \"bucket\") " +
+        String expectedPreviousQuery = "from(bucket: \"bucket\") " +
+                "|> range(start: -inf, stop: time(v: 2023-03-24T01:00:00Z)) " +
+                "|> filter(fn: (r) => r[\"_measurement\"] == \"equipment_statistics\")" +
+                "|> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")"+
+                "|> last(column: \"_time\")";
+
+        String expectedGetAllQuery = "from(bucket: \"bucket\") " +
                 "|> range(start: time(v: 2023-03-24T01:00:00Z), stop: time(v: 2023-04-24T01:00:00Z)) " +
                 "|> filter(fn: (r) => r[\"_measurement\"] == \"equipment_statistics\")" +
                 "|> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")";
@@ -82,9 +108,14 @@ public class EquipmentDataRepositoryTest {
         QueryApi queryApiMock = mock(QueryApi.class);
         when(influxDBClientMock.getQueryApi()).thenReturn(queryApiMock);
 
-        doReturn(List.of())
+        doAnswer(invocation -> {
+            Runnable runnable = invocation.getArgument(4);
+            runnable.run();
+
+            return null;
+        })
                 .when(queryApiMock)
-                .query(any(String.class), any(String.class));
+                .query(any(String.class), any(String.class), any(), any(), any(Runnable.class));
 
         // when
         List<EquipmentData> result = equipmentDataRepository.getData(givenStart, givenStop, null);
@@ -95,7 +126,12 @@ public class EquipmentDataRepositoryTest {
         softly.assertThat(result).isEmpty();
         softly.assertAll();
         verify(influxDBClientMock, times(1)).getQueryApi();
-        verify(queryApiMock, times(1)).query(eq(expectedQuery), eq("org"));
+        verify(queryApiMock, times(1)).query(
+                eq(expectedPreviousQuery), eq("org"), any(), any(), any(Runnable.class)
+        );
+        verify(queryApiMock, times(1)).query(
+                eq(expectedGetAllQuery), eq("org"), any(), any(), any(Runnable.class)
+        );
     }
 
     @Test

@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.Instant;
+import java.time.OffsetDateTime;
 
 @Getter
 @Setter
@@ -13,5 +13,5 @@ public class EquipmentData {
     private Long equipmentId;
     private Double u;
     private Boolean enabled;
-    private Instant time;
+    private OffsetDateTime time;
 }

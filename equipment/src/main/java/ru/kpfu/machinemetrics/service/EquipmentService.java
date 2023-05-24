@@ -13,7 +13,7 @@ import ru.kpfu.machinemetrics.exception.ResourceNotFoundException;
 import ru.kpfu.machinemetrics.model.Equipment;
 import ru.kpfu.machinemetrics.repository.EquipmentRepository;
 
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
@@ -41,7 +41,7 @@ public class EquipmentService {
     }
 
     public Equipment save(Equipment equipment) {
-        equipment.setLastOperationDate(Instant.now());
+        equipment.setLastOperationDate(OffsetDateTime.now());
         return equipmentRepository.save(equipment);
     }
 
@@ -116,7 +116,7 @@ public class EquipmentService {
         equipment.setUnit(updatedEquipment.getUnit());
         equipment.setResponsiblePerson(updatedEquipment.getResponsiblePerson());
         equipment.setStatus(updatedEquipment.getStatus());
-        equipment.setLastOperationDate(Instant.now());
+        equipment.setLastOperationDate(OffsetDateTime.now());
         equipment.setPhotoPath(updatedEquipment.getPhotoPath());
 
         deleteUnusedPhotos();

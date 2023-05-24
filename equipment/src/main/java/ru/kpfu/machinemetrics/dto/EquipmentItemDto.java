@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.Instant;
+import java.time.OffsetDateTime;
 
 @Setter
 @Getter
@@ -25,7 +25,7 @@ public class EquipmentItemDto {
 
     private Double cost;
 
-    private Instant deliveryDate;
+    private OffsetDateTime deliveryDate;
 
     private String installationLocation;
 
@@ -35,7 +35,7 @@ public class EquipmentItemDto {
 
     private String status;
 
-    private Instant lastOperationDate;
+    private OffsetDateTime lastOperationDate;
 
     private String photoPath;
 

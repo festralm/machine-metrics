@@ -12,25 +12,25 @@ import java.util.List;
 @Mapper
 public interface ScheduleMapper {
 
-    @Mapping(source = "startTime", target = "startTime", qualifiedByName = "stringHourToLong")
-    @Mapping(source = "endTime", target = "endTime", qualifiedByName = "stringHourToLong")
+    @Mapping(source = "startTime", target = "startTime", qualifiedByName = "stringHourToInt")
+    @Mapping(source = "endTime", target = "endTime", qualifiedByName = "stringHourToInt")
     Schedule toSchedule(ScheduleCreateDto dto);
 
-    @Mapping(source = "startTime", target = "startTime", qualifiedByName = "longHourToString")
-    @Mapping(source = "endTime", target = "endTime", qualifiedByName = "longHourToString")
+    @Mapping(source = "startTime", target = "startTime", qualifiedByName = "intHourToString")
+    @Mapping(source = "endTime", target = "endTime", qualifiedByName = "intHourToString")
     ScheduleDto toScheduleDto(Schedule schedule);
 
     List<ScheduleDto> toScheduleDtos(List<Schedule> schedules);
 
-    @Named("stringHourToLong")
-    default Long stringTimeToLong(String time) {
+    @Named("stringHourToInt")
+    default Integer stringTimeToLong(String time) {
         var hourAndMinute = time.split(":");
 
-        return Long.parseLong(hourAndMinute[0]) * 60 + Long.parseLong(hourAndMinute[1]);
+        return Integer.parseInt(hourAndMinute[0]) * 60 + Integer.parseInt(hourAndMinute[1]);
     }
 
-    @Named("longHourToString")
-    default String longHourToString(Long time) {
+    @Named("intHourToString")
+    default String intHourToString(Integer time) {
         long hours = time / 60;
 
         String hoursString = Long.toString(hours);

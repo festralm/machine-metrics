@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import ru.kpfu.machinemetrics.properties.InfluxDbProperties;
 
-import java.time.Instant;
+import java.time.OffsetDateTime;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -42,7 +42,7 @@ public class EquipmentStatisticsRepositoryTest {
                 .addTag("equipment_id", Long.toString(1L))
                 .addField("u", 25)
                 .addField("enabled", true)
-                .time(Instant.now(), WritePrecision.NS);
+                .time(OffsetDateTime.now().toInstant(), WritePrecision.NS);
 
         WriteApiBlocking writeApiBlockingMock = Mockito.mock(WriteApiBlocking.class);
         when(influxDBClientMock.getWriteApiBlocking()).thenReturn(writeApiBlockingMock);

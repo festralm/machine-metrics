@@ -6,7 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.OffsetDateTime;
 
 @Getter
 @Setter
@@ -17,9 +18,15 @@ public class ScheduleDto {
 
     private Long id;
 
+    private Integer weekday;
+
+    private OffsetDateTime date;
+
+    private Long equipmentId;
+
+    private Boolean isWorkday;
+
     private String startTime;
 
     private String endTime;
-
-    private Instant date;
 }

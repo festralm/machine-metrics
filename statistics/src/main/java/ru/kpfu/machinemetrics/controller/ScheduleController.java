@@ -28,9 +28,21 @@ public class ScheduleController {
     private final ScheduleService scheduleService;
     private final ScheduleMapper scheduleMapper;
 
+    @GetMapping("/default")
+    public List<ScheduleDto> listDefault() {
+        List<Schedule> scheduleList = scheduleService.listDefault();
+        return scheduleMapper.toScheduleDtos(scheduleList);
+    }
+
     @GetMapping
-    public List<ScheduleDto> listAll() {
-        List<Schedule> scheduleList = scheduleService.getAll();
+    public List<ScheduleDto> listNotDefault() {
+        List<Schedule> scheduleList = scheduleService.listNotDefault();
+        return scheduleMapper.toScheduleDtos(scheduleList);
+    }
+
+    @GetMapping("/equipment/{id}")
+    public List<ScheduleDto> listByEquipmentId(@PathVariable Long id) {
+        List<Schedule> scheduleList = scheduleService.listByEquipmentId(id);
         return scheduleMapper.toScheduleDtos(scheduleList);
     }
 

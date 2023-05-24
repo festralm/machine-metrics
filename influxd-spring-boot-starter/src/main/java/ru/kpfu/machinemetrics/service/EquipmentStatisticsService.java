@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import ru.kpfu.machinemetrics.model.EquipmentInfluxDbData;
 import ru.kpfu.machinemetrics.repository.EquipmentStatisticsRepository;
 
-import java.time.Instant;
+import java.time.OffsetDateTime;
 
 @RequiredArgsConstructor
 public abstract class EquipmentStatisticsService {
@@ -21,7 +21,7 @@ public abstract class EquipmentStatisticsService {
                 .addTag("equipment_id", equipmentId.toString())
                 .addField("u", data.getU())
                 .addField("enabled", data.getEnabled())
-                .time(Instant.now(), WritePrecision.NS);
+                .time(OffsetDateTime.now().toInstant(), WritePrecision.NS);
         equipmentStatisticsRepository.save(point);
 
     }

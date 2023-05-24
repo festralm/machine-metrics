@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 
 @Getter
@@ -15,5 +16,5 @@ public class EquipmentDataDto {
     private Boolean enabled;
     private Boolean disabledDuringActiveTime;
     private Boolean enabledDuringPassiveTime;
-    private ZonedDateTime time;
+    private OffsetDateTime time;
 }
