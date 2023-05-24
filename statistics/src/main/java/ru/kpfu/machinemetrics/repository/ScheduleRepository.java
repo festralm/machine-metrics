@@ -15,6 +15,8 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
 
     List<Schedule> findAllByDateAndEquipmentId(OffsetDateTime OffsetDateTime, Long equipmentId);
 
+    List<Schedule> findAllByWeekdayAndEquipmentId(Integer weekday, Long equipmentId);
+
     List<Schedule> findAllByEquipmentId(Long equipmentId);
 
     @Query(value = "select schedule from Schedule schedule where schedule.date is not null or schedule.equipmentId is not null")

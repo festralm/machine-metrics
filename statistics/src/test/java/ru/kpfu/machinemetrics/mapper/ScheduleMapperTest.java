@@ -51,8 +51,8 @@ public class ScheduleMapperTest {
                 .weekday(2)
                 .date(OffsetDateTime.now())
                 .equipmentId(2L)
-                .startTime(60L)
-                .endTime(18 * 60L)
+                .startTime(60)
+                .endTime(18 * 60)
                 .build();
 
         // when
@@ -77,16 +77,16 @@ public class ScheduleMapperTest {
                 .weekday(1)
                 .date(OffsetDateTime.now())
                 .equipmentId(1L)
-                .startTime(60L)
-                .endTime(18 * 60L)
+                .startTime(60)
+                .endTime(18 * 60)
                 .build();
         Schedule schedule2 = Schedule.builder()
                 .id(2L)
                 .weekday(2)
                 .date(OffsetDateTime.now())
                 .equipmentId(2L)
-                .startTime(2 * 60L + 30)
-                .endTime(17 * 60L + 15)
+                .startTime(2 * 60 + 30)
+                .endTime(17 * 60 + 15)
                 .build();
         List<Schedule> schedules = List.of(schedule1, schedule2);
 

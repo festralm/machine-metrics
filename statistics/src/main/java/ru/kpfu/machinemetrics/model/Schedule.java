@@ -32,7 +32,7 @@ public class Schedule {
 
     private Boolean isWorkday;
 
-    private Long startTime;
+    private Integer startTime;
 
-    private Long endTime;
+    private Integer endTime;
 }

@@ -79,8 +79,8 @@ public class ScheduleControllerTest {
                 .weekday(1)
                 .date(OffsetDateTime.now())
                 .equipmentId(1L)
-                .startTime(11 * 60L)
-                .endTime(18 * 60L)
+                .startTime(11 * 60)
+                .endTime(18 * 60)
                 .build();
         Schedule schedule2 = Schedule.builder()
                 .id(2L)
@@ -159,8 +159,8 @@ public class ScheduleControllerTest {
 
         Schedule schedule = Schedule.builder()
                 .weekday(dto.getWeekday())
-                .startTime(11 * 60L)
-                .endTime(18 * 60L)
+                .startTime(11 * 60)
+                .endTime(18 * 60)
                 .build();
 
         Schedule savedSchedule = Schedule.builder()
@@ -219,8 +219,8 @@ public class ScheduleControllerTest {
 
         Schedule schedule = Schedule.builder()
                 .weekday(dto.getWeekday())
-                .startTime(11 * 60L)
-                .endTime(18 * 60L)
+                .startTime(11 * 60)
+                .endTime(18 * 60)
                 .build();
 
         Locale locale = new Locale("ru");
@@ -672,8 +672,8 @@ public class ScheduleControllerTest {
 
         Schedule updatedSchedule = Schedule.builder()
                 .date(dto.getDate())
-                .startTime(11 * 60L)
-                .endTime(18 * 60L)
+                .startTime(11 * 60)
+                .endTime(18 * 60)
                 .build();
 
         Schedule editedSchedule = Schedule.builder()
@@ -731,8 +731,8 @@ public class ScheduleControllerTest {
 
         Schedule updatedSchedule = Schedule.builder()
                 .weekday(dto.getWeekday())
-                .startTime(11 * 60L)
-                .endTime(18 * 60L)
+                .startTime(11 * 60)
+                .endTime(18 * 60)
                 .build();
 
         Locale locale = new Locale("ru");

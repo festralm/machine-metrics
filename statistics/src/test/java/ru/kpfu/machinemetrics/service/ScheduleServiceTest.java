@@ -57,16 +57,16 @@ public class ScheduleServiceTest {
                 .weekday(1)
                 .date(OffsetDateTime.now())
                 .equipmentId(1L)
-                .startTime(60L)
-                .endTime(18 * 60L)
+                .startTime(60)
+                .endTime(18 * 60)
                 .build();
         Schedule schedule2 = Schedule.builder()
                 .id(2L)
                 .weekday(2)
                 .date(OffsetDateTime.now())
                 .equipmentId(2L)
-                .startTime(2 * 60L + 30)
-                .endTime(17 * 60L + 15)
+                .startTime(2 * 60 + 30)
+                .endTime(17 * 60 + 15)
                 .build();
         List<Schedule> scheduleList = List.of(schedule1, schedule2);
 
@@ -101,16 +101,16 @@ public class ScheduleServiceTest {
                 .weekday(1)
                 .date(OffsetDateTime.now())
                 .equipmentId(1L)
-                .startTime(60L)
-                .endTime(18 * 60L)
+                .startTime(60)
+                .endTime(18 * 60)
                 .build();
         Schedule schedule2 = Schedule.builder()
                 .id(2L)
                 .weekday(2)
                 .date(OffsetDateTime.now())
                 .equipmentId(2L)
-                .startTime(2 * 60L + 30)
-                .endTime(17 * 60L + 15)
+                .startTime(2 * 60 + 30)
+                .endTime(17 * 60 + 15)
                 .build();
         List<Schedule> scheduleList = List.of(schedule1, schedule2);
 
@@ -145,8 +145,8 @@ public class ScheduleServiceTest {
                 .weekday(1)
                 .date(OffsetDateTime.now())
                 .equipmentId(1L)
-                .startTime(60L)
-                .endTime(18 * 60L)
+                .startTime(60)
+                .endTime(18 * 60)
                 .build();
 
         Schedule savedSchedule = Schedule.builder()
@@ -181,8 +181,8 @@ public class ScheduleServiceTest {
                 .weekday(1)
                 .date(OffsetDateTime.now())
                 .equipmentId(1L)
-                .startTime(60L)
-                .endTime(18 * 60L)
+                .startTime(60)
+                .endTime(18 * 60)
                 .build();
 
         Schedule savedSchedule = Schedule.builder()
@@ -231,8 +231,8 @@ public class ScheduleServiceTest {
                 .weekday(1)
                 .date(OffsetDateTime.now())
                 .equipmentId(1L)
-                .startTime(60L)
-                .endTime(18 * 60L)
+                .startTime(60)
+                .endTime(18 * 60)
                 .build();
 
         when(scheduleRepositoryMock.findById(scheduleId)).thenReturn(Optional.of(schedule));
@@ -274,8 +274,8 @@ public class ScheduleServiceTest {
         Schedule schedule = Schedule.builder()
                 .id(1L)
                 .weekday(1)
-                .startTime(60L)
-                .endTime(18 * 60L)
+                .startTime(60)
+                .endTime(18 * 60)
                 .build();
         when(scheduleRepositoryMock.findById(scheduleId)).thenReturn(Optional.of(schedule));
 
@@ -304,8 +304,8 @@ public class ScheduleServiceTest {
                 .weekday(1)
                 .date(OffsetDateTime.now())
                 .equipmentId(1L)
-                .startTime(60L)
-                .endTime(18 * 60L)
+                .startTime(60)
+                .endTime(18 * 60)
                 .build();
 
         Schedule updatedSchedule = Schedule.builder()
@@ -313,8 +313,8 @@ public class ScheduleServiceTest {
                 .weekday(2)
                 .date(OffsetDateTime.now())
                 .equipmentId(2L)
-                .startTime(2 * 60L + 30)
-                .endTime(17 * 60L + 15)
+                .startTime(2 * 60 + 30)
+                .endTime(17 * 60 + 15)
                 .build();
 
         when(scheduleRepositoryMock.findById(scheduleId)).thenReturn(Optional.of(existingSchedule));
@@ -347,8 +347,8 @@ public class ScheduleServiceTest {
                 .weekday(1)
                 .date(OffsetDateTime.now())
                 .equipmentId(1L)
-                .startTime(60L)
-                .endTime(18 * 60L)
+                .startTime(60)
+                .endTime(18 * 60)
                 .build();
 
         when(scheduleRepositoryMock.findById(scheduleId)).thenReturn(Optional.empty());
@@ -374,22 +374,22 @@ public class ScheduleServiceTest {
         Schedule existingSchedule = Schedule.builder()
                 .id(scheduleId)
                 .weekday(1)
-                .startTime(60L)
-                .endTime(18 * 60L)
+                .startTime(60)
+                .endTime(18 * 60)
                 .build();
 
         Schedule updatedSchedule = Schedule.builder()
                 .id(scheduleId)
                 .weekday(1)
-                .startTime(30L)
-                .endTime(18 * 60L)
+                .startTime(30)
+                .endTime(18 * 60)
                 .build();
 
         Schedule defaultSchedule = Schedule.builder()
                 .id(2L)
                 .weekday(1)
-                .startTime(30L)
-                .endTime(18 * 60L)
+                .startTime(30)
+                .endTime(18 * 60)
                 .build();
 
         when(scheduleRepositoryMock.findById(scheduleId)).thenReturn(Optional.of(existingSchedule));
@@ -420,15 +420,15 @@ public class ScheduleServiceTest {
         Schedule existingSchedule = Schedule.builder()
                 .id(scheduleId)
                 .weekday(1)
-                .startTime(60L)
-                .endTime(18 * 60L)
+                .startTime(60)
+                .endTime(18 * 60)
                 .build();
 
         Schedule updatedSchedule = Schedule.builder()
                 .id(scheduleId)
                 .weekday(1)
-                .startTime(30L)
-                .endTime(18 * 60L)
+                .startTime(30)
+                .endTime(18 * 60)
                 .date(OffsetDateTime.now())
                 .build();
 
@@ -462,8 +462,8 @@ public class ScheduleServiceTest {
                 .weekday(1)
                 .date(OffsetDateTime.now())
                 .equipmentId(1L)
-                .startTime(60L)
-                .endTime(18 * 60L)
+                .startTime(60)
+                .endTime(18 * 60)
                 .build();
 
         Schedule updatedSchedule = Schedule.builder()
@@ -471,8 +471,8 @@ public class ScheduleServiceTest {
                 .weekday(2)
                 .date(OffsetDateTime.now())
                 .equipmentId(2L)
-                .startTime(2 * 60L + 30)
-                .endTime(17 * 60L + 15)
+                .startTime(2 * 60 + 30)
+                .endTime(17 * 60 + 15)
                 .build();
 
         Schedule existingSchedule = Schedule.builder()
@@ -480,8 +480,8 @@ public class ScheduleServiceTest {
                 .weekday(2)
                 .date(OffsetDateTime.now())
                 .equipmentId(2L)
-                .startTime(2 * 60L + 30)
-                .endTime(17 * 60L + 15)
+                .startTime(2 * 60 + 30)
+                .endTime(17 * 60 + 15)
                 .build();
 
         when(scheduleRepositoryMock.findById(scheduleId)).thenReturn(Optional.of(schedule));
