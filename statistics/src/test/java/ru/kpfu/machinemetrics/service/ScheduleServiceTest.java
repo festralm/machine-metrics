@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
+import org.springframework.test.context.TestPropertySource;
 import ru.kpfu.machinemetrics.config.MessageSourceConfig;
 import ru.kpfu.machinemetrics.exception.CannotDeleteScheduleException;
 import ru.kpfu.machinemetrics.exception.ResourceNotFoundException;
@@ -34,6 +35,7 @@ import static ru.kpfu.machinemetrics.constants.ScheduleConstants.SCHEDULE_DELETE
 import static ru.kpfu.machinemetrics.constants.ScheduleConstants.SCHEDULE_NOT_FOUND_EXCEPTION_MESSAGE;
 
 @SpringBootTest
+@TestPropertySource("classpath:application.yml")
 @ImportAutoConfiguration(MessageSourceConfig.class)
 public class ScheduleServiceTest {
 

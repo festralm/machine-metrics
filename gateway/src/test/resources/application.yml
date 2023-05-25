@@ -1,0 +1,74 @@
+
+app:
+  service:
+    port:
+      equipment: 8090
+      schedule: 9010
+      statistics: 9020
+      user: 9030
+  api:
+    prefix:
+      v1: /api/v1
+  front:
+    url: http://localhost:8081
+
+spring:
+  application:
+    name: gateway
+  main:
+    web-application-type: reactive
+  cloud:
+    gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: ${app.front.url}
+            allowedMethods: "*"
+            allowedHeaders: "*"
+            exposedHeaders:
+              - "Location"
+              - "Authorization"
+            allowCredentials: true
+      routes:
+        - id: equipment
+          uri: http://127.0.0.1:${app.service.port.equipment}
+          predicates:
+            - Path=${app.api.prefix.v1}/equipment/**,${app.api.prefix.v1}/country/**,${app.api.prefix.v1}/purpose/**,${app.api.prefix.v1}/status/**,${app.api.prefix.v1}/unit/**,${app.api.prefix.v1}/usage-type/**,${app.api.prefix.v1}/photo/**
+          filters:
+            - RemoveRequestHeader=Cookie
+        - id: schedule
+          uri: http://127.0.0.1:${app.service.port.schedule}
+          predicates:
+            - Path=${app.api.prefix.v1}/cron/**,${app.api.prefix.v1}/data-service/**,${app.api.prefix.v1}/equipment-schedule/**
+          filters:
+            - RemoveRequestHeader=Cookie
+        - id: statistics
+          uri: http://127.0.0.1:${app.service.port.statistics}
+          predicates:
+            - Path=${app.api.prefix.v1}/equipment-data,${app.api.prefix.v1}/schedule/**
+          filters:
+            - RemoveRequestHeader=Cookie
+        - id: user
+          uri: http://127.0.0.1:${app.service.port.user}
+          predicates:
+            - Path=${app.api.prefix.v1}/user/**,${app.api.prefix.v1}/role/**
+          filters:
+            - RemoveRequestHeader=Cookie
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/master
+          jwk-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
+jwt:
+  auth:
+    converter:
+      resource-id: login-app
+      principal-attribute: preferred_username
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web.reactive.function.client: TRACE

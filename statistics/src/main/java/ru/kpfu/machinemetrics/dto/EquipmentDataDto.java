@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.OffsetDateTime;
-import java.time.ZonedDateTime;
 
 @Getter
 @Setter

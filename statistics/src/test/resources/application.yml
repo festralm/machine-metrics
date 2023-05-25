@@ -1,0 +1,17 @@
+influxdb:
+  url: http://influxdb:8086
+  bucket: bucket
+  token: test
+  org: org
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/statistics
+    username: statistics
+    password: statistics
+
+app:
+  api:
+    prefix:
+      v1: /api/v1
+  default-zone: "+3"

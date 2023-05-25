@@ -30,95 +30,11 @@ import java.util.stream.Collectors;
 @Transactional
 public class EquipmentDataService {
 
+    private static final DateTimeFormatter isoOffsetDateTime = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
     private final AppProperties appProperties;
     private final EquipmentDataRepository equipmentDataRepository;
     private final ScheduleRepository scheduleRepository;
     private final ScheduleMapper scheduleMapper;
-
-    private static final DateTimeFormatter isoOffsetDateTime = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
-
-    public StatisticsDto getData(Long equipmentId, OffsetDateTime start, OffsetDateTime end) {
-        if (start == null) {
-            start = OffsetDateTime.now().minus(Period.ofDays(1));
-        } else {
-            start = start.withOffsetSameInstant(ZoneOffset.of(appProperties.getDefaultZone()));
-        }
-        if (end == null) {
-            end = OffsetDateTime.now();
-        } else {
-            end = end.withOffsetSameInstant(ZoneOffset.of(appProperties.getDefaultZone()));
-        }
-
-        final List<EquipmentData> equipmentData = equipmentDataRepository.getData(
-                start.format(isoOffsetDateTime),
-                end.format(isoOffsetDateTime),
-                equipmentId
-        );
-
-        return fillEquipmentListData(equipmentData, equipmentId, start, end);
-    }
-
-    private StatisticsDto fillEquipmentListData(
-            List<EquipmentData> equipmentDataList,
-            Long equipmentId,
-            OffsetDateTime start,
-            OffsetDateTime end
-    ) {
-        Duration totalDuration = Duration.between(start, end);
-
-        var result = StatisticsDto.builder()
-                .equipmentData(new ArrayList<>())
-                .upMinutes(0L)
-                .upScheduleMinutes(0L)
-                .upNotScheduleMinutes(0L)
-                .downScheduleMinutes(0L)
-                .start(start)
-                .end(end)
-                .schedules(new HashMap<>())
-                .build();
-
-        var schedules = getSchedules(equipmentId, start, end);
-
-        boolean previousEnabled = false;
-        if (equipmentDataList.size() != 0) {
-            if (equipmentDataList.get(0).getTime().isBefore(start)) {
-                previousEnabled = equipmentDataList.get(0).getEnabled();
-                equipmentDataList = equipmentDataList.subList(1, equipmentDataList.size());
-            }
-        }
-
-        if (equipmentDataList.size() != 0) {
-            final EquipmentData lastEquipmentData = equipmentDataList.get(equipmentDataList.size() - 1);
-
-            fillTimeBeforeFirstData(result, previousEnabled, start, schedules, equipmentDataList.get(0).getTime());
-            fillTimeAfterLastData(result, lastEquipmentData.getEnabled(), end, schedules, lastEquipmentData.getTime());
-
-            fillFromList(equipmentDataList, start, end, result, schedules, previousEnabled);
-
-            final Long upScheduleMinutes = result.getUpScheduleMinutes();
-            final Long downScheduleMinutes = result.getDownScheduleMinutes();
-
-            result.setUpSchedulePercent(upScheduleMinutes * 100.0 / (upScheduleMinutes + downScheduleMinutes));
-            result.setDownSchedulePercent(downScheduleMinutes * 100.0 / (upScheduleMinutes + downScheduleMinutes));
-        } else {
-            if (previousEnabled) {
-                result.setUpMinutes(totalDuration.toMinutes());
-            }
-            fillIfEmpty(start, end, result, schedules, previousEnabled);
-        }
-
-        result.setDownMinutes(totalDuration.toMinutes() - result.getUpMinutes());
-        result.setUpNotScheduleMinutes(result.getUpMinutes() - result.getUpScheduleMinutes());
-
-        result.setSchedules(
-                schedules.entrySet().stream()
-                        .collect(
-                                Collectors.toMap(Map.Entry::getKey,
-                                        e -> scheduleMapper.toScheduleDto(e.getValue()))
-                        )
-        );
-        return result;
-    }
 
     private static void fillTimeBeforeFirstData(
             StatisticsDto result,
@@ -218,33 +134,6 @@ public class EquipmentDataService {
         return dateTime.withHour(time / 60).withMinute(time % 60);
     }
 
-    private void fillFromList(
-            List<EquipmentData> equipmentDataList,
-            OffsetDateTime start,
-            OffsetDateTime end,
-            StatisticsDto result,
-            Map<OffsetDateTime, Schedule> schedules,
-            boolean previousEnabled
-    ) {
-        OffsetDateTime previousTime = start;
-
-        boolean isFirst = true;
-
-        EquipmentData lastEquipmentData = null;
-        for (EquipmentData equipmentData : equipmentDataList) {
-            calculate(result, schedules, equipmentData, previousTime, previousEnabled, null, isFirst);
-
-            previousTime = equipmentData.getTime();
-            previousEnabled = equipmentData.getEnabled();
-            lastEquipmentData = equipmentData;
-            isFirst = false;
-        }
-
-        if (lastEquipmentData != null) {
-            calculate(result, schedules, lastEquipmentData, previousTime, previousEnabled, end, false);
-        }
-    }
-
     private static void fillIfEmpty(
             OffsetDateTime start,
             OffsetDateTime end,
@@ -285,61 +174,6 @@ public class EquipmentDataService {
             result.setDownScheduleMinutes(scheduleMinutes);
             result.setUpSchedulePercent(0.0);
             result.setDownSchedulePercent(100.0);
-        }
-    }
-
-    private Map<OffsetDateTime, Schedule> getSchedules(Long equipmentId, OffsetDateTime start, OffsetDateTime end) {
-        Map<OffsetDateTime, Schedule> result = new HashMap<>();
-        for (OffsetDateTime date = start; date.isBefore(end); date = date.plusDays(1)) {
-            Schedule schedule = getSchedule(equipmentId, date);
-            result.put(date.truncatedTo(ChronoUnit.DAYS), schedule);
-        }
-        return result;
-    }
-
-    private void calculate(
-            StatisticsDto dto,
-            Map<OffsetDateTime, Schedule> schedules,
-            EquipmentData equipmentData,
-            OffsetDateTime previousDateTime,
-            boolean previousEnabled,
-            OffsetDateTime end,
-            boolean isFirst
-    ) {
-        OffsetDateTime currentDateTime = end == null ? equipmentData.getTime() : end;
-
-        Schedule schedule = schedules.get(currentDateTime.truncatedTo(ChronoUnit.DAYS));
-
-        if (end == null) {
-            EquipmentDataDto equipmentDataDto = getEquipmentDataDto(schedule, equipmentData);
-            dto.getEquipmentData().add(equipmentDataDto);
-        }
-
-        if (previousEnabled) {
-            var totalMinutes = Duration.between(previousDateTime, currentDateTime).toMinutes();
-            dto.setUpMinutes(dto.getUpMinutes() + totalMinutes);
-        }
-
-        if (previousDateTime.truncatedTo(ChronoUnit.DAYS).equals(currentDateTime.truncatedTo(ChronoUnit.DAYS))) {
-            long scheduleMinutes = getScheduleMinutes(previousDateTime, currentDateTime, schedule);
-            if (previousEnabled) {
-                dto.setUpScheduleMinutes(dto.getUpScheduleMinutes() + scheduleMinutes);
-            } else if (!previousDateTime.equals(currentDateTime)) {
-                dto.setDownScheduleMinutes(dto.getDownScheduleMinutes() + scheduleMinutes);
-            }
-        } else if (end == null && !isFirst) {
-            Map<OffsetDateTime, Schedule> schedulesBetween = new HashMap<>();
-            for (OffsetDateTime date = previousDateTime; date.isBefore(currentDateTime); date = date.plusDays(1)) {
-                schedulesBetween.put(date, schedules.get(date.truncatedTo(ChronoUnit.DAYS)));
-            }
-            fillTimeBetweenSchedules(
-                    dto,
-                    previousEnabled,
-                    equipmentData.getEnabled(),
-                    schedulesBetween,
-                    currentDateTime,
-                    previousDateTime
-            );
         }
     }
 
@@ -398,6 +232,171 @@ public class EquipmentDataService {
     @org.jetbrains.annotations.NotNull
     private static OffsetDateTime getDateTimeWithMinute(OffsetDateTime date, Integer time) {
         return date.withHour(time / 60).withMinute(time % 60);
+    }
+
+    public StatisticsDto getData(Long equipmentId, OffsetDateTime start, OffsetDateTime end) {
+        if (start == null) {
+            start = OffsetDateTime.now().minus(Period.ofDays(1));
+        } else {
+            start = start.withOffsetSameInstant(ZoneOffset.of(appProperties.getDefaultZone()));
+        }
+        if (end == null) {
+            end = OffsetDateTime.now();
+        } else {
+            end = end.withOffsetSameInstant(ZoneOffset.of(appProperties.getDefaultZone()));
+        }
+
+        final List<EquipmentData> equipmentData = equipmentDataRepository.getData(
+                start.format(isoOffsetDateTime),
+                end.format(isoOffsetDateTime),
+                equipmentId
+        );
+
+        return fillEquipmentListData(equipmentData, equipmentId, start, end);
+    }
+
+    private StatisticsDto fillEquipmentListData(
+            List<EquipmentData> equipmentDataList,
+            Long equipmentId,
+            OffsetDateTime start,
+            OffsetDateTime end
+    ) {
+        Duration totalDuration = Duration.between(start, end);
+
+        var result = StatisticsDto.builder()
+                .equipmentData(new ArrayList<>())
+                .upMinutes(0L)
+                .upScheduleMinutes(0L)
+                .upNotScheduleMinutes(0L)
+                .downScheduleMinutes(0L)
+                .start(start)
+                .end(end)
+                .schedules(new HashMap<>())
+                .build();
+
+        var schedules = getSchedules(equipmentId, start, end);
+
+        boolean previousEnabled = false;
+        if (equipmentDataList.size() != 0) {
+            if (equipmentDataList.get(0).getTime().isBefore(start)) {
+                previousEnabled = equipmentDataList.get(0).getEnabled();
+                equipmentDataList = equipmentDataList.subList(1, equipmentDataList.size());
+            }
+        }
+
+        if (equipmentDataList.size() != 0) {
+            final EquipmentData lastEquipmentData = equipmentDataList.get(equipmentDataList.size() - 1);
+
+            fillTimeBeforeFirstData(result, previousEnabled, start, schedules, equipmentDataList.get(0).getTime());
+            fillTimeAfterLastData(result, lastEquipmentData.getEnabled(), end, schedules, lastEquipmentData.getTime());
+
+            fillFromList(equipmentDataList, start, end, result, schedules, previousEnabled);
+
+            final Long upScheduleMinutes = result.getUpScheduleMinutes();
+            final Long downScheduleMinutes = result.getDownScheduleMinutes();
+
+            result.setUpSchedulePercent(upScheduleMinutes * 100.0 / (upScheduleMinutes + downScheduleMinutes));
+            result.setDownSchedulePercent(downScheduleMinutes * 100.0 / (upScheduleMinutes + downScheduleMinutes));
+        } else {
+            if (previousEnabled) {
+                result.setUpMinutes(totalDuration.toMinutes());
+            }
+            fillIfEmpty(start, end, result, schedules, previousEnabled);
+        }
+
+        result.setDownMinutes(totalDuration.toMinutes() - result.getUpMinutes());
+        result.setUpNotScheduleMinutes(result.getUpMinutes() - result.getUpScheduleMinutes());
+
+        result.setSchedules(
+                schedules.entrySet().stream()
+                        .collect(
+                                Collectors.toMap(Map.Entry::getKey,
+                                        e -> scheduleMapper.toScheduleDto(e.getValue()))
+                        )
+        );
+        return result;
+    }
+
+    private void fillFromList(
+            List<EquipmentData> equipmentDataList,
+            OffsetDateTime start,
+            OffsetDateTime end,
+            StatisticsDto result,
+            Map<OffsetDateTime, Schedule> schedules,
+            boolean previousEnabled
+    ) {
+        OffsetDateTime previousTime = start;
+
+        boolean isFirst = true;
+
+        EquipmentData lastEquipmentData = null;
+        for (EquipmentData equipmentData : equipmentDataList) {
+            calculate(result, schedules, equipmentData, previousTime, previousEnabled, null, isFirst);
+
+            previousTime = equipmentData.getTime();
+            previousEnabled = equipmentData.getEnabled();
+            lastEquipmentData = equipmentData;
+            isFirst = false;
+        }
+
+        if (lastEquipmentData != null) {
+            calculate(result, schedules, lastEquipmentData, previousTime, previousEnabled, end, false);
+        }
+    }
+
+    private Map<OffsetDateTime, Schedule> getSchedules(Long equipmentId, OffsetDateTime start, OffsetDateTime end) {
+        Map<OffsetDateTime, Schedule> result = new HashMap<>();
+        for (OffsetDateTime date = start; date.isBefore(end); date = date.plusDays(1)) {
+            Schedule schedule = getSchedule(equipmentId, date);
+            result.put(date.truncatedTo(ChronoUnit.DAYS), schedule);
+        }
+        return result;
+    }
+
+    private void calculate(
+            StatisticsDto dto,
+            Map<OffsetDateTime, Schedule> schedules,
+            EquipmentData equipmentData,
+            OffsetDateTime previousDateTime,
+            boolean previousEnabled,
+            OffsetDateTime end,
+            boolean isFirst
+    ) {
+        OffsetDateTime currentDateTime = end == null ? equipmentData.getTime() : end;
+
+        Schedule schedule = schedules.get(currentDateTime.truncatedTo(ChronoUnit.DAYS));
+
+        if (end == null) {
+            EquipmentDataDto equipmentDataDto = getEquipmentDataDto(schedule, equipmentData);
+            dto.getEquipmentData().add(equipmentDataDto);
+        }
+
+        if (previousEnabled) {
+            var totalMinutes = Duration.between(previousDateTime, currentDateTime).toMinutes();
+            dto.setUpMinutes(dto.getUpMinutes() + totalMinutes);
+        }
+
+        if (previousDateTime.truncatedTo(ChronoUnit.DAYS).equals(currentDateTime.truncatedTo(ChronoUnit.DAYS))) {
+            long scheduleMinutes = getScheduleMinutes(previousDateTime, currentDateTime, schedule);
+            if (previousEnabled) {
+                dto.setUpScheduleMinutes(dto.getUpScheduleMinutes() + scheduleMinutes);
+            } else if (!previousDateTime.equals(currentDateTime)) {
+                dto.setDownScheduleMinutes(dto.getDownScheduleMinutes() + scheduleMinutes);
+            }
+        } else if (end == null && !isFirst) {
+            Map<OffsetDateTime, Schedule> schedulesBetween = new HashMap<>();
+            for (OffsetDateTime date = previousDateTime; date.isBefore(currentDateTime); date = date.plusDays(1)) {
+                schedulesBetween.put(date, schedules.get(date.truncatedTo(ChronoUnit.DAYS)));
+            }
+            fillTimeBetweenSchedules(
+                    dto,
+                    previousEnabled,
+                    equipmentData.getEnabled(),
+                    schedulesBetween,
+                    currentDateTime,
+                    previousDateTime
+            );
+        }
     }
 
     private Schedule getSchedule(Long equipmentId, OffsetDateTime currentTime) {

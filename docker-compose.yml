@@ -1,0 +1,245 @@
+version: "3.2"
+
+services:
+
+#  equipment:
+#    container_name: 'equipment'
+#    build:
+#      context: ./equipment
+#    environment:
+#      POSTGRES_USER: ${POSTGRES_USER}
+#      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#      RABBIT_USERNAME: ${RABBIT_USERNAME}
+#      RABBIT_PASSWORD: ${RABBIT_PASSWORD}
+#    ports:
+#      - "8090:8090"
+#    networks:
+#      - machinemetrics-network
+#    restart: always
+#    depends_on:
+#      - equipment-db
+
+#  equipment-db:
+#    container_name: 'equipment-db'
+#    image: postgres:13.11
+#    environment:
+#      POSTGRES_USER: ${POSTGRES_USER}
+#      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#      POSTGRES_DB: ${POSTGRES_DB}
+#    volumes:
+#      - ../machinemetrics-volumes/equipment-db:/var/lib/postgresql/data
+#    networks:
+#      - machinemetrics-network
+#    restart: always
+
+#  gateway:
+#    container_name: 'gateway'
+#    build:
+#      context: ./gateway
+#    environment:
+#      KEYCLOAK_URL: ${KEYCLOAK_URL}
+#    ports:
+#      - "9000:9000"
+#    networks:
+#      - machinemetrics-network
+#    restart: always
+#    depends_on:
+#      - keycloak
+
+#  random-1:
+#    container_name: 'random-1'
+#    build:
+#      context: ./random-data
+#    environment:
+#      POSTGRES_USER: ${POSTGRES_USER}
+#      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#      RABBIT_USERNAME: ${RABBIT_USERNAME}
+#      RABBIT_PASSWORD: ${RABBIT_PASSWORD}
+#      INFLUXDB_TOKEN: ${INFLUXDB_TOKEN}
+#    ports:
+#      - "10010:10010"
+#    networks:
+#      - machinemetrics-network
+#    restart: always
+#    depends_on:
+#      - random-1-db
+#      - influxdb
+#      - rabbitmq
+
+#  random-1-db:
+#    container_name: 'random-1-db'
+#    image: postgres:13.11
+#    environment:
+#      POSTGRES_USER: ${POSTGRES_USER}
+#      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#      POSTGRES_DB: ${POSTGRES_DB}
+#    volumes:
+#      - ../machinemetrics-volumes/random-1-db:/var/lib/postgresql/data
+#    networks:
+#      - machinemetrics-network
+#    restart: always
+
+#  random-2:
+#    container_name: 'random-2'
+#    build:
+#      context: ./random-data-2
+#    environment:
+#      POSTGRES_USER: ${POSTGRES_USER}
+#      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#      RABBIT_USERNAME: ${RABBIT_USERNAME}
+#      RABBIT_PASSWORD: ${RABBIT_PASSWORD}
+#      INFLUXDB_TOKEN: ${INFLUXDB_TOKEN}
+#    ports:
+#      - "10020:10020"
+#    networks:
+#      - machinemetrics-network
+#    restart: always
+#    depends_on:
+#      - random-2-db
+#      - influxdb
+#      - rabbitmq
+
+#  random-2-db:
+#    container_name: 'random-2-db'
+#    image: postgres:13.11
+#    environment:
+#      POSTGRES_USER: ${POSTGRES_USER}
+#      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#      POSTGRES_DB: ${POSTGRES_DB}
+#    volumes:
+#      - ../machinemetrics-volumes/random-2-db:/var/lib/postgresql/data
+#    networks:
+#      - machinemetrics-network
+#    restart: always
+
+#  schedule:
+#    container_name: 'schedule'
+#    build:
+#      context: ./schedule
+#    environment:
+#      POSTGRES_USER: ${POSTGRES_USER}
+#      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#      RABBIT_USERNAME: ${RABBIT_USERNAME}
+#      RABBIT_PASSWORD: ${RABBIT_PASSWORD}
+#    ports:
+#      - "9010:9010"
+#    networks:
+#      - machinemetrics-network
+#    restart: always
+#    depends_on:
+#      - schedule-db
+#      - rabbitmq
+
+#  schedule-db:
+#    container_name: 'schedule-db'
+#    image: postgres:13.11
+#    environment:
+#      POSTGRES_USER: ${POSTGRES_USER}
+#      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#      POSTGRES_DB: ${POSTGRES_DB}
+#    volumes:
+#      - ../machinemetrics-volumes/schedule-db:/var/lib/postgresql/data
+#    networks:
+#      - machinemetrics-network
+#    restart: always
+
+#  statistics:
+#    container_name: 'statistics'
+#    build:
+#      context: ./statistics
+#    environment:
+#      POSTGRES_USER: ${POSTGRES_USER}
+#      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#      RABBIT_USERNAME: ${RABBIT_USERNAME}
+#      RABBIT_PASSWORD: ${RABBIT_PASSWORD}
+#      INFLUXDB_TOKEN: ${INFLUXDB_TOKEN}
+#    ports:
+#      - "9020:9020"
+#    networks:
+#      - machinemetrics-network
+#    restart: always
+#    depends_on:
+#      - statistics-db
+#      - rabbitmq
+#      - influxdb
+
+#  statistics-db:
+#    container_name: 'statistics-db'
+#    image: postgres:13.11
+#    environment:
+#      POSTGRES_USER: ${POSTGRES_USER}
+#      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#      POSTGRES_DB: ${POSTGRES_DB}
+#    volumes:
+#      - ../machinemetrics-volumes/statistics-db:/var/lib/postgresql/data
+#    networks:
+#      - machinemetrics-network
+#    restart: always
+
+#  user:
+#    container_name: 'user'
+#    build:
+#      context: ./user
+#    environment:
+#      KEYCLOAK_SECRET: ${KEYCLOAK_SECRET}
+#      KEYCLOAK_URL: ${KEYCLOAK_URL}
+#    ports:
+#      - "9030:9030"
+#    networks:
+#      - machinemetrics-network
+#    restart: always
+#    depends_on:
+#      - keycloak
+
+# todo volume
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: 'rabbitmq'
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - machinemetrics-network
+    restart: always
+
+  influxdb:
+    image: influxdb:2.7-alpine
+    container_name: 'influxdb'
+    ports:
+      - "8086:8086"
+    volumes:
+      - ../machinemetrics-volumes/influxdb:/var/lib/influxdb2
+    networks:
+      - machinemetrics-network
+    restart: always
+
+  keycloak:
+    image: jboss/keycloak:16.1.1
+    container_name: 'keycloak'
+    ports:
+      - "8080:8080"
+    environment:
+#      KEYCLOAK_USER: ${KEYCLOAK_USER}
+#      KEYCLOAK_PASSWORD: ${KEYCLOAK_PASSWORD}
+      KC_HEALTH_ENABLED: true
+      KC_METRICS_ENABLED: true
+      KC_HOSTNAME: localhost:8080
+    volumes:
+      - ../machinemetrics-volumes/keycloak:/opt/jboss/keycloak/standalone/data
+    networks:
+      - machinemetrics-network
+    restart: always
+
+#  front:
+#    container_name: 'front'
+#    build:
+#      context: ./machine-metrics-front
+#    ports:
+#      - "8081:8080"
+#    networks:
+#      - machinemetrics-network
+#    restart: always
+
+#networks:
+#  machinemetrics-network:
+#    driver: bridge

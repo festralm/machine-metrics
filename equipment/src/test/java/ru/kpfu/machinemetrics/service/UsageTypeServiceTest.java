@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
+import org.springframework.test.context.TestPropertySource;
 import ru.kpfu.machinemetrics.config.MessageSourceConfig;
 import ru.kpfu.machinemetrics.exception.ResourceNotFoundException;
 import ru.kpfu.machinemetrics.model.UsageType;
@@ -25,6 +26,7 @@ import static org.mockito.Mockito.when;
 import static ru.kpfu.machinemetrics.constants.UsageTypeConstants.USAGE_TYPE_NOT_FOUND_EXCEPTION_MESSAGE;
 
 @SpringBootTest
+@TestPropertySource("classpath:application.yml")
 @ImportAutoConfiguration(MessageSourceConfig.class)
 public class UsageTypeServiceTest {
 

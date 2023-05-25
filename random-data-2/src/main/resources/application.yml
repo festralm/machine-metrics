@@ -1,16 +1,16 @@
 server:
-  port: 10010
+  port: 10020
 
 influxdb:
-  url: http://localhost:8086
+  url: http://influxdb:8086
   bucket: machinemetrics
   token: ${INFLUXDB_TOKEN}
   org: Alia
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/random-2
-    username: random-2
+    url: jdbc:postgresql://random-2-db:5432/machinemetrics
+    username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
   jpa:
     show-sql: true
@@ -21,10 +21,10 @@ spring:
     jdbc:
       initialize-schema: always
   rabbitmq:
-    host: localhost
+    host: rabbitmq
     port: 5672
-    username: guest
-    password: guest
+    username: ${RABBIT_USERNAME}
+    password: ${RABBIT_PASSWORD}
 
 app:
   name: random-2

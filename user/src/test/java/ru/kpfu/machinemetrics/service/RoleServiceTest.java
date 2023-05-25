@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.TestPropertySource;
 import ru.kpfu.machinemetrics.config.MessageSourceConfig;
 
 import java.util.List;
@@ -18,7 +19,8 @@ import java.util.List;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest({"keycloak.realm=realm", "keycloak.auth-server-url=http://localhost:8080"})
+@SpringBootTest
+@TestPropertySource("classpath:application.yml")
 @ImportAutoConfiguration(MessageSourceConfig.class)
 public class RoleServiceTest {
 

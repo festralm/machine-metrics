@@ -9,25 +9,24 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.TestPropertySource;
 import ru.kpfu.machinemetrics.model.EquipmentData;
 import ru.kpfu.machinemetrics.properties.InfluxDbProperties;
 
 import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest({"influxdb.bucket=bucket", "influxdb.org=org"})
+@SpringBootTest
+@TestPropertySource("classpath:application.yml")
 public class EquipmentDataRepositoryTest {
 
     @Autowired
@@ -50,7 +49,7 @@ public class EquipmentDataRepositoryTest {
                 "|> range(start: -inf, stop: time(v: 2023-03-24T01:00:00Z)) " +
                 "|> filter(fn: (r) => r[\"_measurement\"] == \"equipment_statistics\")" +
                 "|> filter(fn: (r) => r[\"equipment_id\"] == \"1\")" +
-                "|> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")"+
+                "|> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")" +
                 "|> last(column: \"_time\")";
 
         String expectedGetAllQuery = "from(bucket: \"bucket\") " +
@@ -97,7 +96,7 @@ public class EquipmentDataRepositoryTest {
         String expectedPreviousQuery = "from(bucket: \"bucket\") " +
                 "|> range(start: -inf, stop: time(v: 2023-03-24T01:00:00Z)) " +
                 "|> filter(fn: (r) => r[\"_measurement\"] == \"equipment_statistics\")" +
-                "|> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")"+
+                "|> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")" +
                 "|> last(column: \"_time\")";
 
         String expectedGetAllQuery = "from(bucket: \"bucket\") " +

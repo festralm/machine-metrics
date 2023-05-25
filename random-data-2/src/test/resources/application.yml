@@ -1,0 +1,14 @@
+influxdb:
+  url: http://influxdb:8086
+  bucket: machinemetrics
+  token: test
+  org: Alia
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/random-2
+    username: random-2
+    password: random-2
+
+app:
+  name: random-2

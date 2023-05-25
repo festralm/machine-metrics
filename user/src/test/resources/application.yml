@@ -1,0 +1,24 @@
+
+app:
+  api:
+    prefix:
+      v1: /api/v1
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/master
+          jwk-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
+jwt:
+  auth:
+    converter:
+      resource-id: login-app
+      principal-attribute: preferred_username
+
+keycloak:
+  realm: realm
+  resource: admin-cli
+  auth-server-url: http://localhost:8080
+  client-secret: ${KEYCLOAK_SECRET}

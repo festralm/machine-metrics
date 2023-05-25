@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/equipment
+    username: equipment
+    password: equipment
+
+app:
+  api:
+    prefix:
+      v1: /api/v1

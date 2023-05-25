@@ -12,6 +12,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.TestPropertySource;
 import ru.kpfu.machinemetrics.config.MessageSourceConfig;
 import ru.kpfu.machinemetrics.exception.ResourceNotFoundException;
 import ru.kpfu.machinemetrics.model.Equipment;
@@ -32,6 +33,7 @@ import static org.mockito.Mockito.when;
 import static ru.kpfu.machinemetrics.constants.EquipmentConstants.EQUIPMENT_NOT_FOUND_EXCEPTION_MESSAGE;
 
 @SpringBootTest
+@TestPropertySource("classpath:application.yml")
 @ImportAutoConfiguration(MessageSourceConfig.class)
 public class EquipmentServiceTest {
 

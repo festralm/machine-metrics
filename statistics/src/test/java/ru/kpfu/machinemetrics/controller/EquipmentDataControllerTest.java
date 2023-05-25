@@ -12,7 +12,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.kpfu.machinemetrics.config.MessageSourceConfig;
 import ru.kpfu.machinemetrics.dto.EquipmentDataDto;
 import ru.kpfu.machinemetrics.dto.StatisticsDto;
-import ru.kpfu.machinemetrics.model.EquipmentData;
 import ru.kpfu.machinemetrics.service.EquipmentDataService;
 
 import java.nio.charset.StandardCharsets;

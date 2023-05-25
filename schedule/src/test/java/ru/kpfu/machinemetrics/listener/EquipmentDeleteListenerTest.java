@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.TestPropertySource;
 import ru.kpfu.machinemetrics.exception.ResourceNotFoundException;
 import ru.kpfu.machinemetrics.service.EquipmentInfoService;
 
@@ -13,6 +14,7 @@ import static org.mockito.Mockito.verify;
 
 
 @SpringBootTest
+@TestPropertySource("classpath:application.yml")
 public class EquipmentDeleteListenerTest {
 
     @Autowired

@@ -8,6 +8,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.TestPropertySource;
 import ru.kpfu.machinemetrics.dto.StatisticsDto;
 import ru.kpfu.machinemetrics.model.EquipmentData;
 import ru.kpfu.machinemetrics.model.Schedule;
@@ -25,6 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
+@TestPropertySource("classpath:application.yml")
 public class EquipmentDataServiceTest {
 
     @Autowired
@@ -1977,7 +1979,7 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.plusDays(2).truncatedTo(ChronoUnit.DAYS));
 
         softly.assertThat(actualDto.getUpMinutes()).isEqualTo((long) (2 * 60));
-        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo((long) ( 60));
+        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo((long) (60));
         softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo(60);
         softly.assertThat(actualDto.getDownMinutes()).isEqualTo(50 * 60);
         softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo(17 * 60);
@@ -2118,7 +2120,7 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.plusDays(2).truncatedTo(ChronoUnit.DAYS));
 
         softly.assertThat(actualDto.getUpMinutes()).isEqualTo((long) (2 * 60));
-        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo((long) ( 60));
+        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo((long) (60));
         softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo(60);
         softly.assertThat(actualDto.getDownMinutes()).isEqualTo(50 * 60);
         softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo(17 * 60);
@@ -2187,9 +2189,9 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.plusDays(1).truncatedTo(ChronoUnit.DAYS));
         softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.plusDays(2).truncatedTo(ChronoUnit.DAYS));
 
-        softly.assertThat(actualDto.getUpMinutes()).isEqualTo(49*60);
-        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo(16*60);
-        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo(33*60);
+        softly.assertThat(actualDto.getUpMinutes()).isEqualTo(49 * 60);
+        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo(16 * 60);
+        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo(33 * 60);
         softly.assertThat(actualDto.getDownMinutes()).isEqualTo((long) (3 * 60));
         softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo(2 * 60);
 

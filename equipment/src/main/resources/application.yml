@@ -3,18 +3,18 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/equipment
-    username: equipment
+    url: jdbc:postgresql://equipment-db:5432/machinemetrics
+    username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
   jpa:
     show-sql: true
     hibernate:
       ddl-auto: update
   rabbitmq:
-    host: localhost
+    host: rabbitmq
     port: 5672
-    username: guest
-    password: guest
+    username: ${RABBIT_USERNAME}
+    password: ${RABBIT_PASSWORD}
 
 app:
   photo-save-directory: C:\Uni\machinemetrics\equipment\src\main\resources\photo

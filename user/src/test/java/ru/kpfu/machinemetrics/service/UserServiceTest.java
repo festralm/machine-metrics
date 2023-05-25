@@ -15,6 +15,7 @@ import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
+import org.springframework.test.context.TestPropertySource;
 import ru.kpfu.machinemetrics.config.MessageSourceConfig;
 import ru.kpfu.machinemetrics.constants.UserConstants;
 import ru.kpfu.machinemetrics.dto.UserCreateDto;
@@ -40,7 +41,8 @@ import static org.mockito.Mockito.when;
 import static ru.kpfu.machinemetrics.constants.UserConstants.USER_NOT_DELETED_EXCEPTION_MESSAGE;
 import static ru.kpfu.machinemetrics.constants.UserConstants.USER_NOT_FOUND_EXCEPTION_MESSAGE;
 
-@SpringBootTest({"keycloak.realm=realm", "keycloak.auth-server-url=http://localhost:8080"})
+@SpringBootTest
+@TestPropertySource("classpath:application.yml")
 @ImportAutoConfiguration(MessageSourceConfig.class)
 public class UserServiceTest {
 
