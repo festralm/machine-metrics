@@ -26,9 +26,12 @@ public class PhotoService {
         return new ClassPathResource("equipment-default.jpg");
     }
 
-    public String savePhoto(MultipartFile photo) throws IOException {
-        String fileName = photo.getOriginalFilename();
-        String filePath = appProperties.getPhotoSaveDirectory() + "/" + fileName;
+    public Resource getDefault() {
+        return new ClassPathResource("equipment-default.jpg");
+    }
+
+    public String savePhoto(String name, MultipartFile photo) throws IOException {
+        String filePath = appProperties.getPhotoSaveDirectory() + "/" + name;
         photo.transferTo(new File(filePath));
 
         return filePath;

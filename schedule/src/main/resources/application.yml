@@ -3,7 +3,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://schedule-db:5432/machinemetrics
+    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
   jpa:
@@ -11,8 +11,8 @@ spring:
     hibernate:
       ddl-auto: update
   rabbitmq:
-    host: rabbitmq
-    port: 5672
+    host: ${RABBIT_HOST}
+    port: ${RABBIT_PORT}
     username: ${RABBIT_USERNAME}
     password: ${RABBIT_PASSWORD}
 

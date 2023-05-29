@@ -30,9 +30,18 @@ public class PhotoController {
                 .contentType(MediaType.IMAGE_JPEG)
                 .body(photoService.getPhoto(path));
     }
+    @GetMapping("/default")
+    public ResponseEntity<Resource> getDefault() {
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_JPEG)
+                .body(photoService.getDefault());
+    }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public String uploadPhoto(@RequestPart("photo") MultipartFile photo) throws IOException {
-        return photoService.savePhoto(photo);
+    public String uploadPhoto(
+            @RequestPart("name") String name,
+            @RequestPart("photo") MultipartFile photo
+    ) throws IOException {
+        return photoService.savePhoto(name, photo);
     }
 }

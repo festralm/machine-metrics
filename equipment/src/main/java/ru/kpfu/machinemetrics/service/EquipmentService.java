@@ -37,6 +37,9 @@ public class EquipmentService {
     }
 
     public Page<Equipment> search(String name, Pageable pageable) {
+        if (name == null) {
+            name = "";
+        }
         return equipmentRepository.searchAllByNameContainingOrderByName(name, pageable);
     }
 

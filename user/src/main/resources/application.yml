@@ -22,7 +22,7 @@ jwt:
 keycloak:
   realm: master
   resource: admin-cli
-  auth-server-url: ${KEYCLOAK_URLz}
+  auth-server-url: ${KEYCLOAK_URL}
   client-secret: ${KEYCLOAK_SECRET}
 
 logging:

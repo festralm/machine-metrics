@@ -7,8 +7,13 @@ services:
 #    build:
 #      context: ./equipment
 #    environment:
+#      POSTGRES_DB: ${POSTGRES_DB}
 #      POSTGRES_USER: ${POSTGRES_USER}
 #      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#      POSTGRES_HOST: equipment-db
+#      POSTGRES_PORT: ${POSTGRES_PORT}
+#      RABBIT_HOST: ${RABBIT_HOST}
+#      RABBIT_PORT: ${RABBIT_PORT}
 #      RABBIT_USERNAME: ${RABBIT_USERNAME}
 #      RABBIT_PASSWORD: ${RABBIT_PASSWORD}
 #    ports:
@@ -51,11 +56,18 @@ services:
 #    build:
 #      context: ./random-data
 #    environment:
+#      POSTGRES_DB: ${POSTGRES_DB}
 #      POSTGRES_USER: ${POSTGRES_USER}
 #      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#      POSTGRES_HOST: random-1-db
+#      POSTGRES_PORT: ${POSTGRES_PORT}
+#      RABBIT_HOST: ${RABBIT_HOST}
+#      RABBIT_PORT: ${RABBIT_PORT}
 #      RABBIT_USERNAME: ${RABBIT_USERNAME}
 #      RABBIT_PASSWORD: ${RABBIT_PASSWORD}
 #      INFLUXDB_TOKEN: ${INFLUXDB_TOKEN}
+#      INFLUXDB_HOST: ${INFLUXDB_HOST}
+#      INFLUXDB_PORT: ${INFLUXDB_PORT}
 #    ports:
 #      - "10010:10010"
 #    networks:
@@ -84,11 +96,18 @@ services:
 #    build:
 #      context: ./random-data-2
 #    environment:
+#      POSTGRES_DB: ${POSTGRES_DB}
 #      POSTGRES_USER: ${POSTGRES_USER}
 #      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#      POSTGRES_HOST: random-2-db
+#      POSTGRES_PORT: ${POSTGRES_PORT}
+#      RABBIT_HOST: ${RABBIT_HOST}
+#      RABBIT_PORT: ${RABBIT_PORT}
 #      RABBIT_USERNAME: ${RABBIT_USERNAME}
 #      RABBIT_PASSWORD: ${RABBIT_PASSWORD}
 #      INFLUXDB_TOKEN: ${INFLUXDB_TOKEN}
+#      INFLUXDB_HOST: ${INFLUXDB_HOST}
+#      INFLUXDB_PORT: ${INFLUXDB_PORT}
 #    ports:
 #      - "10020:10020"
 #    networks:
@@ -117,8 +136,13 @@ services:
 #    build:
 #      context: ./schedule
 #    environment:
+#      POSTGRES_DB: ${POSTGRES_DB}
 #      POSTGRES_USER: ${POSTGRES_USER}
 #      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#      POSTGRES_HOST: schedule-db
+#      POSTGRES_PORT: ${POSTGRES_PORT}
+#      RABBIT_HOST: ${RABBIT_HOST}
+#      RABBIT_PORT: ${RABBIT_PORT}
 #      RABBIT_USERNAME: ${RABBIT_USERNAME}
 #      RABBIT_PASSWORD: ${RABBIT_PASSWORD}
 #    ports:
@@ -148,11 +172,18 @@ services:
 #    build:
 #      context: ./statistics
 #    environment:
+#      POSTGRES_DB: ${POSTGRES_DB}
 #      POSTGRES_USER: ${POSTGRES_USER}
 #      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#      POSTGRES_HOST: statistics-db
+#      POSTGRES_PORT: ${POSTGRES_PORT}
+#      RABBIT_HOST: ${RABBIT_HOST}
+#      RABBIT_PORT: ${RABBIT_PORT}
 #      RABBIT_USERNAME: ${RABBIT_USERNAME}
 #      RABBIT_PASSWORD: ${RABBIT_PASSWORD}
 #      INFLUXDB_TOKEN: ${INFLUXDB_TOKEN}
+#      INFLUXDB_HOST: ${INFLUXDB_HOST}
+#      INFLUXDB_PORT: ${INFLUXDB_PORT}
 #    ports:
 #      - "9020:9020"
 #    networks:
@@ -224,6 +255,7 @@ services:
       KC_HEALTH_ENABLED: true
       KC_METRICS_ENABLED: true
       KC_HOSTNAME: localhost:8080
+      JDBC_PARAMS: "useSSL=false"
     volumes:
       - ../machinemetrics-volumes/keycloak:/opt/jboss/keycloak/standalone/data
     networks:
@@ -240,6 +272,6 @@ services:
 #      - machinemetrics-network
 #    restart: always
 
-#networks:
-#  machinemetrics-network:
-#    driver: bridge
+networks:
+  machinemetrics-network:
+    driver: bridge

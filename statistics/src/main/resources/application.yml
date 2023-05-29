@@ -2,14 +2,14 @@ server:
   port: 9020
 
 influxdb:
-  url: http://influxdb:8086
+  url: http://${INFLUXDB_HOST}:${INFLUXDB_PORT}
   bucket: machinemetrics
   token: ${INFLUXDB_TOKEN}
   org: Alia
 
 spring:
   datasource:
-    url: jdbc:postgresql://statistics-db:5432/machinemetrics
+    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
   jpa:
@@ -17,8 +17,8 @@ spring:
     hibernate:
       ddl-auto: update
   rabbitmq:
-    host: rabbitmq
-    port: 5672
+    host: ${RABBIT_HOST}
+    port: ${RABBIT_PORT}
     username: ${RABBIT_USERNAME}
     password: ${RABBIT_PASSWORD}
 
