@@ -9,9 +9,11 @@ import ru.kpfu.machinemetrics.exception.CannotDeleteScheduleException;
 import ru.kpfu.machinemetrics.exception.ResourceNotFoundException;
 import ru.kpfu.machinemetrics.exception.ScheduleIsAlreadyCreatedException;
 import ru.kpfu.machinemetrics.model.Schedule;
+import ru.kpfu.machinemetrics.properties.AppProperties;
 import ru.kpfu.machinemetrics.repository.ScheduleRepository;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Locale;
@@ -28,6 +30,8 @@ public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
 
     private final MessageSource messageSource;
+
+    private final AppProperties appProperties;
 
     public List<Schedule> listDefault() {
         return scheduleRepository.findAllByDateAndEquipmentId(null, null);
@@ -90,8 +94,9 @@ public class ScheduleService {
     }
 
     public Schedule edit(Long id, Schedule updatedSchedule) {
-        final OffsetDateTime date = updatedSchedule.getDate() != null
-                ? updatedSchedule.getDate().truncatedTo(ChronoUnit.DAYS)
+        final OffsetDateTime date1 = updatedSchedule.getDate().withOffsetSameInstant(ZoneOffset.of(appProperties.getDefaultZone()));
+        final OffsetDateTime date = date1 != null
+                ? date1.truncatedTo(ChronoUnit.DAYS)
                 : null;
 
         Schedule schedule = getById(id);

@@ -295,8 +295,17 @@ public class EquipmentDataService {
             final Long upScheduleMinutes = result.getUpScheduleMinutes();
             final Long downScheduleMinutes = result.getDownScheduleMinutes();
 
-            result.setUpSchedulePercent(upScheduleMinutes * 100.0 / (upScheduleMinutes + downScheduleMinutes));
-            result.setDownSchedulePercent(downScheduleMinutes * 100.0 / (upScheduleMinutes + downScheduleMinutes));
+            final long l = upScheduleMinutes + downScheduleMinutes;
+            if (l == 0) {
+                result.setUpSchedulePercent(0.0);
+            } else {
+                result.setUpSchedulePercent(upScheduleMinutes * 100.0 / l);
+            }
+            if (l == 0) {
+                result.setDownSchedulePercent(0.0);
+            } else {
+                result.setDownSchedulePercent(downScheduleMinutes * 100.0 / l);
+            }
         } else {
             if (previousEnabled) {
                 result.setUpMinutes(totalDuration.toMinutes());
@@ -346,9 +355,16 @@ public class EquipmentDataService {
 
     private Map<OffsetDateTime, Schedule> getSchedules(Long equipmentId, OffsetDateTime start, OffsetDateTime end) {
         Map<OffsetDateTime, Schedule> result = new HashMap<>();
-        for (OffsetDateTime date = start; date.isBefore(end); date = date.plusDays(1)) {
-            Schedule schedule = getSchedule(equipmentId, date);
-            result.put(date.truncatedTo(ChronoUnit.DAYS), schedule);
+        final OffsetDateTime startDay = start.truncatedTo(ChronoUnit.DAYS);
+        final OffsetDateTime endDate = end.truncatedTo(ChronoUnit.DAYS);
+        for (
+                OffsetDateTime date = startDay;
+                date.truncatedTo(ChronoUnit.DAYS).isBefore(endDate) || date.truncatedTo(ChronoUnit.DAYS).equals(endDate);
+                date = date.plusDays(1)
+        ) {
+            final OffsetDateTime dateDate = date.truncatedTo(ChronoUnit.DAYS);
+            Schedule schedule = getSchedule(equipmentId, dateDate);
+            result.put(dateDate, schedule);
         }
         return result;
     }
