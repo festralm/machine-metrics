@@ -63,6 +63,7 @@ public class Equipment {
     @Column(name = "value")
     private List<String> russiaDevelopmentPriorityDirection;
 
+    @Column(length = 10000)
     private String area;
 
     private String researchObjects;

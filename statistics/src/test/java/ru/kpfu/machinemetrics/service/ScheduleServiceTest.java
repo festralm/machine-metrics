@@ -72,7 +72,7 @@ public class ScheduleServiceTest {
                 .build();
         List<Schedule> scheduleList = List.of(schedule1, schedule2);
 
-        when(scheduleRepositoryMock.findAllByDateAndEquipmentId(null, null)).thenReturn(scheduleList);
+        when(scheduleRepositoryMock.findAllByDateAndEquipmentIdOrderByDateAscWeekdayAsc(null, null)).thenReturn(scheduleList);
 
         // when
         List<Schedule> result = scheduleService.listDefault();

@@ -17,14 +17,16 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
-;
 
 @Repository
 @RequiredArgsConstructor
@@ -75,7 +77,8 @@ public class EquipmentDataRepositoryImpl implements EquipmentDataRepository {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        return result;
+        result.sort(Comparator.comparing(EquipmentData::getTime));
+        return result.stream().peek(x -> x.setTime(x.getTime().truncatedTo(ChronoUnit.MINUTES))).collect(Collectors.toList());
     }
 
     private void addRecordsInPeriod(

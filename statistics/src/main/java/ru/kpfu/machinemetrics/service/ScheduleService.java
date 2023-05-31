@@ -34,7 +34,7 @@ public class ScheduleService {
     private final AppProperties appProperties;
 
     public List<Schedule> listDefault() {
-        return scheduleRepository.findAllByDateAndEquipmentId(null, null);
+        return scheduleRepository.findAllByDateAndEquipmentIdOrderByDateAscWeekdayAsc(null, null);
     }
 
     public List<Schedule> listNotDefault() {
@@ -94,9 +94,8 @@ public class ScheduleService {
     }
 
     public Schedule edit(Long id, Schedule updatedSchedule) {
-        final OffsetDateTime date1 = updatedSchedule.getDate().withOffsetSameInstant(ZoneOffset.of(appProperties.getDefaultZone()));
-        final OffsetDateTime date = date1 != null
-                ? date1.truncatedTo(ChronoUnit.DAYS)
+        final OffsetDateTime date = updatedSchedule.getDate() != null
+                ? updatedSchedule.getDate().withOffsetSameInstant(ZoneOffset.of(appProperties.getDefaultZone())).truncatedTo(ChronoUnit.DAYS)
                 : null;
 
         Schedule schedule = getById(id);

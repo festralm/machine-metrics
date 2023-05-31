@@ -13,13 +13,16 @@ import java.util.Optional;
 public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
     Optional<Schedule> findByDateAndEquipmentIdAndWeekday(OffsetDateTime OffsetDateTime, Long equipmentId, Integer weekday);
 
-    List<Schedule> findAllByDateAndEquipmentId(OffsetDateTime OffsetDateTime, Long equipmentId);
+    List<Schedule> findAllByDateAndEquipmentIdOrderByDateAscWeekdayAsc(OffsetDateTime OffsetDateTime, Long equipmentId);
 
     List<Schedule> findAllByWeekdayAndEquipmentId(Integer weekday, Long equipmentId);
 
     List<Schedule> findAllByEquipmentId(Long equipmentId);
 
-    @Query(value = "select schedule from Schedule schedule where schedule.date is not null or schedule.equipmentId is not null")
+    @Query(value = "select schedule from Schedule schedule " +
+            "where schedule.date is not null " +
+            "or schedule.equipmentId is not null " +
+            "order by schedule.date asc, schedule.weekday asc, schedule.startTime")
     List<Schedule> findAllNotDefault();
 
     Optional<Schedule> findByDate(OffsetDateTime OffsetDateTime);

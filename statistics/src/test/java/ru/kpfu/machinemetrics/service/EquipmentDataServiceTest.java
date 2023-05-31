@@ -264,7 +264,7 @@ public class EquipmentDataServiceTest {
         );
         when(equipmentDataRepositoryMock.getData(any(String.class), any(String.class), any(Long.class)))
                 .thenReturn(givenList);
-        when(scheduleRepositoryMock.findAllByDateAndEquipmentId(
+        when(scheduleRepositoryMock.findAllByDateAndEquipmentIdOrderByDateAscWeekdayAsc(
                 eq(givenStart.truncatedTo(ChronoUnit.DAYS)),
                 isNull()
         )).thenReturn(scheduleList);
@@ -284,7 +284,7 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getUpMinutes()).isEqualTo((long) (10.5 * 60));
         softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo(6 * 60);
         softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo((long) (4.5 * 60));
-        softly.assertThat(actualDto.getDownMinutes()).isEqualTo((long) (0));
+        softly.assertThat(actualDto.getDownMinutes()).isEqualTo(0);
         softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo(0);
 
         softly.assertThat(actualDto.getUpSchedulePercent()).isEqualTo(100.0);
@@ -420,7 +420,7 @@ public class EquipmentDataServiceTest {
         );
         when(equipmentDataRepositoryMock.getData(any(String.class), any(String.class), any(Long.class)))
                 .thenReturn(givenList);
-        when(scheduleRepositoryMock.findAllByDateAndEquipmentId(
+        when(scheduleRepositoryMock.findAllByDateAndEquipmentIdOrderByDateAscWeekdayAsc(
                 isNull(),
                 isNull()
         )).thenReturn(scheduleList);
@@ -439,8 +439,8 @@ public class EquipmentDataServiceTest {
 
         softly.assertThat(actualDto.getUpMinutes()).isEqualTo((long) (6.5 * 60));
         softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo((long) (6.5 * 60));
-        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo((long) (0));
-        softly.assertThat(actualDto.getDownMinutes()).isEqualTo((long) (0));
+        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo(0);
+        softly.assertThat(actualDto.getDownMinutes()).isEqualTo(0);
         softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo(0);
 
         softly.assertThat(actualDto.getUpSchedulePercent()).isEqualTo(100.0);
@@ -498,7 +498,7 @@ public class EquipmentDataServiceTest {
         );
         when(equipmentDataRepositoryMock.getData(any(String.class), any(String.class), any(Long.class)))
                 .thenReturn(givenList);
-        when(scheduleRepositoryMock.findAllByDateAndEquipmentId(
+        when(scheduleRepositoryMock.findAllByDateAndEquipmentIdOrderByDateAscWeekdayAsc(
                 eq(givenStart.truncatedTo(ChronoUnit.DAYS)),
                 isNull()
         )).thenReturn(scheduleList);
@@ -608,8 +608,8 @@ public class EquipmentDataServiceTest {
 
         softly.assertThat(actualDto.getUpMinutes()).isEqualTo((long) (6.5 * 60));
         softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo((long) (6.5 * 60));
-        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo((long) (0));
-        softly.assertThat(actualDto.getDownMinutes()).isEqualTo((long) (24 * 60));
+        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo(0);
+        softly.assertThat(actualDto.getDownMinutes()).isEqualTo(24 * 60);
         softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo(10 * 60);
 
         softly.assertThat(actualDto.getUpSchedulePercent()).isCloseTo(39.3, Offset.offset(0.1));
@@ -1476,7 +1476,7 @@ public class EquipmentDataServiceTest {
         );
         when(equipmentDataRepositoryMock.getData(any(String.class), any(String.class), any(Long.class)))
                 .thenReturn(givenList);
-        when(scheduleRepositoryMock.findAllByDateAndEquipmentId(
+        when(scheduleRepositoryMock.findAllByDateAndEquipmentIdOrderByDateAscWeekdayAsc(
                 isNull(),
                 eq(givenId)
         )).thenReturn(scheduleList);
@@ -2261,7 +2261,7 @@ public class EquipmentDataServiceTest {
     }
 
     private void mockOnDate(Long givenId, OffsetDateTime date) {
-        when(scheduleRepositoryMock.findAllByDateAndEquipmentId(
+        when(scheduleRepositoryMock.findAllByDateAndEquipmentIdOrderByDateAscWeekdayAsc(
                 eq(date.truncatedTo(ChronoUnit.DAYS)),
                 eq(givenId)
         )).thenReturn(List.of(

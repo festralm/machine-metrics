@@ -40,6 +40,7 @@ public class EquipmentDataService {
             StatisticsDto result,
             boolean previousEnabled,
             OffsetDateTime start,
+            OffsetDateTime end,
             Map<OffsetDateTime, Schedule> schedules,
             OffsetDateTime firstDataDateTime
     ) {
@@ -52,19 +53,25 @@ public class EquipmentDataService {
                 )
                 .forEach(x -> {
                     final Schedule schedule = x.getValue();
+                    final OffsetDateTime scheduleStartDateTime = getDateTimeFromDate(x.getKey(), schedule.getStartTime());
+                    final OffsetDateTime scheduleEndDateTime = getDateTimeFromDate(x.getKey(), schedule.getEndTime());
 
                     long scheduleTime = 0;
                     if (start.truncatedTo(ChronoUnit.DAYS).equals(x.getKey().truncatedTo(ChronoUnit.DAYS))) {
                         if (firstDataDateTime.truncatedTo(ChronoUnit.DAYS).equals(x.getKey().truncatedTo(ChronoUnit.DAYS))) {
-                            if (firstDataDateTime.isBefore(getDateTimeFromDate(x.getKey(), schedule.getStartTime()))
+                            if (firstDataDateTime.isBefore(scheduleStartDateTime)
                                     || firstDataDateTime.truncatedTo(ChronoUnit.MINUTES).equals(x.getKey().truncatedTo(ChronoUnit.MINUTES))) {
                                 scheduleTime = getScheduleMinutes(start, firstDataDateTime, schedule);
                             }
                         } else {
-                            scheduleTime = getScheduleMinutes(start, getDateTimeFromDate(x.getKey(), schedule.getEndTime()), schedule);
+                            if (end.isBefore(scheduleEndDateTime) || end.equals(scheduleEndDateTime)) {
+                                scheduleTime = getScheduleMinutes(start, end, schedule);
+                            } else {
+                                scheduleTime = getScheduleMinutes(start, scheduleEndDateTime, schedule);
+                            }
                         }
                     } else if (firstDataDateTime.truncatedTo(ChronoUnit.DAYS).equals(x.getKey().truncatedTo(ChronoUnit.DAYS))) {
-                        scheduleTime = getScheduleMinutes(getDateTimeFromDate(x.getKey(), schedule.getStartTime()), firstDataDateTime, schedule);
+                        scheduleTime = getScheduleMinutes(scheduleStartDateTime, firstDataDateTime, schedule);
                     } else {
                         scheduleTime = schedule.getEndTime().longValue() - schedule.getStartTime();
                     }
@@ -186,6 +193,9 @@ public class EquipmentDataService {
             OffsetDateTime endDateTime,
             Schedule schedule
     ) {
+        if (startDateTime.isAfter(endDateTime)) {
+            return 0;
+        }
         int startTime = getTimeFromDateTime(startDateTime);
         int endTime = getTimeFromDateTime(endDateTime);
 
@@ -236,12 +246,14 @@ public class EquipmentDataService {
 
     public StatisticsDto getData(Long equipmentId, OffsetDateTime start, OffsetDateTime end) {
         if (start == null) {
-            start = OffsetDateTime.now().minus(Period.ofDays(1));
+            start = OffsetDateTime.now().minus(Period.ofDays(1)).truncatedTo(ChronoUnit.MINUTES);
+            start = start.withMinute((start.getMinute() / 5) * 5);
         } else {
             start = start.withOffsetSameInstant(ZoneOffset.of(appProperties.getDefaultZone()));
         }
         if (end == null) {
-            end = OffsetDateTime.now();
+            end = OffsetDateTime.now().truncatedTo(ChronoUnit.MINUTES);
+            end = end.withMinute((start.getMinute() / 5) * 5);
         } else {
             end = end.withOffsetSameInstant(ZoneOffset.of(appProperties.getDefaultZone()));
         }
@@ -287,7 +299,7 @@ public class EquipmentDataService {
         if (equipmentDataList.size() != 0) {
             final EquipmentData lastEquipmentData = equipmentDataList.get(equipmentDataList.size() - 1);
 
-            fillTimeBeforeFirstData(result, previousEnabled, start, schedules, equipmentDataList.get(0).getTime());
+            fillTimeBeforeFirstData(result, previousEnabled, start, end, schedules, equipmentDataList.get(0).getTime());
             fillTimeAfterLastData(result, lastEquipmentData.getEnabled(), end, schedules, lastEquipmentData.getTime());
 
             fillFromList(equipmentDataList, start, end, result, schedules, previousEnabled);
@@ -417,7 +429,7 @@ public class EquipmentDataService {
 
     private Schedule getSchedule(Long equipmentId, OffsetDateTime currentTime) {
         Schedule schedule;
-        List<Schedule> scheduleList = scheduleRepository.findAllByDateAndEquipmentId(
+        List<Schedule> scheduleList = scheduleRepository.findAllByDateAndEquipmentIdOrderByDateAscWeekdayAsc(
                 currentTime.truncatedTo(ChronoUnit.DAYS),
                 equipmentId
         );
@@ -431,14 +443,14 @@ public class EquipmentDataService {
             if (scheduleList.size() > 0) {
                 schedule = scheduleList.get(0);
             } else {
-                scheduleList = scheduleRepository.findAllByDateAndEquipmentId(
+                scheduleList = scheduleRepository.findAllByDateAndEquipmentIdOrderByDateAscWeekdayAsc(
                         null,
                         equipmentId
                 );
                 if (scheduleList.size() > 0) {
                     schedule = scheduleList.get(0);
                 } else {
-                    scheduleList = scheduleRepository.findAllByDateAndEquipmentId(
+                    scheduleList = scheduleRepository.findAllByDateAndEquipmentIdOrderByDateAscWeekdayAsc(
                             currentTime.truncatedTo(ChronoUnit.DAYS),
                             null
                     );
@@ -452,7 +464,7 @@ public class EquipmentDataService {
                         if (scheduleList.size() > 0) {
                             schedule = scheduleList.get(0);
                         } else {
-                            scheduleList = scheduleRepository.findAllByDateAndEquipmentId(
+                            scheduleList = scheduleRepository.findAllByDateAndEquipmentIdOrderByDateAscWeekdayAsc(
                                     null,
                                     null
                             );
