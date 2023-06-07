@@ -8,11 +8,11 @@ import org.springframework.data.domain.PageImpl;
 import ru.kpfu.machinemetrics.dto.EquipmentCreateDto;
 import ru.kpfu.machinemetrics.dto.EquipmentDetailsDto;
 import ru.kpfu.machinemetrics.dto.EquipmentItemDto;
+import ru.kpfu.machinemetrics.model.Address;
 import ru.kpfu.machinemetrics.model.Country;
 import ru.kpfu.machinemetrics.model.Equipment;
 import ru.kpfu.machinemetrics.model.Purpose;
 import ru.kpfu.machinemetrics.model.Status;
-import ru.kpfu.machinemetrics.model.Unit;
 import ru.kpfu.machinemetrics.model.UsageType;
 
 import java.util.List;
@@ -24,7 +24,7 @@ public interface EquipmentMapper {
     @Mapping(source = "purpose", target = "purpose", qualifiedByName = "mapToPurpose")
     @Mapping(source = "usageType", target = "usageType", qualifiedByName = "mapToUsageType")
     @Mapping(source = "manufacturerCountry", target = "manufacturerCountry", qualifiedByName = "mapToCountry")
-    @Mapping(source = "unit", target = "unit", qualifiedByName = "mapToUnit")
+    @Mapping(source = "address", target = "address", qualifiedByName = "mapToAddress")
     @Mapping(source = "status", target = "status", qualifiedByName = "mapToStatus")
     Equipment toEquipment(EquipmentCreateDto dto);
 
@@ -40,9 +40,9 @@ public interface EquipmentMapper {
     @Mapping(source = ".", target = "id")
     Country mapToCountry(Long id);
 
-    @Named("mapToUnit")
+    @Named("mapToAddress")
     @Mapping(source = ".", target = "id")
-    Unit mapToUnit(Long id);
+    Address mapToAddress(Long id);
 
     @Named("mapToStatus")
     @Mapping(source = ".", target = "id")

@@ -36,6 +36,9 @@ public class SecurityConfig {
                 .pathMatchers(HttpMethod.PUT, appApiProperties.getV1() + "/equipment/**")
                 .hasAnyAuthority(Roles.ADMIN.value, Roles.MODERATOR.value)
 
+                .pathMatchers(HttpMethod.DELETE, appApiProperties.getV1() + "/equipment/**")
+                .hasAnyAuthority(Roles.ADMIN.value)
+
                 .pathMatchers(HttpMethod.GET, appApiProperties.getV1() + "/country/**")
                 .hasAnyAuthority(Roles.ADMIN.value, Roles.MODERATOR.value)
 
@@ -44,7 +47,6 @@ public class SecurityConfig {
 
                 .pathMatchers(HttpMethod.DELETE, appApiProperties.getV1() + "/country/**")
                 .hasAnyAuthority(Roles.ADMIN.value)
-
 
                 .pathMatchers(HttpMethod.GET, appApiProperties.getV1() + "/schedule/**")
                 .hasAnyAuthority(Roles.ADMIN.value, Roles.MODERATOR.value)
@@ -82,6 +84,15 @@ public class SecurityConfig {
                 .pathMatchers(HttpMethod.DELETE, appApiProperties.getV1() + "/unit/**")
                 .hasAnyAuthority(Roles.ADMIN.value)
 
+                .pathMatchers(HttpMethod.GET, appApiProperties.getV1() + "/address/**")
+                .hasAnyAuthority(Roles.ADMIN.value, Roles.MODERATOR.value)
+
+                .pathMatchers(HttpMethod.POST, appApiProperties.getV1() + "/address/**")
+                .hasAnyAuthority(Roles.ADMIN.value, Roles.MODERATOR.value)
+
+                .pathMatchers(HttpMethod.DELETE, appApiProperties.getV1() + "/address/**")
+                .hasAnyAuthority(Roles.ADMIN.value)
+
                 .pathMatchers(HttpMethod.GET, appApiProperties.getV1() + "/usage-type/**")
                 .hasAnyAuthority(Roles.ADMIN.value, Roles.MODERATOR.value)
 
@@ -89,9 +100,6 @@ public class SecurityConfig {
                 .hasAnyAuthority(Roles.ADMIN.value, Roles.MODERATOR.value)
 
                 .pathMatchers(HttpMethod.DELETE, appApiProperties.getV1() + "/usage-type/**")
-                .hasAnyAuthority(Roles.ADMIN.value)
-
-                .pathMatchers(HttpMethod.DELETE, appApiProperties.getV1() + "/equipment/**")
                 .hasAnyAuthority(Roles.ADMIN.value)
 
                 .pathMatchers(HttpMethod.GET, appApiProperties.getV1() + "/cron/**")

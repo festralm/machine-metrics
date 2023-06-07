@@ -118,7 +118,7 @@ public class Equipment {
     private String installationLocation;
 
     @ManyToOne
-    private Unit unit;
+    private Address address;
 
     private String responsiblePerson;
 

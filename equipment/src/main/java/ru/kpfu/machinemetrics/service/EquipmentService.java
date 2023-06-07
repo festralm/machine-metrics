@@ -116,7 +116,7 @@ public class EquipmentService {
         equipment.setCollectiveInterdisciplinaryCenterUse(updatedEquipment.isCollectiveInterdisciplinaryCenterUse());
         equipment.setPortalPublicationCardReadiness(updatedEquipment.isPortalPublicationCardReadiness());
         equipment.setInstallationLocation(updatedEquipment.getInstallationLocation());
-        equipment.setUnit(updatedEquipment.getUnit());
+        equipment.setAddress(updatedEquipment.getAddress());
         equipment.setResponsiblePerson(updatedEquipment.getResponsiblePerson());
         equipment.setStatus(updatedEquipment.getStatus());
         equipment.setLastOperationDate(OffsetDateTime.now());

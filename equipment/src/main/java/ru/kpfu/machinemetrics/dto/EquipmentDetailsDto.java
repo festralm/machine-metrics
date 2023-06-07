@@ -90,7 +90,7 @@ public class EquipmentDetailsDto {
 
     private String installationLocation;
 
-    private UnitDto unit;
+    private AddressDto address;
 
     private String responsiblePerson;
 

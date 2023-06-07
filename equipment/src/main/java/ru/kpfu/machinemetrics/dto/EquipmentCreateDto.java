@@ -94,7 +94,7 @@ public class EquipmentCreateDto {
 
     private String installationLocation;
 
-    private Long unit;
+    private Long address;
 
     private String responsiblePerson;
 

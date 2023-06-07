@@ -57,10 +57,10 @@ public class EquipmentInfoService {
         }
         final EquipmentInfo savedEquipmentInfo = equipmentScheduleRepository.save(updatedEquipmentInfo);
 
-        boolean isNotSameService = false;
+        boolean isNotSameService;
         if (savedEquipmentInfo.getDataService() != null) {
             rabbitTemplate.convertAndSend(
-                    String.format("rk-%s", savedEquipmentInfo.getDataService().getName()),
+                        String.format("rk-%s", savedEquipmentInfo.getDataService().getName()),
                     equipmentInfoMapper.toEquipmentRabbitMqDto(savedEquipmentInfo)
             );
         }

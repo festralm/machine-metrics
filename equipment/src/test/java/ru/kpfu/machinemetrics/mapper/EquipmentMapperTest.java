@@ -10,6 +10,7 @@ import org.springframework.test.context.TestPropertySource;
 import ru.kpfu.machinemetrics.dto.EquipmentCreateDto;
 import ru.kpfu.machinemetrics.dto.EquipmentDetailsDto;
 import ru.kpfu.machinemetrics.dto.EquipmentItemDto;
+import ru.kpfu.machinemetrics.model.Address;
 import ru.kpfu.machinemetrics.model.Country;
 import ru.kpfu.machinemetrics.model.Equipment;
 import ru.kpfu.machinemetrics.model.Purpose;
@@ -71,7 +72,7 @@ public class EquipmentMapperTest {
                 .collectiveInterdisciplinaryCenterUse(false)
                 .portalPublicationCardReadiness(true)
                 .installationLocation("installationLocation 1")
-                .unit(1L)
+                .address(1L)
                 .responsiblePerson("responsiblePerson 1")
                 .status(1L)
                 .photoPath("photoPath 1")
@@ -126,7 +127,7 @@ public class EquipmentMapperTest {
         softly.assertThat(equipment.isPortalPublicationCardReadiness())
                 .isEqualTo(dto.getPortalPublicationCardReadiness());
         softly.assertThat(equipment.getInstallationLocation()).isEqualTo(dto.getInstallationLocation());
-        softly.assertThat(equipment.getUnit().getId()).isEqualTo(dto.getUnit());
+        softly.assertThat(equipment.getAddress().getId()).isEqualTo(dto.getAddress());
         softly.assertThat(equipment.getResponsiblePerson()).isEqualTo(dto.getResponsiblePerson());
         softly.assertThat(equipment.getStatus().getId()).isEqualTo(dto.getStatus());
         softly.assertThat(equipment.getLastOperationDate()).isNull();
@@ -180,7 +181,7 @@ public class EquipmentMapperTest {
                 .collectiveInterdisciplinaryCenterUse(false)
                 .portalPublicationCardReadiness(true)
                 .installationLocation("installationLocation 1")
-                .unit(Unit.builder().id(1L).name("unit 1").build())
+                .address(Address.builder().id(1L).address("address 1").unit(Unit.builder().id(1L).build()).build())
                 .responsiblePerson("responsiblePerson 1")
                 .status(Status.builder().id(1L).name("status 1").build())
                 .photoPath("photoPath 1")
@@ -237,8 +238,9 @@ public class EquipmentMapperTest {
         softly.assertThat(dto.getPortalPublicationCardReadiness())
                 .isEqualTo(equipment.isPortalPublicationCardReadiness());
         softly.assertThat(dto.getInstallationLocation()).isEqualTo(equipment.getInstallationLocation());
-        softly.assertThat(dto.getUnit().getName()).isEqualTo(equipment.getUnit().getName());
-        softly.assertThat(dto.getUnit().getId()).isEqualTo(equipment.getUnit().getId());
+        softly.assertThat(dto.getAddress().getId()).isEqualTo(equipment.getAddress().getId());
+        softly.assertThat(dto.getAddress().getAddress()).isEqualTo(equipment.getAddress().getAddress());
+        softly.assertThat(dto.getAddress().getUnit().getId()).isEqualTo(equipment.getAddress().getUnit().getId());
         softly.assertThat(dto.getResponsiblePerson()).isEqualTo(equipment.getResponsiblePerson());
         softly.assertThat(dto.getStatus()).isEqualTo(equipment.getStatus());
         softly.assertThat(dto.getLastOperationDate()).isNull();
@@ -257,7 +259,7 @@ public class EquipmentMapperTest {
                 .cost(100.0)
                 .deliveryDate(OffsetDateTime.now())
                 .installationLocation("installationLocation 1")
-                .unit(Unit.builder().id(1L).name("unit 1").build())
+                .address(Address.builder().id(1L).address("address 1").unit(Unit.builder().id(1L).build()).build())
                 .responsiblePerson("responsiblePerson 1")
                 .status(Status.builder().id(1L).name("status 1").build())
                 .lastOperationDate(OffsetDateTime.now())
@@ -272,7 +274,7 @@ public class EquipmentMapperTest {
                 .cost(200.0)
                 .deliveryDate(OffsetDateTime.now())
                 .installationLocation("installationLocation 2")
-                .unit(Unit.builder().id(1L).name("unit 2").build())
+                .address(Address.builder().id(2L).address("address 2").unit(Unit.builder().id(2L).build()).build())
                 .responsiblePerson("responsiblePerson 2")
                 .status(Status.builder().id(1L).name("status 2").build())
                 .photoPath("photoPath 2")
@@ -299,8 +301,9 @@ public class EquipmentMapperTest {
             softly.assertThat(dto.getCost()).isEqualTo(equipment.getCost());
             softly.assertThat(dto.getDeliveryDate()).isEqualTo(equipment.getDeliveryDate());
             softly.assertThat(dto.getInstallationLocation()).isEqualTo(equipment.getInstallationLocation());
-            softly.assertThat(dto.getUnit().getId()).isEqualTo(equipment.getUnit().getId());
-            softly.assertThat(dto.getUnit().getName()).isEqualTo(equipment.getUnit().getName());
+            softly.assertThat(dto.getAddress().getId()).isEqualTo(equipment.getAddress().getId());
+            softly.assertThat(dto.getAddress().getAddress()).isEqualTo(equipment.getAddress().getAddress());
+            softly.assertThat(dto.getAddress().getUnit().getId()).isEqualTo(equipment.getAddress().getUnit().getId());
             softly.assertThat(dto.getResponsiblePerson()).isEqualTo(equipment.getResponsiblePerson());
             softly.assertThat(dto.getStatus()).isEqualTo(equipment.getStatus().getName());
             softly.assertThat(dto.getLastOperationDate()).isEqualTo(equipment.getLastOperationDate());

@@ -18,7 +18,7 @@ public class EquipmentDataController {
     private final EquipmentDataService equipmentDataService;
 
     @GetMapping
-    public StatisticsDto listFiltered(@RequestParam(required = false) Long id,
+    public StatisticsDto listFiltered(@RequestParam Long id,
                                       @RequestParam(required = false) OffsetDateTime start,
                                       @RequestParam(required = false) OffsetDateTime stop) {
         return equipmentDataService.getData(id, start, stop);
