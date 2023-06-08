@@ -9,6 +9,7 @@ import ru.kpfu.machinemetrics.dto.StatisticsDto;
 import ru.kpfu.machinemetrics.service.EquipmentDataService;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "${app.api.prefix.v1}/equipment-data")
@@ -18,9 +19,9 @@ public class EquipmentDataController {
     private final EquipmentDataService equipmentDataService;
 
     @GetMapping
-    public StatisticsDto listFiltered(@RequestParam Long id,
+    public StatisticsDto listFiltered(@RequestParam List<Long> ids,
                                       @RequestParam(required = false) OffsetDateTime start,
                                       @RequestParam(required = false) OffsetDateTime stop) {
-        return equipmentDataService.getData(id, start, stop);
+        return equipmentDataService.getData(ids, start, stop);
     }
 }

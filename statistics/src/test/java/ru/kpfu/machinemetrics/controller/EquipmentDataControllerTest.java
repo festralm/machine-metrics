@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.kpfu.machinemetrics.config.MessageSourceConfig;
 import ru.kpfu.machinemetrics.dto.EquipmentDataDto;
+import ru.kpfu.machinemetrics.dto.EquipmentStatisticsDto;
 import ru.kpfu.machinemetrics.dto.StatisticsDto;
 import ru.kpfu.machinemetrics.service.EquipmentDataService;
 
@@ -51,26 +52,26 @@ public class EquipmentDataControllerTest {
         );
 
         StatisticsDto givenDto = StatisticsDto.builder()
-                .equipmentData(givenList)
+                .equipmentStatisticsDtos(List.of(EquipmentStatisticsDto.builder().equipmentData(givenList).build()))
                 .start(givenStart)
                 .end(givenStop)
                 .build();
 
-        when(equipmentDataService.getData(eq(givenId), eq(givenStart), eq(givenStop))).thenReturn(givenDto);
+        when(equipmentDataService.getData(eq(List.of(givenId)), eq(givenStart), eq(givenStop))).thenReturn(givenDto);
 
         // expect
         mockMvc.perform(get("/api/v1/equipment-data")
-                        .param("id", givenId.toString())
+                        .param("ids", givenId.toString())
                         .param("start", givenStart.toString())
                         .param("stop", givenStop.toString())
                 )
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.equipmentData.length()").value(2))
-                .andExpect(jsonPath("$.equipmentData[0].equipmentId").value(givenId))
-                .andExpect(jsonPath("$.equipmentData[0].enabled").value(true))
-                .andExpect(jsonPath("$.equipmentData[1].equipmentId").value(givenId))
-                .andExpect(jsonPath("$.equipmentData[1].enabled").value(false))
+                .andExpect(jsonPath("$.equipmentStatisticsDtos[0].equipmentData.length()").value(2))
+                .andExpect(jsonPath("$.equipmentStatisticsDtos[0].equipmentData[0].equipmentId").value(givenId))
+                .andExpect(jsonPath("$.equipmentStatisticsDtos[0].equipmentData[0].enabled").value(true))
+                .andExpect(jsonPath("$.equipmentStatisticsDtos[0].equipmentData[1].equipmentId").value(givenId))
+                .andExpect(jsonPath("$.equipmentStatisticsDtos[0].equipmentData[1].enabled").value(false))
                 .andDo(result -> {
                     String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
                     StatisticsDto actualDto = objectMapper.readValue(response, StatisticsDto.class);
@@ -79,11 +80,11 @@ public class EquipmentDataControllerTest {
                     softly.assertThat(actualDto).isNotNull();
                     softly.assertThat(actualDto.getStart()).isEqualTo(givenStart);
                     softly.assertThat(actualDto.getEnd()).isEqualTo(givenStop);
-                    softly.assertThat(actualDto.getEquipmentData()).hasSize(2);
-                    softly.assertThat(actualDto.getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
-                    softly.assertThat(actualDto.getEquipmentData().get(0).getEnabled()).isEqualTo(true);
-                    softly.assertThat(actualDto.getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
-                    softly.assertThat(actualDto.getEquipmentData().get(1).getEnabled()).isEqualTo(false);
+                    softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData()).hasSize(2);
+                    softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
+                    softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabled()).isEqualTo(true);
+                    softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
+                    softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabled()).isEqualTo(false);
                     softly.assertAll();
                 });
     }

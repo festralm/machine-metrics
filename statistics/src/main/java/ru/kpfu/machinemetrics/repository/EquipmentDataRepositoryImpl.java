@@ -20,12 +20,10 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 
 @Repository
@@ -42,15 +40,16 @@ public class EquipmentDataRepositoryImpl implements EquipmentDataRepository {
                 .u((Double) fluxRecord.getValueByKey("u"))
                 .enabled((Boolean) fluxRecord.getValueByKey("enabled"))
                 .time(fluxRecord.getTime().atOffset(zoneOffset))
+                .isReal(true)
                 .build();
     }
 
     @Override
-    public List<EquipmentData> getData(@NotNull String start, @NotNull String stop, Long equipmentId) {
+    public ArrayList<EquipmentData> getData(@NotNull String start, @NotNull String stop, Long equipmentId) {
 
         QueryApi queryApi = influxDBClient.getQueryApi();
 
-        List<EquipmentData> result = new ArrayList<>();
+        ArrayList<EquipmentData> result = new ArrayList<>();
 
         CountDownLatch latch = new CountDownLatch(2);
 
@@ -78,7 +77,10 @@ public class EquipmentDataRepositoryImpl implements EquipmentDataRepository {
             throw new RuntimeException(e);
         }
         result.sort(Comparator.comparing(EquipmentData::getTime));
-        return result.stream().peek(x -> x.setTime(x.getTime().truncatedTo(ChronoUnit.MINUTES))).collect(Collectors.toList());
+        for (var data : result) {
+            data.setTime(data.getTime().truncatedTo(ChronoUnit.MINUTES));
+        }
+        return result;
     }
 
     private void addRecordsInPeriod(
@@ -93,11 +95,7 @@ public class EquipmentDataRepositoryImpl implements EquipmentDataRepository {
                 "from(bucket: \"%s\") " +
                         "|> range(start: time(v: %s), stop: time(v: %s)) " +
                         "|> filter(fn: (r) => r[\"_measurement\"] == \"equipment_statistics\")" +
-                        (
-                                equipmentId == null ?
-                                        "" :
-                                        "|> filter(fn: (r) => r[\"equipment_id\"] == \"%s\")"
-                        ) +
+                        "|> filter(fn: (r) => r[\"equipment_id\"] == \"%s\")" +
                         "|> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")",
                 influxDbProperties.getBucket(),
                 start,
@@ -125,11 +123,7 @@ public class EquipmentDataRepositoryImpl implements EquipmentDataRepository {
                 "from(bucket: \"%s\") " +
                         "|> range(start: -inf, stop: time(v: %s)) " +
                         "|> filter(fn: (r) => r[\"_measurement\"] == \"equipment_statistics\")" +
-                        (
-                                equipmentId == null ?
-                                        "" :
-                                        "|> filter(fn: (r) => r[\"equipment_id\"] == \"%s\")"
-                        ) +
+                        "|> filter(fn: (r) => r[\"equipment_id\"] == \"%s\")" +
                         "|> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")" +
                         "|> last(column: \"_time\")",
                 influxDbProperties.getBucket(),

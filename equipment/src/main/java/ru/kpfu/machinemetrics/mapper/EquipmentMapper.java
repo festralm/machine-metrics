@@ -58,6 +58,8 @@ public interface EquipmentMapper {
         return new PageImpl<>(dtos, equipments.getPageable(), equipments.getTotalElements());
     }
 
+    List<EquipmentItemDto> toEquipmentItemDtos(List<Equipment> equipments);
+
     @Mapping(target = "status", source = "status.name")
     EquipmentItemDto toEquipmentItemDto(Equipment equipments);
 }

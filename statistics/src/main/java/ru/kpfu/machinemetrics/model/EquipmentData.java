@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.Duration;
 import java.time.OffsetDateTime;
 
 @Getter
@@ -14,4 +15,6 @@ public class EquipmentData {
     private Double u;
     private Boolean enabled;
     private OffsetDateTime time;
+    private Duration duration;
+    private boolean isReal;
 }

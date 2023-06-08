@@ -36,6 +36,10 @@ public class EquipmentService {
         return equipmentRepository.findAllByDeletedFalseOrderByName(pageable);
     }
 
+    public List<Equipment> search(Long unitId) {
+        return equipmentRepository.searchAllByUnitContainingOrderByName(unitId);
+    }
+
     public Page<Equipment> search(String name, Pageable pageable) {
         if (name == null) {
             name = "";

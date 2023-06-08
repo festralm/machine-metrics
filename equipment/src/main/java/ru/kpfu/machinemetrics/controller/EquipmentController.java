@@ -23,6 +23,7 @@ import ru.kpfu.machinemetrics.model.Equipment;
 import ru.kpfu.machinemetrics.service.EquipmentService;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "${app.api.prefix.v1}/equipment")
@@ -39,6 +40,14 @@ public class EquipmentController {
     }
 
     @GetMapping("/search")
+    public List<EquipmentItemDto> search(
+            @RequestParam(value = "unit", required = false) Long unit
+    ) {
+        List<Equipment> equipments = equipmentService.search(unit);
+        return equipmentMapper.toEquipmentItemDtos(equipments);
+    }
+
+    @GetMapping("/search-pageable")
     public Page<EquipmentItemDto> search(
             @RequestParam(value = "name", required = false) String name,
             @PageableDefault Pageable pageable

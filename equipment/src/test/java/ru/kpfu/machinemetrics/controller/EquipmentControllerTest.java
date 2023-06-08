@@ -124,7 +124,7 @@ public class EquipmentControllerTest {
         when(equipmentMapperMock.toEquipmentItemDtos(eq(equipmentPage))).thenReturn(expectedEquipmentItemDtoPage);
 
         // expect
-        mockMvc.perform(get("/api/v1/equipment/search")
+        mockMvc.perform(get("/api/v1/equipment/search-pageable")
                         .param("name", "test")
                         .param("size", "10")
                         .param("page", "1"))

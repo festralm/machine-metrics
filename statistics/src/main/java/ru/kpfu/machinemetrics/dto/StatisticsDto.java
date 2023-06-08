@@ -15,15 +15,5 @@ public class StatisticsDto {
 
     private OffsetDateTime start;
     private OffsetDateTime end;
-    private Map<OffsetDateTime, ScheduleDto> schedules;
-    private List<EquipmentDataDto> equipmentData;
-
-    private Long upMinutes;
-    private Long upScheduleMinutes;
-    private Long upNotScheduleMinutes;
-    private Long downMinutes;
-    private Long downScheduleMinutes;
-
-    private Double upSchedulePercent;
-    private Double downSchedulePercent;
+    private List<EquipmentStatisticsDto> equipmentStatisticsDtos;
 }

@@ -17,6 +17,7 @@ import ru.kpfu.machinemetrics.repository.ScheduleRepository;
 
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -52,22 +53,24 @@ public class EquipmentDataServiceTest {
                 .u(30d)
                 .time(givenStart)
                 .enabled(true)
+                .isReal(true)
                 .build();
         final EquipmentData equipment2 = EquipmentData.builder()
                 .equipmentId(givenId)
                 .u(10d)
                 .time(givenStop)
                 .enabled(false)
+                .isReal(true)
                 .build();
 
-        List<EquipmentData> givenList = List.of(equipment1, equipment2);
+        ArrayList<EquipmentData> givenList = new ArrayList<>(List.of(equipment1, equipment2));
 
         when(equipmentDataRepositoryMock.getData(any(String.class), any(String.class), any(Long.class)))
                 .thenReturn(givenList);
         mockOnDate(givenId, givenStart);
 
         // when
-        StatisticsDto actualDto = equipmentDataService.getData(givenId, givenStart, givenStop);
+        StatisticsDto actualDto = equipmentDataService.getData(List.of(givenId), givenStart, givenStop);
 
         // expect
         SoftAssertions softly = new SoftAssertions();
@@ -75,31 +78,31 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getStart()).isEqualTo(givenStart);
         softly.assertThat(actualDto.getEnd()).isEqualTo(givenStop);
 
-        softly.assertThat(actualDto.getSchedules()).hasSize(1);
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).hasSize(1);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
 
-        softly.assertThat(actualDto.getUpMinutes()).isEqualTo((long) (3.5 * 60));
-        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo((long) (1.5 * 60));
-        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo(2 * 60);
-        softly.assertThat(actualDto.getDownMinutes()).isEqualTo(0);
-        softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpMinutes()).isEqualTo((long) (3.5 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpScheduleMinutes()).isEqualTo((long) (1.5 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpNotScheduleMinutes()).isEqualTo(2 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownMinutes()).isEqualTo(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownScheduleMinutes()).isEqualTo(0);
 
-        softly.assertThat(actualDto.getUpSchedulePercent()).isEqualTo(100.0);
-        softly.assertThat(actualDto.getDownSchedulePercent()).isEqualTo(0.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpSchedulePercent()).isEqualTo(100.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownSchedulePercent()).isEqualTo(0.0);
 
-        softly.assertThat(actualDto.getEquipmentData()).hasSize(2);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData()).hasSize(2);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(false);
         softly.assertAll();
         verify(equipmentDataRepositoryMock, Mockito.times(1))
                 .getData(any(), any(), any());
@@ -118,15 +121,17 @@ public class EquipmentDataServiceTest {
                 .u(10d)
                 .time(givenStart)
                 .enabled(false)
+                .isReal(true)
                 .build();
         final EquipmentData equipment2 = EquipmentData.builder()
                 .equipmentId(givenId)
                 .u(30d)
                 .time(givenStop)
                 .enabled(true)
+                .isReal(true)
                 .build();
 
-        List<EquipmentData> givenList = List.of(equipment1, equipment2);
+        ArrayList<EquipmentData> givenList = new ArrayList<>(List.of(equipment1, equipment2));
 
         List<Schedule> scheduleList = List.of(
                 Schedule.builder()
@@ -145,7 +150,7 @@ public class EquipmentDataServiceTest {
         )).thenReturn(scheduleList);
 
         // when
-        StatisticsDto actualDto = equipmentDataService.getData(givenId, givenStart, givenStop);
+        StatisticsDto actualDto = equipmentDataService.getData(List.of(givenId), givenStart, givenStop);
 
         // expect
         SoftAssertions softly = new SoftAssertions();
@@ -153,31 +158,31 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getStart()).isEqualTo(givenStart);
         softly.assertThat(actualDto.getEnd()).isEqualTo(givenStop);
 
-        softly.assertThat(actualDto.getSchedules()).hasSize(1);
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).hasSize(1);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
 
-        softly.assertThat(actualDto.getUpMinutes()).isEqualTo(0);
-        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo(0);
-        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo(0);
-        softly.assertThat(actualDto.getDownMinutes()).isEqualTo((long) (4.5 * 60));
-        softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo(2 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpMinutes()).isEqualTo(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpScheduleMinutes()).isEqualTo(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpNotScheduleMinutes()).isEqualTo(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownMinutes()).isEqualTo((long) (4.5 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownScheduleMinutes()).isEqualTo(2 * 60);
 
-        softly.assertThat(actualDto.getUpSchedulePercent()).isEqualTo(0.0);
-        softly.assertThat(actualDto.getDownSchedulePercent()).isEqualTo(100.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpSchedulePercent()).isEqualTo(0.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownSchedulePercent()).isEqualTo(100.0);
 
-        softly.assertThat(actualDto.getEquipmentData()).hasSize(2);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(true);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(true);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData()).hasSize(2);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(true);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(true);
         softly.assertAll();
         verify(equipmentDataRepositoryMock, Mockito.times(1))
                 .getData(any(), any(), any());
@@ -192,7 +197,7 @@ public class EquipmentDataServiceTest {
         OffsetDateTime givenStart = now.minusDays(2).withHour(16).withMinute(0).withSecond(0).withNano(0);
         OffsetDateTime givenStop = now.withHour(20).withMinute(0).withSecond(0).withNano(0);
 
-        List<EquipmentData> givenList = List.of();
+        ArrayList<EquipmentData> givenList = new ArrayList<>();
 
         when(equipmentDataRepositoryMock.getData(any(String.class), any(String.class), any(Long.class)))
                 .thenReturn(givenList);
@@ -201,7 +206,7 @@ public class EquipmentDataServiceTest {
         mockOnDate(givenId, givenStart.plusDays(2));
 
         // when
-        StatisticsDto actualDto = equipmentDataService.getData(givenId, givenStart, givenStop);
+        StatisticsDto actualDto = equipmentDataService.getData(List.of(givenId), givenStart, givenStop);
 
         // expect
         SoftAssertions softly = new SoftAssertions();
@@ -209,21 +214,21 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getStart()).isEqualTo(givenStart);
         softly.assertThat(actualDto.getEnd()).isEqualTo(givenStop);
 
-        softly.assertThat(actualDto.getSchedules()).hasSize(3);
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.plusDays(1).truncatedTo(ChronoUnit.DAYS));
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.plusDays(2).truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).hasSize(3);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.plusDays(1).truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.plusDays(2).truncatedTo(ChronoUnit.DAYS));
 
-        softly.assertThat(actualDto.getUpMinutes()).isEqualTo(0);
-        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo(0);
-        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo(0);
-        softly.assertThat(actualDto.getDownMinutes()).isEqualTo(52 * 60L);
-        softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo(18 * 60L);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpMinutes()).isEqualTo(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpScheduleMinutes()).isEqualTo(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpNotScheduleMinutes()).isEqualTo(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownMinutes()).isEqualTo(52 * 60L);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownScheduleMinutes()).isEqualTo(18 * 60L);
 
-        softly.assertThat(actualDto.getUpSchedulePercent()).isEqualTo(0.0);
-        softly.assertThat(actualDto.getDownSchedulePercent()).isEqualTo(100.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpSchedulePercent()).isEqualTo(0.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownSchedulePercent()).isEqualTo(100.0);
 
-        softly.assertThat(actualDto.getEquipmentData()).hasSize(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData()).hasSize(0);
         softly.assertAll();
         verify(equipmentDataRepositoryMock, Mockito.times(1))
                 .getData(any(), any(), any());
@@ -243,15 +248,17 @@ public class EquipmentDataServiceTest {
                 .u(10d)
                 .time(givenStart)
                 .enabled(true)
+                .isReal(true)
                 .build();
         final EquipmentData equipment2 = EquipmentData.builder()
                 .equipmentId(givenId)
                 .u(30d)
                 .time(givenStop)
                 .enabled(false)
+                .isReal(true)
                 .build();
 
-        List<EquipmentData> givenList = List.of(equipment1, equipment2);
+        ArrayList<EquipmentData> givenList = new ArrayList<>(List.of(equipment1, equipment2));
 
         List<Schedule> scheduleList = List.of(
                 Schedule.builder()
@@ -270,7 +277,7 @@ public class EquipmentDataServiceTest {
         )).thenReturn(scheduleList);
 
         // when
-        StatisticsDto actualDto = equipmentDataService.getData(givenId, givenStart, givenStop);
+        StatisticsDto actualDto = equipmentDataService.getData(List.of(givenId), givenStart, givenStop);
 
         // expect
         SoftAssertions softly = new SoftAssertions();
@@ -278,31 +285,31 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getStart()).isEqualTo(givenStart);
         softly.assertThat(actualDto.getEnd()).isEqualTo(givenStop);
 
-        softly.assertThat(actualDto.getSchedules()).hasSize(1);
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).hasSize(1);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
 
-        softly.assertThat(actualDto.getUpMinutes()).isEqualTo((long) (10.5 * 60));
-        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo(6 * 60);
-        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo((long) (4.5 * 60));
-        softly.assertThat(actualDto.getDownMinutes()).isEqualTo(0);
-        softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpMinutes()).isEqualTo((long) (10.5 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpScheduleMinutes()).isEqualTo(6 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpNotScheduleMinutes()).isEqualTo((long) (4.5 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownMinutes()).isEqualTo(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownScheduleMinutes()).isEqualTo(0);
 
-        softly.assertThat(actualDto.getUpSchedulePercent()).isEqualTo(100.0);
-        softly.assertThat(actualDto.getDownSchedulePercent()).isEqualTo(0.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpSchedulePercent()).isEqualTo(100.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownSchedulePercent()).isEqualTo(0.0);
 
-        softly.assertThat(actualDto.getEquipmentData()).hasSize(2);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(true);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData()).hasSize(2);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(true);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(false);
         softly.assertAll();
         verify(equipmentDataRepositoryMock, Mockito.times(1))
                 .getData(any(), any(), any());
@@ -321,15 +328,17 @@ public class EquipmentDataServiceTest {
                 .u(10d)
                 .time(givenStart)
                 .enabled(false)
+                .isReal(true)
                 .build();
         final EquipmentData equipment2 = EquipmentData.builder()
                 .equipmentId(givenId)
                 .u(30d)
                 .time(givenStop)
                 .enabled(true)
+                .isReal(true)
                 .build();
 
-        List<EquipmentData> givenList = List.of(equipment1, equipment2);
+        ArrayList<EquipmentData> givenList = new ArrayList<>(List.of(equipment1, equipment2));
 
         List<Schedule> scheduleList = List.of(
                 Schedule.builder()
@@ -348,7 +357,7 @@ public class EquipmentDataServiceTest {
         )).thenReturn(scheduleList);
 
         // when
-        StatisticsDto actualDto = equipmentDataService.getData(givenId, givenStart, givenStop);
+        StatisticsDto actualDto = equipmentDataService.getData(List.of(givenId), givenStart, givenStop);
 
         // expect
         SoftAssertions softly = new SoftAssertions();
@@ -356,31 +365,31 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getStart()).isEqualTo(givenStart);
         softly.assertThat(actualDto.getEnd()).isEqualTo(givenStop);
 
-        softly.assertThat(actualDto.getSchedules()).hasSize(1);
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).hasSize(1);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
 
-        softly.assertThat(actualDto.getUpMinutes()).isEqualTo(0L);
-        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo(0L);
-        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo(0L);
-        softly.assertThat(actualDto.getDownMinutes()).isEqualTo((long) (10.5 * 60));
-        softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo(6 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpMinutes()).isEqualTo(0L);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpScheduleMinutes()).isEqualTo(0L);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpNotScheduleMinutes()).isEqualTo(0L);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownMinutes()).isEqualTo((long) (10.5 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownScheduleMinutes()).isEqualTo(6 * 60);
 
-        softly.assertThat(actualDto.getUpSchedulePercent()).isEqualTo(0.0);
-        softly.assertThat(actualDto.getDownSchedulePercent()).isEqualTo(100.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpSchedulePercent()).isEqualTo(0.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownSchedulePercent()).isEqualTo(100.0);
 
-        softly.assertThat(actualDto.getEquipmentData()).hasSize(2);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(true);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData()).hasSize(2);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(true);
         softly.assertAll();
         verify(equipmentDataRepositoryMock, Mockito.times(1))
                 .getData(any(), any(), any());
@@ -400,15 +409,17 @@ public class EquipmentDataServiceTest {
                 .u(10d)
                 .time(givenStart)
                 .enabled(true)
+                .isReal(true)
                 .build();
         final EquipmentData equipment2 = EquipmentData.builder()
                 .equipmentId(givenId)
                 .u(30d)
                 .time(givenStop)
                 .enabled(false)
+                .isReal(true)
                 .build();
 
-        List<EquipmentData> givenList = List.of(equipment1, equipment2);
+        ArrayList<EquipmentData> givenList = new ArrayList<>(List.of(equipment1, equipment2));
 
         List<Schedule> scheduleList = List.of(
                 Schedule.builder()
@@ -426,7 +437,7 @@ public class EquipmentDataServiceTest {
         )).thenReturn(scheduleList);
 
         // when
-        StatisticsDto actualDto = equipmentDataService.getData(givenId, givenStart, givenStop);
+        StatisticsDto actualDto = equipmentDataService.getData(List.of(givenId), givenStart, givenStop);
 
         // expect
         SoftAssertions softly = new SoftAssertions();
@@ -434,31 +445,31 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getStart()).isEqualTo(givenStart);
         softly.assertThat(actualDto.getEnd()).isEqualTo(givenStop);
 
-        softly.assertThat(actualDto.getSchedules()).hasSize(1);
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).hasSize(1);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
 
-        softly.assertThat(actualDto.getUpMinutes()).isEqualTo((long) (6.5 * 60));
-        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo((long) (6.5 * 60));
-        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo(0);
-        softly.assertThat(actualDto.getDownMinutes()).isEqualTo(0);
-        softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpMinutes()).isEqualTo((long) (6.5 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpScheduleMinutes()).isEqualTo((long) (6.5 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpNotScheduleMinutes()).isEqualTo(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownMinutes()).isEqualTo(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownScheduleMinutes()).isEqualTo(0);
 
-        softly.assertThat(actualDto.getUpSchedulePercent()).isEqualTo(100.0);
-        softly.assertThat(actualDto.getDownSchedulePercent()).isEqualTo(0.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpSchedulePercent()).isEqualTo(100.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownSchedulePercent()).isEqualTo(0.0);
 
-        softly.assertThat(actualDto.getEquipmentData()).hasSize(2);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(true);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData()).hasSize(2);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(true);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(false);
         softly.assertAll();
         verify(equipmentDataRepositoryMock, Mockito.times(1))
                 .getData(any(), any(), any());
@@ -477,15 +488,17 @@ public class EquipmentDataServiceTest {
                 .u(10d)
                 .time(givenStart)
                 .enabled(false)
+                .isReal(true)
                 .build();
         final EquipmentData equipment2 = EquipmentData.builder()
                 .equipmentId(givenId)
                 .u(30d)
                 .time(givenStop)
                 .enabled(true)
+                .isReal(true)
                 .build();
 
-        List<EquipmentData> givenList = List.of(equipment1, equipment2);
+        ArrayList<EquipmentData> givenList = new ArrayList<>(List.of(equipment1, equipment2));
 
         List<Schedule> scheduleList = List.of(
                 Schedule.builder()
@@ -504,7 +517,7 @@ public class EquipmentDataServiceTest {
         )).thenReturn(scheduleList);
 
         // when
-        StatisticsDto actualDto = equipmentDataService.getData(givenId, givenStart, givenStop);
+        StatisticsDto actualDto = equipmentDataService.getData(List.of(givenId), givenStart, givenStop);
 
         // expect
         SoftAssertions softly = new SoftAssertions();
@@ -512,31 +525,31 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getStart()).isEqualTo(givenStart);
         softly.assertThat(actualDto.getEnd()).isEqualTo(givenStop);
 
-        softly.assertThat(actualDto.getSchedules()).hasSize(1);
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).hasSize(1);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
 
-        softly.assertThat(actualDto.getUpMinutes()).isEqualTo(0L);
-        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo(0L);
-        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo(0L);
-        softly.assertThat(actualDto.getDownMinutes()).isEqualTo((long) (6.5 * 60));
-        softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo((long) (6.5 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpMinutes()).isEqualTo(0L);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpScheduleMinutes()).isEqualTo(0L);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpNotScheduleMinutes()).isEqualTo(0L);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownMinutes()).isEqualTo((long) (6.5 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownScheduleMinutes()).isEqualTo((long) (6.5 * 60));
 
-        softly.assertThat(actualDto.getUpSchedulePercent()).isEqualTo(0.0);
-        softly.assertThat(actualDto.getDownSchedulePercent()).isEqualTo(100.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpSchedulePercent()).isEqualTo(0.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownSchedulePercent()).isEqualTo(100.0);
 
-        softly.assertThat(actualDto.getEquipmentData()).hasSize(2);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(true);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData()).hasSize(2);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(true);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(false);
         softly.assertAll();
         verify(equipmentDataRepositoryMock, Mockito.times(1))
                 .getData(any(), any(), any());
@@ -556,15 +569,17 @@ public class EquipmentDataServiceTest {
                 .u(10d)
                 .time(givenStart.plusDays(1))
                 .enabled(true)
+                .isReal(true)
                 .build();
         final EquipmentData equipment2 = EquipmentData.builder()
                 .equipmentId(givenId)
                 .u(30d)
                 .time(givenStop)
                 .enabled(false)
+                .isReal(true)
                 .build();
 
-        List<EquipmentData> givenList = List.of(equipment1, equipment2);
+        ArrayList<EquipmentData> givenList = new ArrayList<>(List.of(equipment1, equipment2));
 
         when(equipmentDataRepositoryMock.getData(any(String.class), any(String.class), any(Long.class)))
                 .thenReturn(givenList);
@@ -594,7 +609,7 @@ public class EquipmentDataServiceTest {
         ));
 
         // when
-        StatisticsDto actualDto = equipmentDataService.getData(givenId, givenStart, givenStop);
+        StatisticsDto actualDto = equipmentDataService.getData(List.of(givenId), givenStart, givenStop);
 
         // expect
         SoftAssertions softly = new SoftAssertions();
@@ -602,32 +617,32 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getStart()).isEqualTo(givenStart);
         softly.assertThat(actualDto.getEnd()).isEqualTo(givenStop);
 
-        softly.assertThat(actualDto.getSchedules()).hasSize(2);
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStop.truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).hasSize(2);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStop.truncatedTo(ChronoUnit.DAYS));
 
-        softly.assertThat(actualDto.getUpMinutes()).isEqualTo((long) (6.5 * 60));
-        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo((long) (6.5 * 60));
-        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo(0);
-        softly.assertThat(actualDto.getDownMinutes()).isEqualTo(24 * 60);
-        softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo(10 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpMinutes()).isEqualTo((long) (6.5 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpScheduleMinutes()).isEqualTo((long) (6.5 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpNotScheduleMinutes()).isEqualTo(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownMinutes()).isEqualTo(24 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownScheduleMinutes()).isEqualTo(10 * 60);
 
-        softly.assertThat(actualDto.getUpSchedulePercent()).isCloseTo(39.3, Offset.offset(0.1));
-        softly.assertThat(actualDto.getDownSchedulePercent()).isCloseTo(60.6, Offset.offset(0.1));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpSchedulePercent()).isCloseTo(39.3, Offset.offset(0.1));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownSchedulePercent()).isCloseTo(60.6, Offset.offset(0.1));
 
-        softly.assertThat(actualDto.getEquipmentData()).hasSize(2);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(true);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData()).hasSize(2);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(true);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(false);
         softly.assertAll();
         verify(equipmentDataRepositoryMock, Mockito.times(1))
                 .getData(any(), any(), any());
@@ -646,15 +661,17 @@ public class EquipmentDataServiceTest {
                 .u(10d)
                 .time(givenStart.plusDays(1))
                 .enabled(false)
+                .isReal(true)
                 .build();
         final EquipmentData equipment2 = EquipmentData.builder()
                 .equipmentId(givenId)
                 .u(30d)
                 .time(givenStop)
                 .enabled(true)
+                .isReal(true)
                 .build();
 
-        List<EquipmentData> givenList = List.of(equipment1, equipment2);
+        ArrayList<EquipmentData> givenList = new ArrayList<>(List.of(equipment1, equipment2));
 
         when(equipmentDataRepositoryMock.getData(any(String.class), any(String.class), any(Long.class)))
                 .thenReturn(givenList);
@@ -684,7 +701,7 @@ public class EquipmentDataServiceTest {
         ));
 
         // when
-        StatisticsDto actualDto = equipmentDataService.getData(givenId, givenStart, givenStop);
+        StatisticsDto actualDto = equipmentDataService.getData(List.of(givenId), givenStart, givenStop);
 
         // expect
         SoftAssertions softly = new SoftAssertions();
@@ -692,32 +709,32 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getStart()).isEqualTo(givenStart);
         softly.assertThat(actualDto.getEnd()).isEqualTo(givenStop);
 
-        softly.assertThat(actualDto.getSchedules()).hasSize(2);
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStop.truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).hasSize(2);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStop.truncatedTo(ChronoUnit.DAYS));
 
-        softly.assertThat(actualDto.getUpMinutes()).isEqualTo(0L);
-        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo(0L);
-        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo(0L);
-        softly.assertThat(actualDto.getDownMinutes()).isEqualTo((long) (30.5 * 60));
-        softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo((long) (16.5 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpMinutes()).isEqualTo(0L);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpScheduleMinutes()).isEqualTo(0L);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpNotScheduleMinutes()).isEqualTo(0L);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownMinutes()).isEqualTo((long) (30.5 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownScheduleMinutes()).isEqualTo((long) (16.5 * 60));
 
-        softly.assertThat(actualDto.getUpSchedulePercent()).isEqualTo(0.0);
-        softly.assertThat(actualDto.getDownSchedulePercent()).isEqualTo(100.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpSchedulePercent()).isEqualTo(0.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownSchedulePercent()).isEqualTo(100.0);
 
-        softly.assertThat(actualDto.getEquipmentData()).hasSize(2);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(true);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData()).hasSize(2);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(true);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(false);
         softly.assertAll();
         verify(equipmentDataRepositoryMock, Mockito.times(1))
                 .getData(any(), any(), any());
@@ -737,15 +754,17 @@ public class EquipmentDataServiceTest {
                 .u(10d)
                 .time(givenStart)
                 .enabled(true)
+                .isReal(true)
                 .build();
         final EquipmentData equipment2 = EquipmentData.builder()
                 .equipmentId(givenId)
                 .u(30d)
                 .time(givenStop.minusDays(1))
                 .enabled(false)
+                .isReal(true)
                 .build();
 
-        List<EquipmentData> givenList = List.of(equipment1, equipment2);
+        ArrayList<EquipmentData> givenList = new ArrayList<>(List.of(equipment1, equipment2));
 
         when(equipmentDataRepositoryMock.getData(any(String.class), any(String.class), any(Long.class)))
                 .thenReturn(givenList);
@@ -775,7 +794,7 @@ public class EquipmentDataServiceTest {
         ));
 
         // when
-        StatisticsDto actualDto = equipmentDataService.getData(givenId, givenStart, givenStop);
+        StatisticsDto actualDto = equipmentDataService.getData(List.of(givenId), givenStart, givenStop);
 
         // expect
         SoftAssertions softly = new SoftAssertions();
@@ -783,32 +802,32 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getStart()).isEqualTo(givenStart);
         softly.assertThat(actualDto.getEnd()).isEqualTo(givenStop);
 
-        softly.assertThat(actualDto.getSchedules()).hasSize(2);
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStop.truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).hasSize(2);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStop.truncatedTo(ChronoUnit.DAYS));
 
-        softly.assertThat(actualDto.getUpMinutes()).isEqualTo((long) (6.5 * 60));
-        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo((long) (6.5 * 60));
-        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo((long) (0));
-        softly.assertThat(actualDto.getDownMinutes()).isEqualTo((long) (24 * 60));
-        softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo(10 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpMinutes()).isEqualTo((long) (6.5 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpScheduleMinutes()).isEqualTo((long) (6.5 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpNotScheduleMinutes()).isEqualTo((long) (0));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownMinutes()).isEqualTo((long) (24 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownScheduleMinutes()).isEqualTo(10 * 60);
 
-        softly.assertThat(actualDto.getUpSchedulePercent()).isCloseTo(39.3, Offset.offset(0.1));
-        softly.assertThat(actualDto.getDownSchedulePercent()).isCloseTo(60.6, Offset.offset(0.1));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpSchedulePercent()).isCloseTo(39.3, Offset.offset(0.1));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownSchedulePercent()).isCloseTo(60.6, Offset.offset(0.1));
 
-        softly.assertThat(actualDto.getEquipmentData()).hasSize(2);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(true);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData()).hasSize(2);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(true);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(false);
         softly.assertAll();
         verify(equipmentDataRepositoryMock, Mockito.times(1))
                 .getData(any(), any(), any());
@@ -827,15 +846,17 @@ public class EquipmentDataServiceTest {
                 .u(10d)
                 .time(givenStart)
                 .enabled(false)
+                .isReal(true)
                 .build();
         final EquipmentData equipment2 = EquipmentData.builder()
                 .equipmentId(givenId)
                 .u(30d)
                 .time(givenStop.minusDays(1))
                 .enabled(true)
+                .isReal(true)
                 .build();
 
-        List<EquipmentData> givenList = List.of(equipment1, equipment2);
+        ArrayList<EquipmentData> givenList = new ArrayList<>(List.of(equipment1, equipment2));
 
         when(equipmentDataRepositoryMock.getData(any(String.class), any(String.class), any(Long.class)))
                 .thenReturn(givenList);
@@ -865,7 +886,7 @@ public class EquipmentDataServiceTest {
         ));
 
         // when
-        StatisticsDto actualDto = equipmentDataService.getData(givenId, givenStart, givenStop);
+        StatisticsDto actualDto = equipmentDataService.getData(List.of(givenId), givenStart, givenStop);
 
         // expect
         SoftAssertions softly = new SoftAssertions();
@@ -873,32 +894,32 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getStart()).isEqualTo(givenStart);
         softly.assertThat(actualDto.getEnd()).isEqualTo(givenStop);
 
-        softly.assertThat(actualDto.getSchedules()).hasSize(2);
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStop.truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).hasSize(2);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStop.truncatedTo(ChronoUnit.DAYS));
 
-        softly.assertThat(actualDto.getUpMinutes()).isEqualTo((long) (24 * 60));
-        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo((long) (10 * 60));
-        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo((long) (14 * 60));
-        softly.assertThat(actualDto.getDownMinutes()).isEqualTo((long) (6.5 * 60));
-        softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo((long) (6.5 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpMinutes()).isEqualTo((long) (24 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpScheduleMinutes()).isEqualTo((long) (10 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpNotScheduleMinutes()).isEqualTo((long) (14 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownMinutes()).isEqualTo((long) (6.5 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownScheduleMinutes()).isEqualTo((long) (6.5 * 60));
 
-        softly.assertThat(actualDto.getUpSchedulePercent()).isCloseTo(60.6, Offset.offset(0.1));
-        softly.assertThat(actualDto.getDownSchedulePercent()).isCloseTo(39.3, Offset.offset(0.1));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpSchedulePercent()).isCloseTo(60.6, Offset.offset(0.1));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownSchedulePercent()).isCloseTo(39.3, Offset.offset(0.1));
 
-        softly.assertThat(actualDto.getEquipmentData()).hasSize(2);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(true);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData()).hasSize(2);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(true);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(false);
         softly.assertAll();
         verify(equipmentDataRepositoryMock, Mockito.times(1))
                 .getData(any(), any(), any());
@@ -918,22 +939,24 @@ public class EquipmentDataServiceTest {
                 .u(30d)
                 .time(givenStart.withHour(17))
                 .enabled(true)
+                .isReal(true)
                 .build();
         final EquipmentData equipment2 = EquipmentData.builder()
                 .equipmentId(givenId)
                 .u(10d)
                 .time(givenStop.withHour(19))
                 .enabled(false)
+                .isReal(true)
                 .build();
 
-        List<EquipmentData> givenList = List.of(equipment1, equipment2);
+        ArrayList<EquipmentData> givenList = new ArrayList<>(List.of(equipment1, equipment2));
 
         when(equipmentDataRepositoryMock.getData(any(String.class), any(String.class), any(Long.class)))
                 .thenReturn(givenList);
         mockOnDate(givenId, givenStart);
 
         // when
-        StatisticsDto actualDto = equipmentDataService.getData(givenId, givenStart, givenStop);
+        StatisticsDto actualDto = equipmentDataService.getData(List.of(givenId), givenStart, givenStop);
 
         // expect
         SoftAssertions softly = new SoftAssertions();
@@ -941,31 +964,31 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getStart()).isEqualTo(givenStart);
         softly.assertThat(actualDto.getEnd()).isEqualTo(givenStop);
 
-        softly.assertThat(actualDto.getSchedules()).hasSize(1);
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).hasSize(1);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
 
-        softly.assertThat(actualDto.getUpMinutes()).isEqualTo((long) (2 * 60));
-        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo((long) (60));
-        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo(60);
-        softly.assertThat(actualDto.getDownMinutes()).isEqualTo(2 * 60);
-        softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo(60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpMinutes()).isEqualTo((long) (2 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpScheduleMinutes()).isEqualTo((long) (60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpNotScheduleMinutes()).isEqualTo(60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownMinutes()).isEqualTo(2 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownScheduleMinutes()).isEqualTo(60);
 
-        softly.assertThat(actualDto.getUpSchedulePercent()).isEqualTo(50.0);
-        softly.assertThat(actualDto.getDownSchedulePercent()).isEqualTo(50.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpSchedulePercent()).isEqualTo(50.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownSchedulePercent()).isEqualTo(50.0);
 
-        softly.assertThat(actualDto.getEquipmentData()).hasSize(2);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData()).hasSize(2);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(false);
         softly.assertAll();
         verify(equipmentDataRepositoryMock, Mockito.times(1))
                 .getData(any(), any(), any());
@@ -984,15 +1007,17 @@ public class EquipmentDataServiceTest {
                 .u(10d)
                 .time(givenStart.withHour(17))
                 .enabled(false)
+                .isReal(true)
                 .build();
         final EquipmentData equipment2 = EquipmentData.builder()
                 .equipmentId(givenId)
                 .u(30d)
                 .time(givenStop.withHour(19))
                 .enabled(true)
+                .isReal(true)
                 .build();
 
-        List<EquipmentData> givenList = List.of(equipment1, equipment2);
+        ArrayList<EquipmentData> givenList = new ArrayList<>(List.of(equipment1, equipment2));
 
         List<Schedule> scheduleList = List.of(
                 Schedule.builder()
@@ -1011,7 +1036,7 @@ public class EquipmentDataServiceTest {
         )).thenReturn(scheduleList);
 
         // when
-        StatisticsDto actualDto = equipmentDataService.getData(givenId, givenStart, givenStop);
+        StatisticsDto actualDto = equipmentDataService.getData(List.of(givenId), givenStart, givenStop);
 
         // expect
         SoftAssertions softly = new SoftAssertions();
@@ -1019,31 +1044,31 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getStart()).isEqualTo(givenStart);
         softly.assertThat(actualDto.getEnd()).isEqualTo(givenStop);
 
-        softly.assertThat(actualDto.getSchedules()).hasSize(1);
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).hasSize(1);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
 
-        softly.assertThat(actualDto.getUpMinutes()).isEqualTo(60);
-        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo(0);
-        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo(60);
-        softly.assertThat(actualDto.getDownMinutes()).isEqualTo((long) (3 * 60));
-        softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo(2 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpMinutes()).isEqualTo(60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpScheduleMinutes()).isEqualTo(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpNotScheduleMinutes()).isEqualTo(60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownMinutes()).isEqualTo((long) (3 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownScheduleMinutes()).isEqualTo(2 * 60);
 
-        softly.assertThat(actualDto.getUpSchedulePercent()).isEqualTo(0.0);
-        softly.assertThat(actualDto.getDownSchedulePercent()).isEqualTo(100.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpSchedulePercent()).isEqualTo(0.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownSchedulePercent()).isEqualTo(100.0);
 
-        softly.assertThat(actualDto.getEquipmentData()).hasSize(2);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(true);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(true);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData()).hasSize(2);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(true);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(true);
         softly.assertAll();
         verify(equipmentDataRepositoryMock, Mockito.times(1))
                 .getData(any(), any(), any());
@@ -1063,15 +1088,17 @@ public class EquipmentDataServiceTest {
                 .u(30d)
                 .time(givenStart)
                 .enabled(true)
+                .isReal(true)
                 .build();
         final EquipmentData equipment2 = EquipmentData.builder()
                 .equipmentId(givenId)
                 .u(10d)
                 .time(givenStop)
                 .enabled(false)
+                .isReal(true)
                 .build();
 
-        List<EquipmentData> givenList = List.of(equipment1, equipment2);
+        ArrayList<EquipmentData> givenList = new ArrayList<>(List.of(equipment1, equipment2));
 
         when(equipmentDataRepositoryMock.getData(any(String.class), any(String.class), any(Long.class)))
                 .thenReturn(givenList);
@@ -1079,7 +1106,7 @@ public class EquipmentDataServiceTest {
         mockOnDate(givenId, givenStop);
 
         // when
-        StatisticsDto actualDto = equipmentDataService.getData(givenId, givenStart, givenStop);
+        StatisticsDto actualDto = equipmentDataService.getData(List.of(givenId), givenStart, givenStop);
 
         // expect
         SoftAssertions softly = new SoftAssertions();
@@ -1087,32 +1114,32 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getStart()).isEqualTo(givenStart);
         softly.assertThat(actualDto.getEnd()).isEqualTo(givenStop);
 
-        softly.assertThat(actualDto.getSchedules()).hasSize(2);
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStop.truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).hasSize(2);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStop.truncatedTo(ChronoUnit.DAYS));
 
-        softly.assertThat(actualDto.getUpMinutes()).isEqualTo((long) (28 * 60));
-        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo((long) (10 * 60));
-        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo(18 * 60);
-        softly.assertThat(actualDto.getDownMinutes()).isEqualTo(0);
-        softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpMinutes()).isEqualTo((long) (28 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpScheduleMinutes()).isEqualTo((long) (10 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpNotScheduleMinutes()).isEqualTo(18 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownMinutes()).isEqualTo(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownScheduleMinutes()).isEqualTo(0);
 
-        softly.assertThat(actualDto.getUpSchedulePercent()).isEqualTo(100.0);
-        softly.assertThat(actualDto.getDownSchedulePercent()).isEqualTo(0.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpSchedulePercent()).isEqualTo(100.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownSchedulePercent()).isEqualTo(0.0);
 
-        softly.assertThat(actualDto.getEquipmentData()).hasSize(2);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData()).hasSize(2);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(false);
         softly.assertAll();
         verify(equipmentDataRepositoryMock, Mockito.times(1))
                 .getData(any(), any(), any());
@@ -1131,15 +1158,17 @@ public class EquipmentDataServiceTest {
                 .u(10d)
                 .time(givenStart)
                 .enabled(false)
+                .isReal(true)
                 .build();
         final EquipmentData equipment2 = EquipmentData.builder()
                 .equipmentId(givenId)
                 .u(30d)
                 .time(givenStop)
                 .enabled(true)
+                .isReal(true)
                 .build();
 
-        List<EquipmentData> givenList = List.of(equipment1, equipment2);
+        ArrayList<EquipmentData> givenList = new ArrayList<>(List.of(equipment1, equipment2));
 
         when(equipmentDataRepositoryMock.getData(any(String.class), any(String.class), any(Long.class)))
                 .thenReturn(givenList);
@@ -1169,7 +1198,7 @@ public class EquipmentDataServiceTest {
         ));
 
         // when
-        StatisticsDto actualDto = equipmentDataService.getData(givenId, givenStart, givenStop);
+        StatisticsDto actualDto = equipmentDataService.getData(List.of(givenId), givenStart, givenStop);
 
         // expect
         SoftAssertions softly = new SoftAssertions();
@@ -1177,32 +1206,32 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getStart()).isEqualTo(givenStart);
         softly.assertThat(actualDto.getEnd()).isEqualTo(givenStop);
 
-        softly.assertThat(actualDto.getSchedules()).hasSize(2);
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStop.truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).hasSize(2);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStop.truncatedTo(ChronoUnit.DAYS));
 
-        softly.assertThat(actualDto.getUpMinutes()).isEqualTo(0);
-        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo(0);
-        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo(0);
-        softly.assertThat(actualDto.getDownMinutes()).isEqualTo((long) (28 * 60));
-        softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo(10 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpMinutes()).isEqualTo(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpScheduleMinutes()).isEqualTo(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpNotScheduleMinutes()).isEqualTo(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownMinutes()).isEqualTo((long) (28 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownScheduleMinutes()).isEqualTo(10 * 60);
 
-        softly.assertThat(actualDto.getUpSchedulePercent()).isEqualTo(0.0);
-        softly.assertThat(actualDto.getDownSchedulePercent()).isEqualTo(100.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpSchedulePercent()).isEqualTo(0.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownSchedulePercent()).isEqualTo(100.0);
 
-        softly.assertThat(actualDto.getEquipmentData()).hasSize(2);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(true);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(true);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData()).hasSize(2);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(true);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(true);
         softly.assertAll();
         verify(equipmentDataRepositoryMock, Mockito.times(1))
                 .getData(any(), any(), any());
@@ -1222,28 +1251,31 @@ public class EquipmentDataServiceTest {
                 .u(30d)
                 .time(givenStart.withHour(15))
                 .enabled(true)
+                .isReal(true)
                 .build();
         final EquipmentData equipment2 = EquipmentData.builder()
                 .equipmentId(givenId)
                 .u(10d)
                 .time(givenStop.withHour(17))
                 .enabled(false)
+                .isReal(true)
                 .build();
         final EquipmentData equipment3 = EquipmentData.builder()
                 .equipmentId(givenId)
                 .u(30d)
                 .time(givenStart.withHour(19))
                 .enabled(true)
+                .isReal(true)
                 .build();
 
-        List<EquipmentData> givenList = List.of(equipment1, equipment2, equipment3);
+        ArrayList<EquipmentData> givenList = new ArrayList<>(List.of(equipment1, equipment2, equipment3));
 
         when(equipmentDataRepositoryMock.getData(any(String.class), any(String.class), any(Long.class)))
                 .thenReturn(givenList);
         mockOnDate(givenId, givenStart);
 
         // when
-        StatisticsDto actualDto = equipmentDataService.getData(givenId, givenStart, givenStop);
+        StatisticsDto actualDto = equipmentDataService.getData(List.of(givenId), givenStart, givenStop);
 
         // expect
         SoftAssertions softly = new SoftAssertions();
@@ -1251,31 +1283,31 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getStart()).isEqualTo(givenStart);
         softly.assertThat(actualDto.getEnd()).isEqualTo(givenStop);
 
-        softly.assertThat(actualDto.getSchedules()).hasSize(1);
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).hasSize(1);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
 
-        softly.assertThat(actualDto.getUpMinutes()).isEqualTo((long) (2 * 60));
-        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo((long) (60));
-        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo(60);
-        softly.assertThat(actualDto.getDownMinutes()).isEqualTo(2 * 60);
-        softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo(60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpMinutes()).isEqualTo((long) (2 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpScheduleMinutes()).isEqualTo((long) (60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpNotScheduleMinutes()).isEqualTo(60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownMinutes()).isEqualTo(2 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownScheduleMinutes()).isEqualTo(60);
 
-        softly.assertThat(actualDto.getUpSchedulePercent()).isEqualTo(50.0);
-        softly.assertThat(actualDto.getDownSchedulePercent()).isEqualTo(50.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpSchedulePercent()).isEqualTo(50.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownSchedulePercent()).isEqualTo(50.0);
 
-        softly.assertThat(actualDto.getEquipmentData()).hasSize(2);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabled()).isEqualTo(equipment2.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getU()).isEqualTo(equipment2.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getTime()).isEqualTo(equipment2.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(true);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabled()).isEqualTo(equipment3.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getU()).isEqualTo(equipment3.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getTime()).isEqualTo(equipment3.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(true);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData()).hasSize(2);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabled()).isEqualTo(equipment2.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getU()).isEqualTo(equipment2.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getTime()).isEqualTo(equipment2.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(true);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabled()).isEqualTo(equipment3.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getU()).isEqualTo(equipment3.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getTime()).isEqualTo(equipment3.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(true);
         softly.assertAll();
         verify(equipmentDataRepositoryMock, Mockito.times(1))
                 .getData(any(), any(), any());
@@ -1294,28 +1326,31 @@ public class EquipmentDataServiceTest {
                 .u(30d)
                 .time(givenStart.withHour(15))
                 .enabled(false)
+                .isReal(true)
                 .build();
         final EquipmentData equipment2 = EquipmentData.builder()
                 .equipmentId(givenId)
                 .u(10d)
                 .time(givenStop.withHour(17))
                 .enabled(false)
+                .isReal(true)
                 .build();
         final EquipmentData equipment3 = EquipmentData.builder()
                 .equipmentId(givenId)
                 .u(30d)
                 .time(givenStart.withHour(19))
                 .enabled(true)
+                .isReal(true)
                 .build();
 
-        List<EquipmentData> givenList = List.of(equipment1, equipment2, equipment3);
+        ArrayList<EquipmentData> givenList = new ArrayList<>(List.of(equipment1, equipment2, equipment3));
 
         when(equipmentDataRepositoryMock.getData(any(String.class), any(String.class), any(Long.class)))
                 .thenReturn(givenList);
         mockOnDate(givenId, givenStart);
 
         // when
-        StatisticsDto actualDto = equipmentDataService.getData(givenId, givenStart, givenStop);
+        StatisticsDto actualDto = equipmentDataService.getData(List.of(givenId), givenStart, givenStop);
 
         // expect
         SoftAssertions softly = new SoftAssertions();
@@ -1323,31 +1358,31 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getStart()).isEqualTo(givenStart);
         softly.assertThat(actualDto.getEnd()).isEqualTo(givenStop);
 
-        softly.assertThat(actualDto.getSchedules()).hasSize(1);
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).hasSize(1);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
 
-        softly.assertThat(actualDto.getUpMinutes()).isEqualTo((long) (60));
-        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo((long) 0);
-        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo(60);
-        softly.assertThat(actualDto.getDownMinutes()).isEqualTo(3 * 60);
-        softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo(2 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpMinutes()).isEqualTo((long) (60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpScheduleMinutes()).isEqualTo((long) 0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpNotScheduleMinutes()).isEqualTo(60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownMinutes()).isEqualTo(3 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownScheduleMinutes()).isEqualTo(2 * 60);
 
-        softly.assertThat(actualDto.getUpSchedulePercent()).isEqualTo(0.0);
-        softly.assertThat(actualDto.getDownSchedulePercent()).isEqualTo(100.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpSchedulePercent()).isEqualTo(0.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownSchedulePercent()).isEqualTo(100.0);
 
-        softly.assertThat(actualDto.getEquipmentData()).hasSize(2);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabled()).isEqualTo(equipment2.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getU()).isEqualTo(equipment2.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getTime()).isEqualTo(equipment2.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(true);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabled()).isEqualTo(equipment3.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getU()).isEqualTo(equipment3.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getTime()).isEqualTo(equipment3.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(true);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData()).hasSize(2);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabled()).isEqualTo(equipment2.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getU()).isEqualTo(equipment2.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getTime()).isEqualTo(equipment2.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(true);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabled()).isEqualTo(equipment3.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getU()).isEqualTo(equipment3.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getTime()).isEqualTo(equipment3.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(true);
         softly.assertAll();
         verify(equipmentDataRepositoryMock, Mockito.times(1))
                 .getData(any(), any(), any());
@@ -1366,21 +1401,24 @@ public class EquipmentDataServiceTest {
                 .u(10d)
                 .time(givenStart.withHour(15))
                 .enabled(true)
+                .isReal(true)
                 .build();
         final EquipmentData equipment2 = EquipmentData.builder()
                 .equipmentId(givenId)
                 .u(30d)
                 .time(givenStop.withHour(17))
                 .enabled(true)
+                .isReal(true)
                 .build();
         final EquipmentData equipment3 = EquipmentData.builder()
                 .equipmentId(givenId)
                 .u(30d)
                 .time(givenStop.withHour(19))
                 .enabled(false)
+                .isReal(true)
                 .build();
 
-        List<EquipmentData> givenList = List.of(equipment1, equipment2, equipment3);
+        ArrayList<EquipmentData> givenList = new ArrayList<>(List.of(equipment1, equipment2, equipment3));
 
         List<Schedule> scheduleList = List.of(
                 Schedule.builder()
@@ -1399,7 +1437,7 @@ public class EquipmentDataServiceTest {
         )).thenReturn(scheduleList);
 
         // when
-        StatisticsDto actualDto = equipmentDataService.getData(givenId, givenStart, givenStop);
+        StatisticsDto actualDto = equipmentDataService.getData(List.of(givenId), givenStart, givenStop);
 
         // expect
         SoftAssertions softly = new SoftAssertions();
@@ -1407,31 +1445,31 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getStart()).isEqualTo(givenStart);
         softly.assertThat(actualDto.getEnd()).isEqualTo(givenStop);
 
-        softly.assertThat(actualDto.getSchedules()).hasSize(1);
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).hasSize(1);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
 
-        softly.assertThat(actualDto.getUpMinutes()).isEqualTo(3 * 60);
-        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo(2 * 60);
-        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo(60);
-        softly.assertThat(actualDto.getDownMinutes()).isEqualTo((long) 60);
-        softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpMinutes()).isEqualTo(3 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpScheduleMinutes()).isEqualTo(2 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpNotScheduleMinutes()).isEqualTo(60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownMinutes()).isEqualTo((long) 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownScheduleMinutes()).isEqualTo(0);
 
-        softly.assertThat(actualDto.getUpSchedulePercent()).isEqualTo(100.0);
-        softly.assertThat(actualDto.getDownSchedulePercent()).isEqualTo(0.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpSchedulePercent()).isEqualTo(100.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownSchedulePercent()).isEqualTo(0.0);
 
-        softly.assertThat(actualDto.getEquipmentData()).hasSize(2);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabled()).isEqualTo(equipment2.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getU()).isEqualTo(equipment2.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getTime()).isEqualTo(equipment2.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabled()).isEqualTo(equipment3.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getU()).isEqualTo(equipment3.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getTime()).isEqualTo(equipment3.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData()).hasSize(2);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabled()).isEqualTo(equipment2.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getU()).isEqualTo(equipment2.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getTime()).isEqualTo(equipment2.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabled()).isEqualTo(equipment3.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getU()).isEqualTo(equipment3.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getTime()).isEqualTo(equipment3.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(false);
         softly.assertAll();
         verify(equipmentDataRepositoryMock, Mockito.times(1))
                 .getData(any(), any(), any());
@@ -1450,21 +1488,24 @@ public class EquipmentDataServiceTest {
                 .u(10d)
                 .time(givenStart.withHour(15))
                 .enabled(false)
+                .isReal(true)
                 .build();
         final EquipmentData equipment2 = EquipmentData.builder()
                 .equipmentId(givenId)
                 .u(30d)
                 .time(givenStop.withHour(17))
                 .enabled(true)
+                .isReal(true)
                 .build();
         final EquipmentData equipment3 = EquipmentData.builder()
                 .equipmentId(givenId)
                 .u(30d)
                 .time(givenStop.withHour(19))
                 .enabled(false)
+                .isReal(true)
                 .build();
 
-        List<EquipmentData> givenList = List.of(equipment1, equipment2, equipment3);
+        ArrayList<EquipmentData> givenList = new ArrayList<>(List.of(equipment1, equipment2, equipment3));
 
         List<Schedule> scheduleList = List.of(
                 Schedule.builder()
@@ -1482,7 +1523,7 @@ public class EquipmentDataServiceTest {
         )).thenReturn(scheduleList);
 
         // when
-        StatisticsDto actualDto = equipmentDataService.getData(givenId, givenStart, givenStop);
+        StatisticsDto actualDto = equipmentDataService.getData(List.of(givenId), givenStart, givenStop);
 
         // expect
         SoftAssertions softly = new SoftAssertions();
@@ -1490,31 +1531,31 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getStart()).isEqualTo(givenStart);
         softly.assertThat(actualDto.getEnd()).isEqualTo(givenStop);
 
-        softly.assertThat(actualDto.getSchedules()).hasSize(1);
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).hasSize(1);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
 
-        softly.assertThat(actualDto.getUpMinutes()).isEqualTo(2 * 60);
-        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo(60);
-        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo(60);
-        softly.assertThat(actualDto.getDownMinutes()).isEqualTo((long) (2 * 60));
-        softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo(60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpMinutes()).isEqualTo(2 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpScheduleMinutes()).isEqualTo(60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpNotScheduleMinutes()).isEqualTo(60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownMinutes()).isEqualTo((long) (2 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownScheduleMinutes()).isEqualTo(60);
 
-        softly.assertThat(actualDto.getUpSchedulePercent()).isEqualTo(50.0);
-        softly.assertThat(actualDto.getDownSchedulePercent()).isEqualTo(50.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpSchedulePercent()).isEqualTo(50.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownSchedulePercent()).isEqualTo(50.0);
 
-        softly.assertThat(actualDto.getEquipmentData()).hasSize(2);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabled()).isEqualTo(equipment2.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getU()).isEqualTo(equipment2.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getTime()).isEqualTo(equipment2.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabled()).isEqualTo(equipment3.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getU()).isEqualTo(equipment3.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getTime()).isEqualTo(equipment3.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData()).hasSize(2);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabled()).isEqualTo(equipment2.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getU()).isEqualTo(equipment2.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getTime()).isEqualTo(equipment2.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabled()).isEqualTo(equipment3.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getU()).isEqualTo(equipment3.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getTime()).isEqualTo(equipment3.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(false);
         softly.assertAll();
         verify(equipmentDataRepositoryMock, Mockito.times(1))
                 .getData(any(), any(), any());
@@ -1534,16 +1575,17 @@ public class EquipmentDataServiceTest {
                 .u(30d)
                 .time(givenStart.withHour(15))
                 .enabled(true)
+                .isReal(true)
                 .build();
 
-        List<EquipmentData> givenList = List.of(equipment1);
+        ArrayList<EquipmentData> givenList = new ArrayList<>(List.of(equipment1));
 
         when(equipmentDataRepositoryMock.getData(any(String.class), any(String.class), any(Long.class)))
                 .thenReturn(givenList);
         mockOnDate(givenId, givenStart);
 
         // when
-        StatisticsDto actualDto = equipmentDataService.getData(givenId, givenStart, givenStop);
+        StatisticsDto actualDto = equipmentDataService.getData(List.of(givenId), givenStart, givenStop);
 
         // expect
         SoftAssertions softly = new SoftAssertions();
@@ -1551,19 +1593,19 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getStart()).isEqualTo(givenStart);
         softly.assertThat(actualDto.getEnd()).isEqualTo(givenStop);
 
-        softly.assertThat(actualDto.getSchedules()).hasSize(1);
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).hasSize(1);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
 
-        softly.assertThat(actualDto.getUpMinutes()).isEqualTo((long) (4 * 60));
-        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo((long) (2 * 60));
-        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo(2 * 60);
-        softly.assertThat(actualDto.getDownMinutes()).isEqualTo(0);
-        softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpMinutes()).isEqualTo((long) (4 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpScheduleMinutes()).isEqualTo((long) (2 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpNotScheduleMinutes()).isEqualTo(2 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownMinutes()).isEqualTo(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownScheduleMinutes()).isEqualTo(0);
 
-        softly.assertThat(actualDto.getUpSchedulePercent()).isEqualTo(100.0);
-        softly.assertThat(actualDto.getDownSchedulePercent()).isEqualTo(0.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpSchedulePercent()).isEqualTo(100.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownSchedulePercent()).isEqualTo(0.0);
 
-        softly.assertThat(actualDto.getEquipmentData()).hasSize(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData()).hasSize(0);
         softly.assertAll();
         verify(equipmentDataRepositoryMock, Mockito.times(1))
                 .getData(any(), any(), any());
@@ -1582,16 +1624,17 @@ public class EquipmentDataServiceTest {
                 .u(30d)
                 .time(givenStart.withHour(15))
                 .enabled(false)
+                .isReal(true)
                 .build();
 
-        List<EquipmentData> givenList = List.of(equipment1);
+        ArrayList<EquipmentData> givenList = new ArrayList<>(List.of(equipment1));
 
         when(equipmentDataRepositoryMock.getData(any(String.class), any(String.class), any(Long.class)))
                 .thenReturn(givenList);
         mockOnDate(givenId, givenStart);
 
         // when
-        StatisticsDto actualDto = equipmentDataService.getData(givenId, givenStart, givenStop);
+        StatisticsDto actualDto = equipmentDataService.getData(List.of(givenId), givenStart, givenStop);
 
         // expect
         SoftAssertions softly = new SoftAssertions();
@@ -1599,19 +1642,19 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getStart()).isEqualTo(givenStart);
         softly.assertThat(actualDto.getEnd()).isEqualTo(givenStop);
 
-        softly.assertThat(actualDto.getSchedules()).hasSize(1);
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).hasSize(1);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
 
-        softly.assertThat(actualDto.getUpMinutes()).isEqualTo((long) 0);
-        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo((long) 0);
-        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo(0);
-        softly.assertThat(actualDto.getDownMinutes()).isEqualTo(4 * 60);
-        softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo(2 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpMinutes()).isEqualTo((long) 0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpScheduleMinutes()).isEqualTo((long) 0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpNotScheduleMinutes()).isEqualTo(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownMinutes()).isEqualTo(4 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownScheduleMinutes()).isEqualTo(2 * 60);
 
-        softly.assertThat(actualDto.getUpSchedulePercent()).isEqualTo(0.0);
-        softly.assertThat(actualDto.getDownSchedulePercent()).isEqualTo(100.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpSchedulePercent()).isEqualTo(0.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownSchedulePercent()).isEqualTo(100.0);
 
-        softly.assertThat(actualDto.getEquipmentData()).hasSize(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData()).hasSize(0);
         softly.assertAll();
         verify(equipmentDataRepositoryMock, Mockito.times(1))
                 .getData(any(), any(), any());
@@ -1631,21 +1674,24 @@ public class EquipmentDataServiceTest {
                 .u(30d)
                 .time(givenStart)
                 .enabled(true)
+                .isReal(true)
                 .build();
         final EquipmentData equipment2 = EquipmentData.builder()
                 .equipmentId(givenId)
                 .u(10d)
                 .time(givenStop.minusDays(1).withHour(18))
                 .enabled(false)
+                .isReal(true)
                 .build();
         final EquipmentData equipment3 = EquipmentData.builder()
                 .equipmentId(givenId)
                 .u(10d)
                 .time(givenStop)
                 .enabled(true)
+                .isReal(true)
                 .build();
 
-        List<EquipmentData> givenList = List.of(equipment1, equipment2, equipment3);
+        ArrayList<EquipmentData> givenList = new ArrayList<>(List.of(equipment1, equipment2, equipment3));
 
         when(equipmentDataRepositoryMock.getData(any(String.class), any(String.class), any(Long.class)))
                 .thenReturn(givenList);
@@ -1654,7 +1700,7 @@ public class EquipmentDataServiceTest {
         mockOnDate(givenId, equipment3.getTime());
 
         // when
-        StatisticsDto actualDto = equipmentDataService.getData(givenId, givenStart, givenStop);
+        StatisticsDto actualDto = equipmentDataService.getData(List.of(givenId), givenStart, givenStop);
 
         // expect
         SoftAssertions softly = new SoftAssertions();
@@ -1662,39 +1708,39 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getStart()).isEqualTo(givenStart);
         softly.assertThat(actualDto.getEnd()).isEqualTo(givenStop);
 
-        softly.assertThat(actualDto.getSchedules()).hasSize(3);
-        softly.assertThat(actualDto.getSchedules()).containsKey(equipment1.getTime().truncatedTo(ChronoUnit.DAYS));
-        softly.assertThat(actualDto.getSchedules()).containsKey(equipment2.getTime().truncatedTo(ChronoUnit.DAYS));
-        softly.assertThat(actualDto.getSchedules()).containsKey(equipment3.getTime().truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).hasSize(3);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(equipment1.getTime().truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(equipment2.getTime().truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(equipment3.getTime().truncatedTo(ChronoUnit.DAYS));
 
-        softly.assertThat(actualDto.getUpMinutes()).isEqualTo((long) (26 * 60));
-        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo((long) (10 * 60));
-        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo(16 * 60);
-        softly.assertThat(actualDto.getDownMinutes()).isEqualTo(26 * 60);
-        softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo(8 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpMinutes()).isEqualTo((long) (26 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpScheduleMinutes()).isEqualTo((long) (10 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpNotScheduleMinutes()).isEqualTo(16 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownMinutes()).isEqualTo(26 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownScheduleMinutes()).isEqualTo(8 * 60);
 
-        softly.assertThat(actualDto.getUpSchedulePercent()).isCloseTo(55.5, Offset.offset(0.1));
-        softly.assertThat(actualDto.getDownSchedulePercent()).isCloseTo(44.4, Offset.offset(0.1));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpSchedulePercent()).isCloseTo(55.5, Offset.offset(0.1));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownSchedulePercent()).isCloseTo(44.4, Offset.offset(0.1));
 
-        softly.assertThat(actualDto.getEquipmentData()).hasSize(3);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(true);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(2).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(2).getEnabled()).isEqualTo(equipment3.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(2).getU()).isEqualTo(equipment3.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(2).getTime()).isEqualTo(equipment3.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(2).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(2).getEnabledDuringPassiveTime()).isEqualTo(true);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData()).hasSize(3);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(true);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(2).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(2).getEnabled()).isEqualTo(equipment3.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(2).getU()).isEqualTo(equipment3.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(2).getTime()).isEqualTo(equipment3.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(2).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(2).getEnabledDuringPassiveTime()).isEqualTo(true);
         softly.assertAll();
         verify(equipmentDataRepositoryMock, Mockito.times(1))
                 .getData(any(), any(), any());
@@ -1715,21 +1761,24 @@ public class EquipmentDataServiceTest {
                 .u(30d)
                 .time(givenStart)
                 .enabled(false)
+                .isReal(true)
                 .build();
         final EquipmentData equipment2 = EquipmentData.builder()
                 .equipmentId(givenId)
                 .u(10d)
                 .time(givenStop.minusDays(1).withHour(18))
                 .enabled(true)
+                .isReal(true)
                 .build();
         final EquipmentData equipment3 = EquipmentData.builder()
                 .equipmentId(givenId)
                 .u(10d)
                 .time(givenStop)
                 .enabled(false)
+                .isReal(true)
                 .build();
 
-        List<EquipmentData> givenList = List.of(equipment1, equipment2, equipment3);
+        ArrayList<EquipmentData> givenList = new ArrayList<>(List.of(equipment1, equipment2, equipment3));
 
         when(equipmentDataRepositoryMock.getData(any(String.class), any(String.class), any(Long.class)))
                 .thenReturn(givenList);
@@ -1738,7 +1787,7 @@ public class EquipmentDataServiceTest {
         mockOnDate(givenId, equipment3.getTime());
 
         // when
-        StatisticsDto actualDto = equipmentDataService.getData(givenId, givenStart, givenStop);
+        StatisticsDto actualDto = equipmentDataService.getData(List.of(givenId), givenStart, givenStop);
 
         // expect
         SoftAssertions softly = new SoftAssertions();
@@ -1746,39 +1795,39 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getStart()).isEqualTo(givenStart);
         softly.assertThat(actualDto.getEnd()).isEqualTo(givenStop);
 
-        softly.assertThat(actualDto.getSchedules()).hasSize(3);
-        softly.assertThat(actualDto.getSchedules()).containsKey(equipment1.getTime().truncatedTo(ChronoUnit.DAYS));
-        softly.assertThat(actualDto.getSchedules()).containsKey(equipment2.getTime().truncatedTo(ChronoUnit.DAYS));
-        softly.assertThat(actualDto.getSchedules()).containsKey(equipment3.getTime().truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).hasSize(3);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(equipment1.getTime().truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(equipment2.getTime().truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(equipment3.getTime().truncatedTo(ChronoUnit.DAYS));
 
-        softly.assertThat(actualDto.getUpMinutes()).isEqualTo((long) (26 * 60));
-        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo((long) (8 * 60));
-        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo(18 * 60);
-        softly.assertThat(actualDto.getDownMinutes()).isEqualTo(26 * 60);
-        softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo(10 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpMinutes()).isEqualTo((long) (26 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpScheduleMinutes()).isEqualTo((long) (8 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpNotScheduleMinutes()).isEqualTo(18 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownMinutes()).isEqualTo(26 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownScheduleMinutes()).isEqualTo(10 * 60);
 
-        softly.assertThat(actualDto.getUpSchedulePercent()).isCloseTo(44.4, Offset.offset(0.1));
-        softly.assertThat(actualDto.getDownSchedulePercent()).isCloseTo(55.5, Offset.offset(0.1));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpSchedulePercent()).isCloseTo(44.4, Offset.offset(0.1));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownSchedulePercent()).isCloseTo(55.5, Offset.offset(0.1));
 
-        softly.assertThat(actualDto.getEquipmentData()).hasSize(3);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(true);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(2).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(2).getEnabled()).isEqualTo(equipment3.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(2).getU()).isEqualTo(equipment3.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(2).getTime()).isEqualTo(equipment3.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(2).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(2).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData()).hasSize(3);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(true);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(2).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(2).getEnabled()).isEqualTo(equipment3.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(2).getU()).isEqualTo(equipment3.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(2).getTime()).isEqualTo(equipment3.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(2).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(2).getEnabledDuringPassiveTime()).isEqualTo(false);
         softly.assertAll();
         verify(equipmentDataRepositoryMock, Mockito.times(1))
                 .getData(any(), any(), any());
@@ -1798,15 +1847,17 @@ public class EquipmentDataServiceTest {
                 .u(30d)
                 .time(givenStart)
                 .enabled(true)
+                .isReal(true)
                 .build();
         final EquipmentData equipment2 = EquipmentData.builder()
                 .equipmentId(givenId)
                 .u(10d)
                 .time(givenStop)
                 .enabled(true)
+                .isReal(true)
                 .build();
 
-        List<EquipmentData> givenList = List.of(equipment1, equipment2);
+        ArrayList<EquipmentData> givenList = new ArrayList<>(List.of(equipment1, equipment2));
 
         when(equipmentDataRepositoryMock.getData(any(String.class), any(String.class), any(Long.class)))
                 .thenReturn(givenList);
@@ -1817,7 +1868,7 @@ public class EquipmentDataServiceTest {
         mockOnDate(givenId, equipment1.getTime().plusDays(4));
 
         // when
-        StatisticsDto actualDto = equipmentDataService.getData(givenId, givenStart, givenStop);
+        StatisticsDto actualDto = equipmentDataService.getData(List.of(givenId), givenStart, givenStop);
 
         // expect
         SoftAssertions softly = new SoftAssertions();
@@ -1825,35 +1876,35 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getStart()).isEqualTo(givenStart);
         softly.assertThat(actualDto.getEnd()).isEqualTo(givenStop);
 
-        softly.assertThat(actualDto.getSchedules()).hasSize(5);
-        softly.assertThat(actualDto.getSchedules()).containsKey(equipment1.getTime().truncatedTo(ChronoUnit.DAYS));
-        softly.assertThat(actualDto.getSchedules()).containsKey(equipment1.getTime().plusDays(1).truncatedTo(ChronoUnit.DAYS));
-        softly.assertThat(actualDto.getSchedules()).containsKey(equipment1.getTime().plusDays(2).truncatedTo(ChronoUnit.DAYS));
-        softly.assertThat(actualDto.getSchedules()).containsKey(equipment1.getTime().plusDays(3).truncatedTo(ChronoUnit.DAYS));
-        softly.assertThat(actualDto.getSchedules()).containsKey(equipment1.getTime().plusDays(4).truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).hasSize(5);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(equipment1.getTime().truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(equipment1.getTime().plusDays(1).truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(equipment1.getTime().plusDays(2).truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(equipment1.getTime().plusDays(3).truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(equipment1.getTime().plusDays(4).truncatedTo(ChronoUnit.DAYS));
 
-        softly.assertThat(actualDto.getUpMinutes()).isEqualTo((long) (100 * 60));
-        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo((long) (34 * 60));
-        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo(66 * 60);
-        softly.assertThat(actualDto.getDownMinutes()).isEqualTo(0);
-        softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpMinutes()).isEqualTo((long) (100 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpScheduleMinutes()).isEqualTo((long) (34 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpNotScheduleMinutes()).isEqualTo(66 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownMinutes()).isEqualTo(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownScheduleMinutes()).isEqualTo(0);
 
-        softly.assertThat(actualDto.getUpSchedulePercent()).isCloseTo(100.0, Offset.offset(0.1));
-        softly.assertThat(actualDto.getDownSchedulePercent()).isCloseTo(0, Offset.offset(0.1));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpSchedulePercent()).isCloseTo(100.0, Offset.offset(0.1));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownSchedulePercent()).isCloseTo(0, Offset.offset(0.1));
 
-        softly.assertThat(actualDto.getEquipmentData()).hasSize(2);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(true);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData()).hasSize(2);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(true);
         softly.assertAll();
         verify(equipmentDataRepositoryMock, Mockito.times(1))
                 .getData(any(), any(), any());
@@ -1873,15 +1924,17 @@ public class EquipmentDataServiceTest {
                 .u(30d)
                 .time(givenStart)
                 .enabled(false)
+                .isReal(true)
                 .build();
         final EquipmentData equipment2 = EquipmentData.builder()
                 .equipmentId(givenId)
                 .u(10d)
                 .time(givenStop)
                 .enabled(true)
+                .isReal(true)
                 .build();
 
-        List<EquipmentData> givenList = List.of(equipment1, equipment2);
+        ArrayList<EquipmentData> givenList = new ArrayList<>(List.of(equipment1, equipment2));
 
         when(equipmentDataRepositoryMock.getData(any(String.class), any(String.class), any(Long.class)))
                 .thenReturn(givenList);
@@ -1892,7 +1945,7 @@ public class EquipmentDataServiceTest {
         mockOnDate(givenId, equipment1.getTime().plusDays(4));
 
         // when
-        StatisticsDto actualDto = equipmentDataService.getData(givenId, givenStart, givenStop);
+        StatisticsDto actualDto = equipmentDataService.getData(List.of(givenId), givenStart, givenStop);
 
         // expect
         SoftAssertions softly = new SoftAssertions();
@@ -1900,35 +1953,35 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getStart()).isEqualTo(givenStart);
         softly.assertThat(actualDto.getEnd()).isEqualTo(givenStop);
 
-        softly.assertThat(actualDto.getSchedules()).hasSize(5);
-        softly.assertThat(actualDto.getSchedules()).containsKey(equipment1.getTime().truncatedTo(ChronoUnit.DAYS));
-        softly.assertThat(actualDto.getSchedules()).containsKey(equipment1.getTime().plusDays(1).truncatedTo(ChronoUnit.DAYS));
-        softly.assertThat(actualDto.getSchedules()).containsKey(equipment1.getTime().plusDays(2).truncatedTo(ChronoUnit.DAYS));
-        softly.assertThat(actualDto.getSchedules()).containsKey(equipment1.getTime().plusDays(3).truncatedTo(ChronoUnit.DAYS));
-        softly.assertThat(actualDto.getSchedules()).containsKey(equipment1.getTime().plusDays(4).truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).hasSize(5);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(equipment1.getTime().truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(equipment1.getTime().plusDays(1).truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(equipment1.getTime().plusDays(2).truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(equipment1.getTime().plusDays(3).truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(equipment1.getTime().plusDays(4).truncatedTo(ChronoUnit.DAYS));
 
-        softly.assertThat(actualDto.getUpMinutes()).isEqualTo((long) 0);
-        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo((long) 0);
-        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo(0);
-        softly.assertThat(actualDto.getDownMinutes()).isEqualTo(100 * 60);
-        softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo(34 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpMinutes()).isEqualTo((long) 0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpScheduleMinutes()).isEqualTo((long) 0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpNotScheduleMinutes()).isEqualTo(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownMinutes()).isEqualTo(100 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownScheduleMinutes()).isEqualTo(34 * 60);
 
-        softly.assertThat(actualDto.getUpSchedulePercent()).isCloseTo(0.0, Offset.offset(0.1));
-        softly.assertThat(actualDto.getDownSchedulePercent()).isCloseTo(100.0, Offset.offset(0.1));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpSchedulePercent()).isCloseTo(0.0, Offset.offset(0.1));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownSchedulePercent()).isCloseTo(100.0, Offset.offset(0.1));
 
-        softly.assertThat(actualDto.getEquipmentData()).hasSize(2);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(true);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(true);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData()).hasSize(2);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(true);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(true);
         softly.assertAll();
         verify(equipmentDataRepositoryMock, Mockito.times(1))
                 .getData(any(), any(), any());
@@ -1948,15 +2001,17 @@ public class EquipmentDataServiceTest {
                 .u(30d)
                 .time(givenStart.plusDays(2).withHour(17))
                 .enabled(true)
+                .isReal(true)
                 .build();
         final EquipmentData equipment2 = EquipmentData.builder()
                 .equipmentId(givenId)
                 .u(10d)
                 .time(givenStop.withHour(19))
                 .enabled(false)
+                .isReal(true)
                 .build();
 
-        List<EquipmentData> givenList = List.of(equipment1, equipment2);
+        ArrayList<EquipmentData> givenList = new ArrayList<>(List.of(equipment1, equipment2));
 
         when(equipmentDataRepositoryMock.getData(any(String.class), any(String.class), any(Long.class)))
                 .thenReturn(givenList);
@@ -1965,7 +2020,7 @@ public class EquipmentDataServiceTest {
         mockOnDate(givenId, givenStart.plusDays(2));
 
         // when
-        StatisticsDto actualDto = equipmentDataService.getData(givenId, givenStart, givenStop);
+        StatisticsDto actualDto = equipmentDataService.getData(List.of(givenId), givenStart, givenStop);
 
         // expect
         SoftAssertions softly = new SoftAssertions();
@@ -1973,33 +2028,33 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getStart()).isEqualTo(givenStart);
         softly.assertThat(actualDto.getEnd()).isEqualTo(givenStop);
 
-        softly.assertThat(actualDto.getSchedules()).hasSize(3);
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.plusDays(1).truncatedTo(ChronoUnit.DAYS));
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.plusDays(2).truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).hasSize(3);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.plusDays(1).truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.plusDays(2).truncatedTo(ChronoUnit.DAYS));
 
-        softly.assertThat(actualDto.getUpMinutes()).isEqualTo((long) (2 * 60));
-        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo((long) (60));
-        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo(60);
-        softly.assertThat(actualDto.getDownMinutes()).isEqualTo(50 * 60);
-        softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo(17 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpMinutes()).isEqualTo((long) (2 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpScheduleMinutes()).isEqualTo((long) (60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpNotScheduleMinutes()).isEqualTo(60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownMinutes()).isEqualTo(50 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownScheduleMinutes()).isEqualTo(17 * 60);
 
-        softly.assertThat(actualDto.getUpSchedulePercent()).isCloseTo(5.5, Offset.offset(0.1));
-        softly.assertThat(actualDto.getDownSchedulePercent()).isCloseTo(94.4, Offset.offset(0.1));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpSchedulePercent()).isCloseTo(5.5, Offset.offset(0.1));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownSchedulePercent()).isCloseTo(94.4, Offset.offset(0.1));
 
-        softly.assertThat(actualDto.getEquipmentData()).hasSize(2);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData()).hasSize(2);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(false);
         softly.assertAll();
         verify(equipmentDataRepositoryMock, Mockito.times(1))
                 .getData(any(), any(), any());
@@ -2018,15 +2073,17 @@ public class EquipmentDataServiceTest {
                 .u(30d)
                 .time(givenStart.plusDays(2).withHour(17))
                 .enabled(false)
+                .isReal(true)
                 .build();
         final EquipmentData equipment2 = EquipmentData.builder()
                 .equipmentId(givenId)
                 .u(10d)
                 .time(givenStop.withHour(19))
                 .enabled(true)
+                .isReal(true)
                 .build();
 
-        List<EquipmentData> givenList = List.of(equipment1, equipment2);
+        ArrayList<EquipmentData> givenList = new ArrayList<>(List.of(equipment1, equipment2));
 
         when(equipmentDataRepositoryMock.getData(any(String.class), any(String.class), any(Long.class)))
                 .thenReturn(givenList);
@@ -2035,7 +2092,7 @@ public class EquipmentDataServiceTest {
         mockOnDate(givenId, givenStart.plusDays(2));
 
         // when
-        StatisticsDto actualDto = equipmentDataService.getData(givenId, givenStart, givenStop);
+        StatisticsDto actualDto = equipmentDataService.getData(List.of(givenId), givenStart, givenStop);
 
         // expect
         SoftAssertions softly = new SoftAssertions();
@@ -2043,33 +2100,33 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getStart()).isEqualTo(givenStart);
         softly.assertThat(actualDto.getEnd()).isEqualTo(givenStop);
 
-        softly.assertThat(actualDto.getSchedules()).hasSize(3);
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.plusDays(1).truncatedTo(ChronoUnit.DAYS));
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.plusDays(2).truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).hasSize(3);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.plusDays(1).truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.plusDays(2).truncatedTo(ChronoUnit.DAYS));
 
-        softly.assertThat(actualDto.getUpMinutes()).isEqualTo(60);
-        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo(0);
-        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo(60);
-        softly.assertThat(actualDto.getDownMinutes()).isEqualTo((long) (51 * 60));
-        softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo(18 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpMinutes()).isEqualTo(60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpScheduleMinutes()).isEqualTo(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpNotScheduleMinutes()).isEqualTo(60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownMinutes()).isEqualTo((long) (51 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownScheduleMinutes()).isEqualTo(18 * 60);
 
-        softly.assertThat(actualDto.getUpSchedulePercent()).isEqualTo(0.0);
-        softly.assertThat(actualDto.getDownSchedulePercent()).isEqualTo(100.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpSchedulePercent()).isEqualTo(0.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownSchedulePercent()).isEqualTo(100.0);
 
-        softly.assertThat(actualDto.getEquipmentData()).hasSize(2);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(true);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(true);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData()).hasSize(2);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(true);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(true);
         softly.assertAll();
         verify(equipmentDataRepositoryMock, Mockito.times(1))
                 .getData(any(), any(), any());
@@ -2089,15 +2146,17 @@ public class EquipmentDataServiceTest {
                 .u(30d)
                 .time(givenStart.withHour(17))
                 .enabled(true)
+                .isReal(true)
                 .build();
         final EquipmentData equipment2 = EquipmentData.builder()
                 .equipmentId(givenId)
                 .u(10d)
                 .time(givenStart.withHour(19))
                 .enabled(false)
+                .isReal(true)
                 .build();
 
-        List<EquipmentData> givenList = List.of(equipment1, equipment2);
+        ArrayList<EquipmentData> givenList = new ArrayList<>(List.of(equipment1, equipment2));
 
         when(equipmentDataRepositoryMock.getData(any(String.class), any(String.class), any(Long.class)))
                 .thenReturn(givenList);
@@ -2106,7 +2165,7 @@ public class EquipmentDataServiceTest {
         mockOnDate(givenId, givenStart.plusDays(2));
 
         // when
-        StatisticsDto actualDto = equipmentDataService.getData(givenId, givenStart, givenStop);
+        StatisticsDto actualDto = equipmentDataService.getData(List.of(givenId), givenStart, givenStop);
 
         // expect
         SoftAssertions softly = new SoftAssertions();
@@ -2114,33 +2173,33 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getStart()).isEqualTo(givenStart);
         softly.assertThat(actualDto.getEnd()).isEqualTo(givenStop);
 
-        softly.assertThat(actualDto.getSchedules()).hasSize(3);
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.plusDays(1).truncatedTo(ChronoUnit.DAYS));
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.plusDays(2).truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).hasSize(3);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.plusDays(1).truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.plusDays(2).truncatedTo(ChronoUnit.DAYS));
 
-        softly.assertThat(actualDto.getUpMinutes()).isEqualTo((long) (2 * 60));
-        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo((long) (60));
-        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo(60);
-        softly.assertThat(actualDto.getDownMinutes()).isEqualTo(50 * 60);
-        softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo(17 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpMinutes()).isEqualTo((long) (2 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpScheduleMinutes()).isEqualTo((long) (60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpNotScheduleMinutes()).isEqualTo(60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownMinutes()).isEqualTo(50 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownScheduleMinutes()).isEqualTo(17 * 60);
 
-        softly.assertThat(actualDto.getUpSchedulePercent()).isCloseTo(5.5, Offset.offset(0.1));
-        softly.assertThat(actualDto.getDownSchedulePercent()).isCloseTo(94.4, Offset.offset(0.1));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpSchedulePercent()).isCloseTo(5.5, Offset.offset(0.1));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownSchedulePercent()).isCloseTo(94.4, Offset.offset(0.1));
 
-        softly.assertThat(actualDto.getEquipmentData()).hasSize(2);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData()).hasSize(2);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(false);
         softly.assertAll();
         verify(equipmentDataRepositoryMock, Mockito.times(1))
                 .getData(any(), any(), any());
@@ -2159,15 +2218,17 @@ public class EquipmentDataServiceTest {
                 .u(30d)
                 .time(givenStart.withHour(17))
                 .enabled(false)
+                .isReal(true)
                 .build();
         final EquipmentData equipment2 = EquipmentData.builder()
                 .equipmentId(givenId)
                 .u(10d)
                 .time(givenStart.withHour(19))
                 .enabled(true)
+                .isReal(true)
                 .build();
 
-        List<EquipmentData> givenList = List.of(equipment1, equipment2);
+        ArrayList<EquipmentData> givenList = new ArrayList<>(List.of(equipment1, equipment2));
 
         when(equipmentDataRepositoryMock.getData(any(String.class), any(String.class), any(Long.class)))
                 .thenReturn(givenList);
@@ -2176,7 +2237,7 @@ public class EquipmentDataServiceTest {
         mockOnDate(givenId, givenStart.plusDays(2));
 
         // when
-        StatisticsDto actualDto = equipmentDataService.getData(givenId, givenStart, givenStop);
+        StatisticsDto actualDto = equipmentDataService.getData(List.of(givenId), givenStart, givenStop);
 
         // expect
         SoftAssertions softly = new SoftAssertions();
@@ -2184,33 +2245,33 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getStart()).isEqualTo(givenStart);
         softly.assertThat(actualDto.getEnd()).isEqualTo(givenStop);
 
-        softly.assertThat(actualDto.getSchedules()).hasSize(3);
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.plusDays(1).truncatedTo(ChronoUnit.DAYS));
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.plusDays(2).truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).hasSize(3);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.plusDays(1).truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.plusDays(2).truncatedTo(ChronoUnit.DAYS));
 
-        softly.assertThat(actualDto.getUpMinutes()).isEqualTo(49 * 60);
-        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo(16 * 60);
-        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo(33 * 60);
-        softly.assertThat(actualDto.getDownMinutes()).isEqualTo((long) (3 * 60));
-        softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo(2 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpMinutes()).isEqualTo(49 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpScheduleMinutes()).isEqualTo(16 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpNotScheduleMinutes()).isEqualTo(33 * 60);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownMinutes()).isEqualTo((long) (3 * 60));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownScheduleMinutes()).isEqualTo(2 * 60);
 
-        softly.assertThat(actualDto.getUpSchedulePercent()).isCloseTo(88.8, Offset.offset(0.1));
-        softly.assertThat(actualDto.getDownSchedulePercent()).isCloseTo(11.1, Offset.offset(0.1));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpSchedulePercent()).isCloseTo(88.8, Offset.offset(0.1));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownSchedulePercent()).isCloseTo(11.1, Offset.offset(0.1));
 
-        softly.assertThat(actualDto.getEquipmentData()).hasSize(2);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(true);
-        softly.assertThat(actualDto.getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
-        softly.assertThat(actualDto.getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
-        softly.assertThat(actualDto.getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(true);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData()).hasSize(2);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabled()).isEqualTo(equipment1.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getU()).isEqualTo(equipment1.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getTime()).isEqualTo(equipment1.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getDisabledDuringActiveTime()).isEqualTo(true);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(0).getEnabledDuringPassiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEquipmentId()).isEqualTo(givenId);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabled()).isEqualTo(equipment2.getEnabled());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getU()).isEqualTo(equipment2.getU());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getTime()).isEqualTo(equipment2.getTime());
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getDisabledDuringActiveTime()).isEqualTo(false);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData().get(1).getEnabledDuringPassiveTime()).isEqualTo(true);
         softly.assertAll();
         verify(equipmentDataRepositoryMock, Mockito.times(1))
                 .getData(any(), any(), any());
@@ -2225,7 +2286,7 @@ public class EquipmentDataServiceTest {
         OffsetDateTime givenStart = now.minusDays(1).withHour(16).withMinute(0).withSecond(0).withNano(0);
         OffsetDateTime givenStop = now.withHour(20).withMinute(0).withSecond(0).withNano(0);
 
-        List<EquipmentData> givenList = List.of();
+        ArrayList<EquipmentData> givenList = new ArrayList<>();
 
         when(equipmentDataRepositoryMock.getData(any(String.class), any(String.class), any(Long.class)))
                 .thenReturn(givenList);
@@ -2233,7 +2294,7 @@ public class EquipmentDataServiceTest {
         mockOnDate(givenId, givenStart.plusDays(1));
 
         // when
-        StatisticsDto actualDto = equipmentDataService.getData(givenId, givenStart, givenStop);
+        StatisticsDto actualDto = equipmentDataService.getData(List.of(givenId), givenStart, givenStop);
 
         // expect
         SoftAssertions softly = new SoftAssertions();
@@ -2241,20 +2302,20 @@ public class EquipmentDataServiceTest {
         softly.assertThat(actualDto.getStart()).isEqualTo(givenStart);
         softly.assertThat(actualDto.getEnd()).isEqualTo(givenStop);
 
-        softly.assertThat(actualDto.getSchedules()).hasSize(2);
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
-        softly.assertThat(actualDto.getSchedules()).containsKey(givenStart.plusDays(1).truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).hasSize(2);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.truncatedTo(ChronoUnit.DAYS));
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getSchedules()).containsKey(givenStart.plusDays(1).truncatedTo(ChronoUnit.DAYS));
 
-        softly.assertThat(actualDto.getUpMinutes()).isEqualTo(0);
-        softly.assertThat(actualDto.getUpScheduleMinutes()).isEqualTo(0);
-        softly.assertThat(actualDto.getUpNotScheduleMinutes()).isEqualTo(0);
-        softly.assertThat(actualDto.getDownMinutes()).isEqualTo(28 * 60L);
-        softly.assertThat(actualDto.getDownScheduleMinutes()).isEqualTo(10 * 60L);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpMinutes()).isEqualTo(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpScheduleMinutes()).isEqualTo(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpNotScheduleMinutes()).isEqualTo(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownMinutes()).isEqualTo(28 * 60L);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownScheduleMinutes()).isEqualTo(10 * 60L);
 
-        softly.assertThat(actualDto.getUpSchedulePercent()).isEqualTo(0.0);
-        softly.assertThat(actualDto.getDownSchedulePercent()).isEqualTo(100.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getUpSchedulePercent()).isEqualTo(0.0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getDownSchedulePercent()).isEqualTo(100.0);
 
-        softly.assertThat(actualDto.getEquipmentData()).hasSize(0);
+        softly.assertThat(actualDto.getEquipmentStatisticsDtos().get(0).getEquipmentData()).hasSize(0);
         softly.assertAll();
         verify(equipmentDataRepositoryMock, Mockito.times(1))
                 .getData(any(), any(), any());

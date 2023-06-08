@@ -88,52 +88,6 @@ public class EquipmentDataRepositoryTest {
     }
 
     @Test
-    void testGetDataWithEmptyId() {
-        // given
-        String givenStart = "2023-03-24T01:00:00Z";
-        String givenStop = "2023-04-24T01:00:00Z";
-
-        String expectedPreviousQuery = "from(bucket: \"bucket\") " +
-                "|> range(start: -inf, stop: time(v: 2023-03-24T01:00:00Z)) " +
-                "|> filter(fn: (r) => r[\"_measurement\"] == \"equipment_statistics\")" +
-                "|> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")" +
-                "|> last(column: \"_time\")";
-
-        String expectedGetAllQuery = "from(bucket: \"bucket\") " +
-                "|> range(start: time(v: 2023-03-24T01:00:00Z), stop: time(v: 2023-04-24T01:00:00Z)) " +
-                "|> filter(fn: (r) => r[\"_measurement\"] == \"equipment_statistics\")" +
-                "|> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")";
-
-        QueryApi queryApiMock = mock(QueryApi.class);
-        when(influxDBClientMock.getQueryApi()).thenReturn(queryApiMock);
-
-        doAnswer(invocation -> {
-            Runnable runnable = invocation.getArgument(4);
-            runnable.run();
-
-            return null;
-        })
-                .when(queryApiMock)
-                .query(any(String.class), any(String.class), any(), any(), any(Runnable.class));
-
-        // when
-        List<EquipmentData> result = equipmentDataRepository.getData(givenStart, givenStop, null);
-
-        // then
-        SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(result).isNotNull();
-        softly.assertThat(result).isEmpty();
-        softly.assertAll();
-        verify(influxDBClientMock, times(1)).getQueryApi();
-        verify(queryApiMock, times(1)).query(
-                eq(expectedPreviousQuery), eq("org"), any(), any(), any(Runnable.class)
-        );
-        verify(queryApiMock, times(1)).query(
-                eq(expectedGetAllQuery), eq("org"), any(), any(), any(Runnable.class)
-        );
-    }
-
-    @Test
     void testDeleteByEquipmentId() {
         // given
         Long givenId = 1L;

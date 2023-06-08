@@ -19,8 +19,15 @@ public interface EquipmentRepository extends JpaRepository<Equipment, Long> {
     Optional<Equipment> findByIdAndDeletedFalse(Long id);
 
     @Query(value = "select equipment from Equipment equipment " +
-            "where lower(equipment.name) " +
-            "like lower(concat('%', :name, '%'))" +
+            "where :unitId is null or :unitId = equipment.address.unit.id " +
+            "    and not equipment.deleted " +
+            "group by equipment.id " +
+            "order by equipment.name ")
+    List<Equipment> searchAllByUnitContainingOrderByName(Long unitId);
+
+    @Query(value = "select equipment from Equipment equipment " +
+            "where lower(equipment.name) like lower(concat('%', :name, '%')) " +
+            "    and not equipment.deleted " +
             "group by equipment.id " +
             "order by equipment.name ")
     Page<Equipment> searchAllByNameContainingOrderByName(String name, Pageable pageable);
